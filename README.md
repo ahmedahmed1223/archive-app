@@ -1,54 +1,75 @@
-# أرشيف الفيديو - Vite
+# أرشيف الفيديو
 
-تم تحويل التطبيق من ملف SPA واحد إلى مشروع Vite منظم مع الحفاظ على واجهات التطبيق وإمكاناته.
+أرشيف فيديو بسيط ومحمول مبني باستخدام Vite، مُصمم لحفظ وتشغيل مجموعة من ملفات الفيديو محليًا داخل واجهة واحدة. المشروع مُهيأ للبناء كملف HTML واحد (single-file) باستخدام `vite-plugin-singlefile`، مما يجعل النشر بسيطًا ومناسبًا لمواقع ثابتة أو توزيعات محلية.
 
-## التشغيل
+## الميزات
+
+- واجهة خفيفة لعرض وتشغيل فيديوهات محفوظة محليًا.
+- يعمل كحزمة واحدة بعد البناء (`dist/index.html`) — يحتوي الملف على كل الـ JS وCSS مُضمّنًا.
+- يدعم ثيمات مبدئية ويمكن تهيئتها عبر `src/theme/`.
+- بنية مشروع منظمة تُسهّل فصل منطق التشغيل، الواجهة، والأنماط.
+
+## المتطلبات
+
+- Node.js 16+ و npm
+
+## التشغيل محليًا (بيئة تطوير)
 
 ```bash
 npm install
 npm run dev
 ```
 
-ثم افتح العنوان الذي يعرضه Vite، عادة:
+ثم افتح المتصفح على العنوان الذي يعرضه Vite (افتراضياً `http://127.0.0.1:5173/`).
 
-```text
-http://127.0.0.1:5173/
-```
-
-## البناء كملف واحد
+## البناء للنشر
 
 ```bash
 npm run build
 ```
 
-يستخدم المشروع `vite-plugin-singlefile` أثناء البناء، لذلك يكون الناتج الأساسي:
+بعد البناء ستجد ملفًا واحدًا مُجمَّعًا في `dist/index.html` يحتوي на التطبيق كاملاً (JS وCSS مضمّنين) — مناسب للرفع كموقع ثابت أو للاستخدام محليًا كنسخة واحدة.
 
-```text
-dist/index.html
+## بنية المشروع
+
 ```
-
-يتم تضمين JavaScript وCSS داخل ملف HTML النهائي ليعمل التطبيق كحزمة محلية واحدة.
-
-## البنية
-
-```text
 index.html
+README.md
+package.json
 src/
-  main.js
+  main.js                  # مدخل التطبيق
   app/
-    startVideoArchive.js
+    startVideoArchive.js   # واجهة بدء الأرشيف وتهيئته
   runtime/
-    videoArchiveRuntime.js
+    videoArchiveRuntime.js # منطق تشغيل الفيديو والأرشفة
   styles/
-    generated-tailwind.css
-    app-overrides.css
+    generated-tailwind.css # أنماط مُدمجة/منشأة
+    app-overrides.css      # تعديلات على الأنماط
   theme/
-    applyInitialTheme.js
-    themeStorage.js
+    applyInitialTheme.js   # تطبيق الثيم عند التحميل
+    themeStorage.js        # تخزين تفضيلات الثيم
 ```
 
-- `src/main.js`: نقطة دخول Vite.
-- `src/app/startVideoArchive.js`: تشغيل التطبيق وربطه بعنصر `#root`.
-- `src/runtime/videoArchiveRuntime.js`: منطق التطبيق الأصلي المستخرج من ملف الـ SPA مع تحويل التشغيل التلقائي إلى دالة قابلة للاستدعاء.
-- `src/styles/`: الأنماط المستخرجة والمنظمة في ملفات مستقلة.
-- `src/theme/`: منطق تهيئة الثيم قبل تشغيل التطبيق.
+## التخصيص
+
+- لتغيير سلوك التشغيل أو استيراد فيديوهات جديدة، عدِّل الملفات داخل `src/runtime/` و `src/app/`.
+- لتعديل الأنماط، عدِّل `src/styles/app-overrides.css` أو أعد توليد `generated-tailwind.css` حسب إعداداتك.
+
+## نشر إلى GitHub Pages أو مضيف ملفات ثابت
+
+1. `npm run build`
+2. ارفع محتويات مجلد `dist/` إلى مضيف الملفات الثابتة أو إلى GitHub Pages.
+
+## المساهمة
+
+إذا رغبت بالمساهمة: افتح Issue أو قدم Pull Request يوضح التعديل والغرض.
+
+## الترخيص
+
+هذا المشروع مرخَّص بموجب ترخيص MIT.
+
+----
+
+تم الآن إضافة:
+- ملف `CONTRIBUTING.md` للإرشادات.
+- GitHub Actions workflow لنشر `dist/` تلقائيًا إلى GitHub Pages بعد كل دفع إلى `main`.
