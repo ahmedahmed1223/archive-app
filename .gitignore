@@ -2,3 +2,4 @@ node_modules
 .vite/
 .npm-cache/
 *.log
+IMPLEMENTATION_STATUS.md
