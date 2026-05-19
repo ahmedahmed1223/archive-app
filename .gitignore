@@ -1,6 +1,7 @@
 node_modules
 .vite/
 output/
+Base_old/
 .npm-cache/
 *.log
 IMPLEMENTATION_STATUS.md
