@@ -29,13 +29,37 @@
   html, body, #root { direction: rtl; text-align: right; }
   body { background: var(--color-bg-primary); color: var(--color-text-primary); }
   [dir="ltr"], [dir="ltr"] * { direction: ltr; }
-  .help-page, .help-page p, .help-page li, .help-page h1, .help-page h2, .help-page h3, .help-page h4 {
+  [dir="auto"], .va-bidi-text {
+    unicode-bidi: plaintext;
+    text-align: start;
+    overflow-wrap: anywhere;
+  }
+  .va-bidi-input {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+  .help-page {
     direction: rtl;
     text-align: right;
+    unicode-bidi: isolate;
   }
-  .help-page [dir="ltr"], .help-page [dir="ltr"] * {
+  .help-page p,
+  .help-page li,
+  .help-page h1,
+  .help-page h2,
+  .help-page h3,
+  .help-page h4 {
+    text-align: right;
+    unicode-bidi: plaintext;
+  }
+  .help-page code,
+  .help-page kbd,
+  .help-page .font-mono,
+  .help-page [dir="ltr"],
+  .help-page [dir="ltr"] * {
     direction: ltr;
     text-align: left;
+    unicode-bidi: isolate;
   }
   .login-screen-shell {
     color-scheme: dark;
@@ -224,9 +248,11 @@
     color: var(--color-text-primary);
     padding: var(--space-6);
     box-shadow: 0 24px 80px rgba(0,0,0,.32);
+    direction: rtl;
+    text-align: right;
   }
-  .va-dialog-title { margin: 0 0 var(--space-2); font-size: 1.125rem; line-height: 1.75rem; font-weight: 700; }
-  .va-dialog-message { margin: 0; color: var(--color-text-secondary); white-space: pre-line; line-height: 1.7; }
+  .va-dialog-title { margin: 0 0 var(--space-2); font-size: 1.125rem; line-height: 1.75rem; font-weight: 700; unicode-bidi: plaintext; text-align: start; overflow-wrap: anywhere; }
+  .va-dialog-message { margin: 0; color: var(--color-text-secondary); white-space: pre-line; line-height: 1.7; unicode-bidi: plaintext; text-align: start; overflow-wrap: anywhere; }
   .va-dialog-input {
     width: 100%;
     margin-top: var(--space-4);
@@ -235,6 +261,21 @@
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
     padding: 0.75rem 1rem;
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"] {
+    direction: rtl;
+    text-align: right;
+  }
+  [data-slot="dialog-title"],
+  [data-slot="dialog-description"],
+  [data-slot="alert-dialog-title"],
+  [data-slot="alert-dialog-description"] {
+    unicode-bidi: plaintext;
+    text-align: start;
+    overflow-wrap: anywhere;
   }
   .va-dialog-actions { display: flex; justify-content: flex-start; gap: var(--space-3); margin-top: var(--space-6); }
   .va-dialog-button {
