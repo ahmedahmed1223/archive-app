@@ -101,6 +101,117 @@
   .help-page textarea {
     text-align: right;
   }
+  .va-mixed-token,
+  .va-ltr-inline,
+  .va-shortcut-sequence,
+  .help-page kbd,
+  .help-page code {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+  }
+  .va-mixed-token,
+  .help-page kbd,
+  .help-page code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
+  }
+  .va-technical-line {
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: right !important;
+  }
+  .va-number-badge {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+  }
+  .va-rtl-list,
+  .help-page .va-rtl-list {
+    direction: rtl;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+  }
+  .va-rtl-list > li {
+    display: flex;
+    align-items: flex-start;
+    gap: .625rem;
+    text-align: right;
+  }
+  .va-rtl-list > li::before {
+    flex: 0 0 auto;
+    margin-top: .55em;
+  }
+  .va-bullet-list > li::before {
+    content: "";
+    width: .38rem;
+    height: .38rem;
+    border-radius: 999px;
+    background: var(--va-v1-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--va-v1-accent) 16%, transparent);
+  }
+  .va-numbered-list {
+    counter-reset: va-numbered-list;
+  }
+  .va-numbered-list > li {
+    counter-increment: va-numbered-list;
+  }
+  .va-numbered-list > li::before {
+    content: counter(va-numbered-list);
+    width: 1.55rem;
+    height: 1.55rem;
+    margin-top: -.1rem;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--va-v1-accent) 38%, transparent);
+    background: color-mix(in srgb, var(--va-v1-accent-soft) 78%, transparent);
+    color: #a7f3d0;
+    font-size: .75rem;
+    font-weight: 700;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .va-stepper-rtl {
+    direction: rtl;
+  }
+  .va-progress-rtl {
+    direction: rtl;
+    display: flex;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+  .va-progress-rtl > * {
+    flex: 0 0 auto;
+  }
+  .va-context-bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    background: color-mix(in srgb, var(--va-v1-bg) 86%, transparent);
+    backdrop-filter: blur(14px);
+  }
+  .va-context-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .85rem 1.5rem;
+  }
+  .va-context-title {
+    min-width: 0;
+  }
+  .va-context-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .5rem;
+  }
   .login-screen-shell {
     color-scheme: dark;
   }
@@ -192,6 +303,20 @@
     }
     .va-v1-action {
       justify-content: space-between;
+    }
+    .va-context-bar {
+      position: static;
+    }
+    .va-context-bar-inner {
+      align-items: stretch;
+      flex-direction: column;
+      padding: .75rem 1rem;
+    }
+    .va-context-actions {
+      justify-content: stretch;
+    }
+    .va-context-actions > * {
+      flex: 1 1 auto;
     }
   }
   button, [role="button"], input, select, textarea { touch-action: manipulation; }
