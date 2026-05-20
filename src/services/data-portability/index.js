@@ -1,13 +1,4 @@
 export {
-  createArchiveExcelPackagePayload,
-  createTransferPackage,
-  normalizeBackupData,
-  readArchiveExcelPackage,
-  readTransferPackage,
-  runOperationPreflight,
-  validateBackupData
-} from "../../runtime/legacyAdapter.js";
-export {
   EXCEL_ARCHIVE_CHUNK_SIZE,
   EXCEL_ARCHIVE_PACKAGE_TYPE,
   EXCEL_ARCHIVE_PAYLOAD_SHEET,
@@ -17,3 +8,20 @@ export {
   TRANSFER_SCHEMA_VERSION,
   stableStringifyForChecksum
 } from "./packageFormat.js";
+export {
+  createPortableArchivePayload,
+  createPortablePayloadSummary,
+  getPortablePayloadCounts,
+  redactPortableUsers
+} from "./payload.js";
+export { csvEscape, rowsToCsv } from "./csv.js";
+export { downloadArchiveBlob } from "./browserDownload.js";
+export { validateBackupData } from "./validation.js";
+export { calculateTransferChecksum, sha256Hex } from "./checksum.js";
+export { safeJsonParse, sanitizePlainData } from "./json.js";
+export {
+  createArchiveExcelPackagePayload,
+  createTransferPackage,
+  readArchiveExcelPackage,
+  readTransferPackage
+} from "./packageOperations.js";

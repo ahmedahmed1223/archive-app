@@ -1,1 +1,1 @@
-export { TokenAutocompleteField as TagAutocomplete, TokenAutocompleteField as default } from "../../runtime/legacyAdapter.js";
+export { TokenAutocompleteField as TagAutocomplete, TokenAutocompleteField as default } from "../legacyComponentAdapter.js";

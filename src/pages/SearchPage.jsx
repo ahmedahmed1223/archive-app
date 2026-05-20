@@ -1,1 +1,1 @@
-export { SearchPanel as SearchPage, SearchPanel as default } from "../runtime/legacyAdapter.js";
+export { SearchPanel as SearchPage, SearchPanel as default } from "./legacyPageAdapter.js";

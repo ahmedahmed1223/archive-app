@@ -15,6 +15,10 @@ import {
   UsersPage,
   VocabularyPage
 } from "../pages/index.js";
+import {
+  HEAVY_PAGE_IDS,
+  PAGE_GROUPS
+} from "./pageManifest.js";
 
 export const PAGE_COMPONENTS = {
   dashboard: DashboardPage,
@@ -34,11 +38,4 @@ export const PAGE_COMPONENTS = {
   help: HelpPage
 };
 
-export const PAGE_GROUPS = {
-  daily: ["dashboard", "archive", "add", "search"],
-  organization: ["collections", "types", "vocabulary", "htags"],
-  administration: ["users", "settings", "history", "help"],
-  data: ["backup", "reports"]
-};
-
-export const HEAVY_PAGE_IDS = ["settings", "backup", "reports", "help"];
+export { HEAVY_PAGE_IDS, PAGE_GROUPS };

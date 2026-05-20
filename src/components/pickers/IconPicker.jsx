@@ -1,1 +1,1 @@
-export { IconPicker, IconPicker as default } from "../../runtime/legacyAdapter.js";
+export { IconPicker, IconPicker as default } from "../legacyComponentAdapter.js";

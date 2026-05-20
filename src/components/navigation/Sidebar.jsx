@@ -1,1 +1,1 @@
-export { AppSidebar as Sidebar, AppSidebar as default } from "../../runtime/legacyAdapter.js";
+export { AppSidebar as Sidebar, AppSidebar as default } from "../legacyComponentAdapter.js";

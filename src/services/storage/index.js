@@ -1,5 +1,4 @@
 export {
-  STORES,
   dbDeleteBatch,
   dbPutBatch,
   getIndexedDbDataSnapshot,
@@ -10,3 +9,4 @@ export {
   writeNormalizedDataToIndexedDb,
   writeStorageManifest
 } from "../../runtime/legacyAdapter.js";
+export { DB_NAME, DB_VERSION, STORES } from "./schema.js";
