@@ -71,6 +71,9 @@
     text-align: right;
     unicode-bidi: isolate;
   }
+  .help-page * {
+    text-align: right;
+  }
   .help-page p,
   .help-page li,
   .help-page h1,
@@ -80,14 +83,23 @@
     text-align: right;
     unicode-bidi: plaintext;
   }
+  .help-page [dir="auto"]:not(input):not(textarea),
+  .help-page .va-bidi-text {
+    direction: rtl;
+    text-align: right;
+  }
   .help-page code,
   .help-page kbd,
   .help-page .font-mono,
   .help-page [dir="ltr"],
   .help-page [dir="ltr"] * {
     direction: ltr;
-    text-align: left;
+    text-align: right;
     unicode-bidi: isolate;
+  }
+  .help-page input,
+  .help-page textarea {
+    text-align: right;
   }
   .login-screen-shell {
     color-scheme: dark;
@@ -338,8 +350,8 @@
     direction: rtl;
     text-align: right;
   }
-  .va-dialog-title { margin: 0 0 var(--space-2); font-size: 1.125rem; line-height: 1.75rem; font-weight: 700; unicode-bidi: plaintext; text-align: start; overflow-wrap: anywhere; }
-  .va-dialog-message { margin: 0; color: var(--color-text-secondary); white-space: pre-line; line-height: 1.7; unicode-bidi: plaintext; text-align: start; overflow-wrap: anywhere; }
+  .va-dialog-title { margin: 0 0 var(--space-2); font-size: 1.125rem; line-height: 1.75rem; font-weight: 700; direction: rtl; unicode-bidi: plaintext; text-align: right; overflow-wrap: anywhere; }
+  .va-dialog-message { margin: 0; color: var(--color-text-secondary); white-space: pre-line; line-height: 1.7; direction: rtl; unicode-bidi: plaintext; text-align: right; overflow-wrap: anywhere; }
   .va-dialog-input {
     width: 100%;
     margin-top: var(--space-4);
@@ -349,7 +361,7 @@
     color: var(--color-text-primary);
     padding: 0.75rem 1rem;
     unicode-bidi: plaintext;
-    text-align: start;
+    text-align: right;
   }
   [data-slot="dialog-content"],
   [data-slot="alert-dialog-content"] {
@@ -361,7 +373,7 @@
   [data-slot="alert-dialog-title"],
   [data-slot="alert-dialog-description"] {
     unicode-bidi: plaintext;
-    text-align: start;
+    text-align: right;
     overflow-wrap: anywhere;
   }
   .va-dialog-actions { display: flex; justify-content: flex-start; gap: var(--space-3); margin-top: var(--space-6); }
