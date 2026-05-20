@@ -7,3 +7,7 @@ export {
   selectDeletedItems,
   selectFavoriteItems
 } from "../../stores/selectors.js";
+export {
+  getHtml5VideoPreviewSource,
+  isHtml5PreviewableVideo
+} from "./mediaPreview.js";

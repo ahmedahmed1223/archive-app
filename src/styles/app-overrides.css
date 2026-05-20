@@ -1,20 +1,20 @@
 :root {
-    --color-bg-primary: #ffffff;
-    --color-bg-surface: #f8fafc;
+    --color-bg-primary: #f7f4ee;
+    --color-bg-surface: #fffdf8;
     --color-bg-elevated: #ffffff;
-    --color-text-primary: #111827;
-    --color-text-secondary: #475569;
-    --color-text-muted: #64748b;
-    --color-border: #e5e7eb;
-    --color-accent: #059669;
-    --va-v1-bg: #030712;
-    --va-v1-surface: #0b1220;
-    --va-v1-surface-2: #111827;
-    --va-v1-elevated: #162033;
-    --va-v1-border: #263244;
-    --va-v1-accent: #10b981;
-    --va-v1-accent-strong: #047857;
-    --va-v1-accent-soft: #063b32;
+    --color-text-primary: #172033;
+    --color-text-secondary: #485466;
+    --color-text-muted: #6f7784;
+    --color-border: #ebe5da;
+    --color-accent: #14b8a6;
+    --va-v1-bg: #f7f4ee;
+    --va-v1-surface: #fffdf8;
+    --va-v1-surface-2: #f1ece3;
+    --va-v1-elevated: #ffffff;
+    --va-v1-border: #e2dacd;
+    --va-v1-accent: #14b8a6;
+    --va-v1-accent-strong: #0f766e;
+    --va-v1-accent-soft: #dff7f3;
     --va-v1-info: #38bdf8;
     --va-v1-warning: #f59e0b;
     --va-v1-danger: #ef4444;
@@ -31,22 +31,22 @@
     --radius-panel: 0.75rem;
   }
   html.dark {
-    --color-bg-primary: #030712;
-    --color-bg-surface: #111827;
-    --color-bg-elevated: #0f172a;
-    --color-text-primary: #f9fafb;
-    --color-text-secondary: #d1d5db;
-    --color-text-muted: #9ca3af;
-    --color-border: rgba(255,255,255,0.12);
-    --color-accent: #10b981;
-    --va-v1-bg: #030712;
-    --va-v1-surface: #0b1220;
-    --va-v1-surface-2: #111827;
-    --va-v1-elevated: #162033;
-    --va-v1-border: #263244;
-    --va-v1-accent: #10b981;
-    --va-v1-accent-strong: #047857;
-    --va-v1-accent-soft: #063b32;
+    --color-bg-primary: #07111f;
+    --color-bg-surface: #0b1626;
+    --color-bg-elevated: #142033;
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-border: rgba(203,213,225,0.14);
+    --color-accent: #14b8a6;
+    --va-v1-bg: #07111f;
+    --va-v1-surface: #0b1626;
+    --va-v1-surface-2: #111c2e;
+    --va-v1-elevated: #142033;
+    --va-v1-border: #26364c;
+    --va-v1-accent: #14b8a6;
+    --va-v1-accent-strong: #0f766e;
+    --va-v1-accent-soft: #0f3f3b;
     --va-v1-info: #38bdf8;
     --va-v1-warning: #f59e0b;
     --va-v1-danger: #ef4444;
@@ -229,6 +229,54 @@
   .login-screen-shell [class*="bg-white/5"] {
     border-color: rgba(255,255,255,.14);
   }
+  .login-screen-shell {
+    background:
+      radial-gradient(circle at 72% 18%, color-mix(in srgb, var(--va-v1-accent) 14%, transparent), transparent 34rem),
+      linear-gradient(145deg, #07111f, #0b1626 48%, #07111f) !important;
+  }
+  .va-onboarding-choice strong,
+  .va-core-ui-item strong {
+    display: block;
+    color: #f8fafc;
+    font-size: .875rem;
+  }
+  .va-onboarding-choice small,
+  .va-core-ui-item p {
+    display: block;
+    margin-top: .2rem;
+    color: #94a3b8;
+    font-size: .75rem;
+    line-height: 1.55;
+  }
+  .va-core-ui-map {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+  }
+  .va-core-ui-item {
+    display: flex;
+    gap: .65rem;
+    align-items: flex-start;
+    min-height: 5rem;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: .875rem;
+    background: rgba(0,0,0,.12);
+    padding: .75rem;
+  }
+  .va-core-ui-item > span {
+    display: inline-flex;
+    width: 1.9rem;
+    height: 1.9rem;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    border-radius: .65rem;
+    background: color-mix(in srgb, var(--va-v1-accent) 14%, transparent);
+    color: #99f6e4;
+  }
+  .va-html5-preview video {
+    display: block;
+  }
   .theme-panel {
     background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
     border: 1px solid var(--color-border);
@@ -317,6 +365,9 @@
     }
     .va-context-actions > * {
       flex: 1 1 auto;
+    }
+    .va-core-ui-map {
+      grid-template-columns: 1fr;
     }
   }
   button, [role="button"], input, select, textarea { touch-action: manipulation; }
