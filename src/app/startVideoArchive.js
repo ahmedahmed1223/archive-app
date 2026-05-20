@@ -1,4 +1,4 @@
-import { mountVideoArchive } from "../runtime/videoArchiveRuntime.js";
+import { mountVideoArchive } from "./App.jsx";
 
 export function startVideoArchive(rootId = "root") {
   const rootElement = document.getElementById(rootId);

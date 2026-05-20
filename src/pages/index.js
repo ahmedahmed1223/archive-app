@@ -1,0 +1,15 @@
+export { DashboardPage } from "./DashboardPage.jsx";
+export { ArchivePage } from "./ArchivePage.jsx";
+export { AddVideoPage } from "./AddVideoPage.jsx";
+export { DetailPage } from "./DetailPage.jsx";
+export { SearchPage } from "./SearchPage.jsx";
+export { SettingsPage } from "./SettingsPage.jsx";
+export { DataCenterPage } from "./DataCenterPage.jsx";
+export { TypesPage } from "./TypesPage.jsx";
+export { CollectionsPage } from "./CollectionsPage.jsx";
+export { VocabularyPage } from "./VocabularyPage.jsx";
+export { HierarchicalTagsPage } from "./HierarchicalTagsPage.jsx";
+export { ReportsPage } from "./ReportsPage.jsx";
+export { UsersPage } from "./UsersPage.jsx";
+export { HistoryPage } from "./HistoryPage.jsx";
+export { HelpPage } from "./HelpPage.jsx";
