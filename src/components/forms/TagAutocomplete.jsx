@@ -1,1 +1,1 @@
-export { TokenAutocompleteField as TagAutocomplete, TokenAutocompleteField as default } from "../../runtime/videoArchiveRuntime.js";
+export { TokenAutocompleteField as TagAutocomplete, TokenAutocompleteField as default } from "../../runtime/legacyAdapter.js";

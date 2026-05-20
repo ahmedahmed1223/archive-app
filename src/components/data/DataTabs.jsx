@@ -1,1 +1,1 @@
-export { DataCenterTabs as DataTabs, DataCenterTabs as default } from "../../runtime/videoArchiveRuntime.js";
+export { DataCenterTabs as DataTabs, DataCenterTabs as default } from "../../runtime/legacyAdapter.js";

@@ -6,7 +6,7 @@ export {
   readTransferPackage,
   runOperationPreflight,
   validateBackupData
-} from "../../runtime/videoArchiveRuntime.js";
+} from "../../runtime/legacyAdapter.js";
 export {
   EXCEL_ARCHIVE_CHUNK_SIZE,
   EXCEL_ARCHIVE_PACKAGE_TYPE,

@@ -1,1 +1,1 @@
-export { HierarchicalTagsPage, HierarchicalTagsPage as default } from "../runtime/videoArchiveRuntime.js";
+export { HierarchicalTagsPage, HierarchicalTagsPage as default } from "../runtime/legacyAdapter.js";

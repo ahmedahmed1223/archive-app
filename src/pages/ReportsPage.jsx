@@ -1,1 +1,1 @@
-export { ReportsPage, ReportsPage as default } from "../runtime/videoArchiveRuntime.js";
+export { ReportsPage, ReportsPage as default } from "../runtime/legacyAdapter.js";

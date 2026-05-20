@@ -1,2 +1,2 @@
-export { useAppStore as useSettingsStore } from "../runtime/videoArchiveRuntime.js";
+export { useAppStore as useSettingsStore } from "./appStore.js";
 export { selectSettings, selectSystemReadiness } from "./selectors.js";

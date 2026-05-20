@@ -1,4 +1,4 @@
-export { useAppStore as useArchiveStore } from "../runtime/videoArchiveRuntime.js";
+export { useAppStore as useArchiveStore } from "./appStore.js";
 export {
   selectActiveItems,
   selectArchiveFilters,

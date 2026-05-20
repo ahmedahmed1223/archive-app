@@ -1,1 +1,1 @@
-export * from "../runtime/videoArchiveRuntime.js";
+export * from "../runtime/legacyAdapter.js";

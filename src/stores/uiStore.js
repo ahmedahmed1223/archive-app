@@ -1,2 +1,2 @@
-export { useAppStore as useUiStore } from "../runtime/videoArchiveRuntime.js";
+export { useAppStore as useUiStore } from "./appStore.js";
 export { selectArchiveFilters, selectSystemReadiness } from "./selectors.js";

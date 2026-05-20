@@ -3,4 +3,4 @@ export {
   appConfirm,
   appPrompt,
   cn
-} from "../runtime/videoArchiveRuntime.js";
+} from "../runtime/legacyAdapter.js";

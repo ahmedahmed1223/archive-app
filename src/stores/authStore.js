@@ -1,4 +1,4 @@
 export {
   useAuthStore,
   useSessionStore
-} from "../runtime/videoArchiveRuntime.js";
+} from "./appStore.js";

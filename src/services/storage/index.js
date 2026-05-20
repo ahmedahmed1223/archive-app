@@ -9,4 +9,4 @@ export {
   withStoreOperation,
   writeNormalizedDataToIndexedDb,
   writeStorageManifest
-} from "../../runtime/videoArchiveRuntime.js";
+} from "../../runtime/legacyAdapter.js";

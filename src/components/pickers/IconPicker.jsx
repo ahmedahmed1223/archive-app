@@ -1,1 +1,1 @@
-export { IconPicker, IconPicker as default } from "../../runtime/videoArchiveRuntime.js";
+export { IconPicker, IconPicker as default } from "../../runtime/legacyAdapter.js";

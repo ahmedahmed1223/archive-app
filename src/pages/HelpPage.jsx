@@ -1,1 +1,1 @@
-export { HelpPage, HelpPage as default } from "../runtime/videoArchiveRuntime.js";
+export { HelpPage, HelpPage as default } from "../runtime/legacyAdapter.js";

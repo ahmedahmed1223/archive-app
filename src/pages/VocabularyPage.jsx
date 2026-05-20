@@ -1,1 +1,1 @@
-export { VocabularyPage, VocabularyPage as default } from "../runtime/videoArchiveRuntime.js";
+export { VocabularyPage, VocabularyPage as default } from "../runtime/legacyAdapter.js";

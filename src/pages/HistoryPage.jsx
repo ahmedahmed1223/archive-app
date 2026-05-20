@@ -1,1 +1,1 @@
-export { HistoryPanel as HistoryPage, HistoryPanel as default } from "../runtime/videoArchiveRuntime.js";
+export { HistoryPanel as HistoryPage, HistoryPanel as default } from "../runtime/legacyAdapter.js";

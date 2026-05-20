@@ -1,1 +1,1 @@
-export { CollectionsPage, CollectionsPage as default } from "../runtime/videoArchiveRuntime.js";
+export { CollectionsPage, CollectionsPage as default } from "../runtime/legacyAdapter.js";

@@ -1,1 +1,1 @@
-export { EmptyState, EmptyState as default } from "../../runtime/videoArchiveRuntime.js";
+export { EmptyState, EmptyState as default } from "../../runtime/legacyAdapter.js";

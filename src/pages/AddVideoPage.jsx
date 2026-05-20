@@ -1,1 +1,1 @@
-export { VideoForm as AddVideoPage, VideoForm as default } from "../runtime/videoArchiveRuntime.js";
+export { VideoForm as AddVideoPage, VideoForm as default } from "../runtime/legacyAdapter.js";

@@ -1,1 +1,1 @@
-export { KeyboardShortcutsDialog, KeyboardShortcutsDialog as default } from "../../runtime/videoArchiveRuntime.js";
+export { KeyboardShortcutsDialog, KeyboardShortcutsDialog as default } from "../../runtime/legacyAdapter.js";
