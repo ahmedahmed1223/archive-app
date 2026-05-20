@@ -511,6 +511,62 @@
   .va-dialog-confirm { background: var(--color-accent); color: white; border-color: transparent; }
   .va-dialog-danger .va-dialog-confirm { background: #dc2626; }
   .va-dialog-cancel { background: transparent; color: var(--color-text-secondary); }
+  .va-empty-state {
+    min-height: clamp(18rem, 42vh, 28rem);
+    border: 1px solid color-mix(in srgb, var(--va-v1-border) 70%, transparent);
+    border-radius: var(--radius-panel);
+    background: linear-gradient(180deg, rgba(15,23,42,.58), rgba(3,7,18,.18));
+  }
+  .va-empty-icon {
+    border-color: color-mix(in srgb, var(--va-v1-accent) 24%, var(--color-border));
+  }
+  .va-empty-corner {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--va-v1-bg) 78%, transparent);
+  }
+  .va-archive-header {
+    align-items: flex-start;
+  }
+  .va-archive-toolbar {
+    position: sticky;
+    top: calc(5.75rem + env(safe-area-inset-top, 0px));
+    z-index: 24;
+    border: 1px solid color-mix(in srgb, var(--va-v1-border) 70%, transparent);
+    border-radius: var(--radius-panel);
+    background: color-mix(in srgb, var(--va-v1-surface) 88%, transparent);
+    padding: .75rem;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 16px 44px rgba(0,0,0,.18);
+  }
+  .va-archive-summary {
+    min-height: 44px;
+    border-color: color-mix(in srgb, var(--va-v1-border) 62%, transparent) !important;
+    background: linear-gradient(180deg, rgba(15,23,42,.52), rgba(15,23,42,.24)) !important;
+  }
+  .va-summary-reset {
+    margin-inline-start: auto;
+  }
+  .va-mobile-fab {
+    position: fixed;
+    inset-inline-end: max(1rem, env(safe-area-inset-right, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+    z-index: 80;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-height: 52px;
+    padding: 0 1rem;
+    border: 1px solid rgba(16,185,129,.42);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #059669, #047857);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 18px 44px rgba(4,120,87,.36);
+  }
+  .va-mobile-fab:focus-visible {
+    outline: 2px solid #a7f3d0;
+    outline-offset: 3px;
+  }
   @supports (padding: max(0px)) {
     .safe-area-bottom, .fixed-bottom-bar {
       padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.75rem);
@@ -525,4 +581,18 @@
     html, body, #root { overflow-x: clip; }
     table { min-width: 0; width: 100%; }
     .overflow-x-auto { overflow-x: clip; }
+    .va-empty-state {
+      min-height: 18rem;
+      padding-block: 3rem !important;
+    }
+    .va-archive-toolbar {
+      position: static;
+      padding: .625rem;
+      box-shadow: none;
+    }
+    .va-summary-reset {
+      width: 100%;
+      justify-content: center;
+      margin-inline-start: 0;
+    }
   }
