@@ -1,1 +1,9 @@
-export { DataCenterTabs as DataTabs, DataCenterTabs as default } from "../legacyComponentAdapter.js";
+import { DataCenterTabs } from "../legacyComponentAdapter.js";
+import { createLegacyComponent } from "../legacyComponentFactory.js";
+
+export const DataTabs = createLegacyComponent(DataCenterTabs, {
+  id: "data-tabs",
+  legacyComponentName: "DataCenterTabs"
+});
+
+export default DataTabs;

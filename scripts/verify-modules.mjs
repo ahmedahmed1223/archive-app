@@ -57,6 +57,10 @@ import {
   getSidebarNavigationGroups
 } from "../src/components/navigation/viewModel.js";
 import {
+  getPageMigrationStatus,
+  getPageMigrationSummary
+} from "../src/pages/migrationStatus.js";
+import {
   createDataCenterExportFilters,
   createDataCenterExportSummary,
   formatTimeUntilBackup,
@@ -264,6 +268,15 @@ run("navigation view model", () => {
   assert.equal(groups.some((group) => group.id === "daily"), true);
   assert.equal(getPageContextBarModel("archive").title, "الأرشيف");
   assert.equal(getPrimaryPageAction("backup").dataTab, "import");
+});
+
+run("page migration wrappers", () => {
+  const status = getPageMigrationStatus();
+  const summary = getPageMigrationSummary(status);
+  assert.equal(summary.total, 15);
+  assert.equal(summary.legacyWrapped, 15);
+  assert.equal(status.find((page) => page.id === "archive")?.legacyComponentName, "VideoGrid");
+  assert.equal(status.every((page) => page.status === "legacy-wrapper"), true);
 });
 
 run("data portability JSON safety", () => {
