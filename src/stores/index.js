@@ -14,4 +14,5 @@ export {
   uiActionKeys
 } from "./appStore.js";
 
+export * from "./globalShortcuts.js";
 export * from "./selectors.js";

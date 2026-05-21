@@ -5,6 +5,15 @@ import {
   isHtml5PreviewableVideo
 } from "../src/features/archive/mediaPreview.js";
 import {
+  filterCommandPaletteCommands
+} from "../src/components/common/commandPaletteViewModel.js";
+import {
+  createShortcutDialogItems,
+  filterShortcutDialogItems,
+  getShortcutDialogCategories,
+  getShortcutDialogItemsForCategory
+} from "../src/components/common/shortcutDialogViewModel.js";
+import {
   createArchiveRouteParams,
   getArchiveActiveFilterCount,
   getArchiveResultRangeText,
@@ -19,6 +28,16 @@ import {
   isTextEntryTarget,
   shortcutMatches
 } from "../src/features/settings/keyboardShortcuts.js";
+import {
+  HELP_FAQ_ITEMS,
+  HELP_QUICK_SECTION_LINKS
+} from "../src/features/help/content.js";
+import {
+  createHelpShortcutList,
+  filterHelpFaqItems,
+  filterHelpSections,
+  normalizeHelpSectionId
+} from "../src/features/help/viewModel.js";
 import {
   createSettingsTabUiPatch,
   getSettingsTabState,
@@ -53,6 +72,9 @@ import {
   createImportPreviewSummary,
   formatImportPreviewSummary
 } from "../src/services/data-portability/importPreview.js";
+import {
+  getGlobalShortcutAction
+} from "../src/stores/globalShortcuts.js";
 import {
   isArchiveExcelImportFile,
   readArchiveImportFile
@@ -145,6 +167,56 @@ run("keyboard shortcut helpers", () => {
   assert.equal(shortcutMatches({ ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "k" }, "Ctrl+K"), true);
   assert.equal(shortcutMatches({ ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, key: "k" }, "Ctrl+K"), false);
   assert.equal(isTextEntryTarget({ tagName: "INPUT" }), true);
+});
+
+run("global shortcut action resolver", () => {
+  const ctrlK = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "k", target: { tagName: "BODY" } };
+  const ctrlSlashInInput = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "/", target: { tagName: "INPUT" } };
+  const ctrlKInInput = { ...ctrlK, target: { tagName: "INPUT" } };
+  assert.equal(getGlobalShortcutAction(ctrlK, {}), "openSearch");
+  assert.equal(getGlobalShortcutAction(ctrlSlashInInput, {}), "showShortcuts");
+  assert.equal(getGlobalShortcutAction(ctrlKInInput, {}), null);
+  assert.equal(getGlobalShortcutAction(ctrlK, { keyboardShortcuts: { openSearch: "disabled" } }), null);
+});
+
+run("shortcut and command dialog view models", () => {
+  const actions = [
+    { id: "openSearch", label: "فتح البحث المتقدم", category: "التنقل", defaultKeys: "Ctrl+K" },
+    { id: "lockApp", label: "قفل التطبيق", category: "الأمان", defaultKeys: "Ctrl+Shift+L" }
+  ];
+  const items = createShortcutDialogItems(actions);
+  const visible = filterShortcutDialogItems(items, "قفل", { lockApp: "Alt+L" });
+  assert.deepEqual(visible.map((item) => item.id), ["lockApp"]);
+  assert.deepEqual(getShortcutDialogCategories(items), ["التنقل", "الأمان"]);
+  assert.deepEqual(getShortcutDialogItemsForCategory(actions, visible, "الأمان").map((item) => item.id), ["lockApp"]);
+
+  const commands = filterCommandPaletteCommands([
+    { id: "backup", label: "فتح مركز البيانات", detail: "نسخ احتياطي واستيراد", keys: "Ctrl+B" },
+    { id: "help", label: "فتح مركز المساعدة", detail: "تعليمات", keys: "Ctrl+/" }
+  ], "استيراد");
+  assert.deepEqual(commands.map((command) => command.id), ["backup"]);
+});
+
+run("help view model", () => {
+  assert.equal(HELP_QUICK_SECTION_LINKS.some(([sectionId]) => sectionId === "shortcuts"), true);
+  assert.equal(HELP_FAQ_ITEMS.some((faq) => faq.question.includes("فيديو")), true);
+  assert.equal(normalizeHelpSectionId("keyboard"), "shortcuts");
+  assert.equal(normalizeHelpSectionId(""), "getting-started");
+  assert.deepEqual(filterHelpSections([
+    { id: "getting-started", title: "البدء" },
+    { id: "backup-import", title: "النسخ الاحتياطي", searchText: "استيراد نقل" }
+  ], "نقل").map((section) => section.id), ["backup-import"]);
+  assert.deepEqual(filterHelpFaqItems([
+    { question: "كيف أبحث؟", answer: "استخدم الأرشيف" },
+    { question: "كيف أنقل البيانات؟", answer: "استخدم ملف النقل" }
+  ], "النقل").map((faq) => faq.question), ["كيف أنقل البيانات؟"]);
+
+  const shortcutList = createHelpShortcutList([
+    { id: "openSearch", label: "فتح البحث", category: "التنقل", defaultKeys: "Ctrl+K" },
+    { id: "openBackup", label: "مركز البيانات", category: "التنقل", defaultKeys: "Ctrl+B" }
+  ], { openBackup: "disabled" });
+  assert.deepEqual(shortcutList[0].keys, ["Ctrl", "K"]);
+  assert.equal(shortcutList[1].disabled, true);
 });
 
 run("settings view model", () => {
