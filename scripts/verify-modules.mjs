@@ -274,10 +274,12 @@ run("page migration wrappers", () => {
   const status = getPageMigrationStatus();
   const summary = getPageMigrationSummary(status);
   assert.equal(summary.total, 15);
-  assert.equal(summary.native, 2);
-  assert.equal(summary.legacyWrapped, 13);
-  assert.equal(status.find((page) => page.id === "archive")?.legacyComponentName, "VideoGrid");
+  assert.equal(summary.native, 5);
+  assert.equal(summary.legacyWrapped, 10);
+  assert.equal(status.find((page) => page.id === "archive")?.status, "native");
   assert.equal(status.find((page) => page.id === "dashboard")?.status, "native");
+  assert.equal(status.find((page) => page.id === "backup")?.status, "native");
+  assert.equal(status.find((page) => page.id === "reports")?.status, "native");
   assert.equal(status.find((page) => page.id === "help")?.status, "native");
 });
 
