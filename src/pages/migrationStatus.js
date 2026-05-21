@@ -1,7 +1,7 @@
 import { PAGE_MANIFEST } from "../app/pageManifest.js";
 
 export const LEGACY_PAGE_MIGRATION = {
-  dashboard: { legacyComponentName: "Dashboard", status: "legacy-wrapper" },
+  dashboard: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/DashboardPage.jsx; it still uses legacy React bridge until shared UI primitives are native." },
   archive: { legacyComponentName: "VideoGrid", status: "legacy-wrapper" },
   add: { legacyComponentName: "VideoForm", status: "legacy-wrapper" },
   detail: { legacyComponentName: "VideoDetail", status: "legacy-wrapper" },
@@ -15,7 +15,7 @@ export const LEGACY_PAGE_MIGRATION = {
   htags: { legacyComponentName: "HierarchicalTagsPage", status: "legacy-wrapper" },
   reports: { legacyComponentName: "ReportsPage", status: "legacy-wrapper" },
   users: { legacyComponentName: "UsersPage", status: "legacy-wrapper" },
-  help: { legacyComponentName: "HelpPage", status: "legacy-wrapper" }
+  help: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/HelpPage.jsx; it still uses legacy React bridge until shared UI primitives are native." }
 };
 
 export function getPageMigrationStatus() {
