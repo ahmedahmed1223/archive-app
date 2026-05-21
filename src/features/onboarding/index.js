@@ -4,3 +4,4 @@ export {
   ONBOARDING_STEPS,
   ONBOARDING_THEME_OPTIONS
 } from "./flow.js";
+export * from "./viewModel.js";

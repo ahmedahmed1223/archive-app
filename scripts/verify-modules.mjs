@@ -20,6 +20,24 @@ import {
   shortcutMatches
 } from "../src/features/settings/keyboardShortcuts.js";
 import {
+  createSettingsTabUiPatch,
+  getSettingsTabState,
+  hasMeaningfulSettingsDraftChanges,
+  normalizeSettingsTab
+} from "../src/features/settings/viewModel.js";
+import {
+  createOnboardingUiPatch,
+  getFirstTaskDestination,
+  getNextOnboardingStep,
+  getOnboardingStepIndex,
+  shouldShowV1Tour
+} from "../src/features/onboarding/viewModel.js";
+import {
+  getPageContextBarModel,
+  getPrimaryPageAction,
+  getSidebarNavigationGroups
+} from "../src/components/navigation/viewModel.js";
+import {
   createDataCenterExportFilters,
   createDataCenterExportSummary,
   formatTimeUntilBackup,
@@ -127,6 +145,53 @@ run("keyboard shortcut helpers", () => {
   assert.equal(shortcutMatches({ ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "k" }, "Ctrl+K"), true);
   assert.equal(shortcutMatches({ ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, key: "k" }, "Ctrl+K"), false);
   assert.equal(isTextEntryTarget({ tagName: "INPUT" }), true);
+});
+
+run("settings view model", () => {
+  assert.equal(normalizeSettingsTab("shortcuts"), "shortcuts");
+  assert.equal(normalizeSettingsTab("missing"), "general");
+  assert.equal(getSettingsTabState("security").activeLabel, "الأمان");
+  assert.deepEqual(createSettingsTabUiPatch({ ui: { lastSettingsTab: "general", lastHelpSection: "x" } }, "data"), {
+    ui: { lastSettingsTab: "data", lastHelpSection: "x" }
+  });
+  assert.equal(
+    hasMeaningfulSettingsDraftChanges(
+      { ui: { lastSettingsTab: "general" }, theme: "dark" },
+      { ui: { lastSettingsTab: "security" }, theme: "dark" },
+      "dark"
+    ),
+    false
+  );
+});
+
+run("onboarding view model", () => {
+  assert.equal(getOnboardingStepIndex("appearance"), 3);
+  assert.equal(getNextOnboardingStep("appearance").id, "interface");
+  assert.equal(getFirstTaskDestination("import-backup"), "backup");
+  assert.equal(shouldShowV1Tour({ settings: { ui: { v1OnboardingCompleted: true, v1TourCompleted: false } }, currentPage: "dashboard" }), true);
+  assert.deepEqual(createOnboardingUiPatch({
+    stepId: "interface",
+    securityMode: "quick",
+    themeChoice: "system",
+    firstTaskChoice: "add-video",
+    completed: true,
+    now: "2026-01-01T00:00:00.000Z"
+  }), {
+    lastOnboardingStep: "interface",
+    onboardingSecurityMode: "quick",
+    onboardingThemeChoice: "system",
+    firstTaskChoice: "add-video",
+    v1OnboardingCompleted: true,
+    onboardingSkippedAt: null,
+    onboardingCoreUiSeenAt: "2026-01-01T00:00:00.000Z"
+  });
+});
+
+run("navigation view model", () => {
+  const groups = getSidebarNavigationGroups();
+  assert.equal(groups.some((group) => group.id === "daily"), true);
+  assert.equal(getPageContextBarModel("archive").title, "الأرشيف");
+  assert.equal(getPrimaryPageAction("backup").dataTab, "import");
 });
 
 run("data portability JSON safety", () => {
