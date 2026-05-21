@@ -33,18 +33,26 @@ export function createTransferPackage(state, sourceDeviceName) {
   };
 }
 
-export function readTransferPackage(text) {
-  const parsed = safeJsonParse(text, null);
+function normalizePackagePayload(rawPayload, options = {}) {
+  const cleanPayload = sanitizePlainData(rawPayload);
+  return typeof options.normalizePayload === "function"
+    ? options.normalizePayload(cleanPayload)
+    : cleanPayload;
+}
+
+export function readTransferPackage(text, options = {}) {
+  const parsed = safeJsonParse(text, null, { onError: options.onParseError });
   if (!parsed || typeof parsed !== "object") {
     return { valid: false, errors: ["ملف النقل غير صالح أو تالف"] };
   }
 
   const rawPayload = sanitizePlainData(parsed.packageType === TRANSFER_PACKAGE_TYPE ? parsed.payload : parsed);
-  if (!rawPayload || typeof rawPayload !== "object") {
+  const payload = normalizePackagePayload(rawPayload, options);
+  if (!payload || typeof payload !== "object") {
     return { valid: false, errors: ["ملف النقل لا يحتوي بيانات قابلة للقراءة"] };
   }
 
-  const validation = validateBackupData(rawPayload);
+  const validation = validateBackupData(payload);
   if (!validation.valid) return { valid: false, errors: validation.errors };
 
   if (parsed.packageType === TRANSFER_PACKAGE_TYPE && parsed.checksum) {
@@ -56,8 +64,15 @@ export function readTransferPackage(text) {
 
   return {
     valid: true,
-    package: parsed.packageType === TRANSFER_PACKAGE_TYPE ? { ...parsed, payload: rawPayload } : createTransferPackage(rawPayload, "ملف قديم"),
-    payload: rawPayload
+    package: parsed.packageType === TRANSFER_PACKAGE_TYPE
+      ? { ...parsed, payload }
+      : createTransferPackage(
+        typeof options.createLegacyPackageState === "function"
+          ? options.createLegacyPackageState(payload, rawPayload)
+          : payload,
+        "ملف قديم"
+      ),
+    payload
   };
 }
 
@@ -86,7 +101,20 @@ export function createArchiveExcelPackagePayload(state) {
   return { rows, payload: cleanPayload, checksum, exportedAt, chunkCount: chunks.length };
 }
 
-export function readArchiveExcelPackage(arrayBuffer, XLSX) {
+export function appendArchiveExcelPayloadSheet(XLSX, workbook, state) {
+  const archivePackage = createArchiveExcelPackagePayload(state);
+  const worksheet = XLSX.utils.json_to_sheet(archivePackage.rows);
+  worksheet["!cols"] = [{ wch: 24 }, { wch: 96 }];
+  XLSX.utils.book_append_sheet(workbook, worksheet, EXCEL_ARCHIVE_PAYLOAD_SHEET);
+  workbook.Workbook = workbook.Workbook || {};
+  workbook.Workbook.Sheets = workbook.SheetNames.map((name) => ({
+    name,
+    Hidden: name === EXCEL_ARCHIVE_PAYLOAD_SHEET ? 1 : 0
+  }));
+  return archivePackage;
+}
+
+export function readArchiveExcelPackage(arrayBuffer, XLSX, options = {}) {
   try {
     const wb = XLSX.read(arrayBuffer, { type: "array", cellDates: true });
     const ws = wb.Sheets?.[EXCEL_ARCHIVE_PAYLOAD_SHEET];
@@ -106,7 +134,8 @@ export function readArchiveExcelPackage(arrayBuffer, XLSX) {
     }
 
     const payloadText = Array.from({ length: chunkCount }, (_, index) => values.get(`chunk_${String(index).padStart(3, "0")}`) || "").join("");
-    const rawPayload = sanitizePlainData(safeJsonParse(payloadText, null));
+    const parsedPayload = safeJsonParse(payloadText, null, { onError: options.onParseError });
+    const rawPayload = sanitizePlainData(parsedPayload);
     if (!rawPayload) {
       return { valid: false, errors: ["تعذر قراءة بيانات Excel المخفية. قد يكون الملف تالفاً أو معدلاً."] };
     }
@@ -116,18 +145,19 @@ export function readArchiveExcelPackage(arrayBuffer, XLSX) {
       return { valid: false, errors: ["فشل التحقق من سلامة ملف Excel. قد يكون الملف معدلاً بعد التصدير."] };
     }
 
-    const validation = validateBackupData(rawPayload);
+    const payload = normalizePackagePayload(rawPayload, options);
+    const validation = validateBackupData(payload);
     if (!validation.valid) return { valid: false, errors: validation.errors };
 
     return {
       valid: true,
-      payload: rawPayload,
+      payload,
       package: {
         packageType: EXCEL_ARCHIVE_PACKAGE_TYPE,
         schemaVersion: Number(values.get("schemaVersion") || EXCEL_ARCHIVE_SCHEMA_VERSION),
         exportedAt: values.get("exportedAt"),
         checksum,
-        counts: getPortablePayloadCounts(rawPayload)
+        counts: getPortablePayloadCounts(payload)
       }
     };
   } catch (error) {

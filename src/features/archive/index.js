@@ -11,3 +11,4 @@ export {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
 } from "./mediaPreview.js";
+export * from "./viewModel.js";

@@ -15,6 +15,7 @@ export {
   redactPortableUsers
 } from "./payload.js";
 export { csvEscape, rowsToCsv } from "./csv.js";
+export { createArchiveCsvExportFiles } from "./csvExport.js";
 export { downloadArchiveBlob } from "./browserDownload.js";
 export { validateBackupData } from "./validation.js";
 export { calculateTransferChecksum, sha256Hex } from "./checksum.js";
@@ -27,8 +28,10 @@ export {
 } from "./importPreview.js";
 export { safeJsonParse, sanitizePlainData } from "./json.js";
 export {
+  appendArchiveExcelPayloadSheet,
   createArchiveExcelPackagePayload,
   createTransferPackage,
   readArchiveExcelPackage,
   readTransferPackage
 } from "./packageOperations.js";
+export { createArchiveExcelWorkbook } from "./excelWorkbook.js";
