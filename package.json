@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
+    "verify": "node scripts/verify-modules.mjs",
+    "check": "npm run verify && npm run build",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

@@ -13,11 +13,17 @@ function getExtension(value = "") {
   return dotIndex >= 0 ? clean.slice(dotIndex) : "";
 }
 
-function encodeFilePath(path) {
+function encodeFilePathSegments(path) {
   return path
     .split("/")
     .map((part) => encodeURIComponent(part))
     .join("/");
+}
+
+function encodeWindowsFilePath(path) {
+  const drive = path.slice(0, 2);
+  const rest = path.slice(3);
+  return rest ? `${drive}/${encodeFilePathSegments(rest)}` : `${drive}/`;
 }
 
 export function isHtml5PreviewableVideo(path = "") {
@@ -30,10 +36,10 @@ export function getHtml5VideoPreviewSource(path = "") {
   if (/^(https?:|blob:|data:|file:)/i.test(value)) return value;
   const normalized = value.replace(/\\/g, "/");
   if (/^[a-z]:\//i.test(normalized)) {
-    return `file:///${encodeFilePath(normalized)}`;
+    return `file:///${encodeWindowsFilePath(normalized)}`;
   }
   if (normalized.startsWith("/")) {
-    return `file://${encodeFilePath(normalized)}`;
+    return `file://${encodeFilePathSegments(normalized)}`;
   }
   return null;
 }

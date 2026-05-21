@@ -18,6 +18,13 @@ export { csvEscape, rowsToCsv } from "./csv.js";
 export { downloadArchiveBlob } from "./browserDownload.js";
 export { validateBackupData } from "./validation.js";
 export { calculateTransferChecksum, sha256Hex } from "./checksum.js";
+export {
+  IMPORT_PREVIEW_ENTITIES,
+  comparableImportRecord,
+  createImportPreviewSummary,
+  formatImportPreviewSummary,
+  summarizeImportEntity
+} from "./importPreview.js";
 export { safeJsonParse, sanitizePlainData } from "./json.js";
 export {
   createArchiveExcelPackagePayload,
