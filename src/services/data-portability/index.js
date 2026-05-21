@@ -27,6 +27,7 @@ export {
   summarizeImportEntity
 } from "./importPreview.js";
 export { safeJsonParse, sanitizePlainData } from "./json.js";
+export { isArchiveExcelImportFile, readArchiveImportFile } from "./importReader.js";
 export {
   appendArchiveExcelPayloadSheet,
   createArchiveExcelPackagePayload,

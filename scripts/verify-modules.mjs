@@ -35,8 +35,13 @@ import {
   createImportPreviewSummary,
   formatImportPreviewSummary
 } from "../src/services/data-portability/importPreview.js";
+import {
+  isArchiveExcelImportFile,
+  readArchiveImportFile
+} from "../src/services/data-portability/importReader.js";
 import { createArchiveCsvExportFiles } from "../src/services/data-portability/csvExport.js";
 import {
+  createArchiveExcelPackagePayload,
   createTransferPackage,
   readTransferPackage
 } from "../src/services/data-portability/packageOperations.js";
@@ -63,6 +68,11 @@ import {
 
 function run(name, test) {
   test();
+  console.log(`ok - ${name}`);
+}
+
+async function runAsync(name, test) {
+  await test();
   console.log(`ok - ${name}`);
 }
 
@@ -157,6 +167,51 @@ run("transfer package normalization hook", () => {
   assert.equal(result.valid, true);
   assert.equal(result.payload.videoItems[0].title, "فيديو معدل");
   assert.equal(result.package.payload.videoItems[0].title, "فيديو معدل");
+});
+
+await runAsync("archive import file reader", async () => {
+  const baseState = {
+    contentTypes: [{ id: "type", name: "نوع", fields: [], subtypes: [] }],
+    videoItems: [{ id: "video", type: "type", title: "فيديو" }]
+  };
+
+  const jsonResult = await readArchiveImportFile({
+    name: "archive.json",
+    type: "application/json",
+    text: async () => JSON.stringify(baseState)
+  }, {
+    normalizePayload: (payload) => ({ ...payload, version: payload.version || "2.0" })
+  });
+  assert.equal(jsonResult.valid, true);
+  assert.equal(jsonResult.sourceType, "json");
+
+  const transferPackage = createTransferPackage(baseState, "test");
+  const transferResult = await readArchiveImportFile({
+    name: "transfer.json",
+    type: "application/json",
+    text: async () => JSON.stringify(transferPackage)
+  });
+  assert.equal(transferResult.valid, true);
+  assert.equal(transferResult.sourceType, "transfer");
+  assert.equal(transferResult.packageInfo.packageType, "video-archive-transfer");
+
+  const excelPackage = createArchiveExcelPackagePayload(baseState);
+  const fakeXlsx = {
+    read: () => ({ Sheets: { __archive_payload: {} } }),
+    utils: {
+      sheet_to_json: () => excelPackage.rows
+    }
+  };
+  const excelResult = await readArchiveImportFile({
+    name: "archive.xlsx",
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    arrayBuffer: async () => new ArrayBuffer(0)
+  }, {
+    loadXlsx: async () => fakeXlsx
+  });
+  assert.equal(isArchiveExcelImportFile({ name: "archive.xlsx" }), true);
+  assert.equal(excelResult.valid, true);
+  assert.equal(excelResult.sourceType, "excel");
 });
 
 run("data center view model", () => {
