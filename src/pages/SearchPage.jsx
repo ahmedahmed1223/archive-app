@@ -1,10 +1,392 @@
-import { SearchPanel } from "./legacyPageAdapter.js";
-import { createLegacyPage } from "./legacyPageFactory.js";
+import {
+  Archive,
+  FolderOpen,
+  RefreshCw,
+  Search,
+  Tags,
+  Video,
+  formatDateTime,
+  formatNumber,
+  legacyJsxRuntime,
+  legacyMotion,
+  legacyReact,
+  parseAppRoute,
+  useAppStore,
+  writeAppRoute
+} from "../runtime/legacyAdapter.js";
+import {
+  createArchiveRouteParams
+} from "../features/archive/viewModel.js";
+import {
+  createSearchRouteParams,
+  getSearchActiveFilterCount,
+  getSearchResults,
+  parseSearchRouteParams
+} from "../features/search/viewModel.js";
 
-export const SearchPage = createLegacyPage(SearchPanel, {
-  id: "search",
-  title: "البحث المتقدم",
-  legacyComponentName: "SearchPanel"
-});
+const { jsx, jsxs } = legacyJsxRuntime;
+const motion = legacyMotion;
+
+const PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
+
+function SearchMetric({ label, value, hint }) {
+  return jsxs("div", {
+    className: "rounded-xl border border-white/5 bg-gray-950/35 p-3 text-right",
+    children: [
+      jsx("p", { className: "text-xs text-gray-500", children: label }),
+      jsx("p", { className: "mt-1 text-lg font-bold text-white", children: value }),
+      hint && jsx("p", { className: "mt-1 text-xs text-gray-500", children: hint })
+    ]
+  });
+}
+
+function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
+  return jsx(motion.article, {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
+    className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    dir: "rtl",
+    children: jsxs("div", {
+      className: "grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]",
+      children: [
+        jsxs("div", {
+          className: "min-w-0",
+          children: [
+            jsxs("div", {
+              className: "flex flex-wrap items-center gap-2",
+              children: [
+                jsx("h3", { className: "line-clamp-2 text-base font-bold leading-relaxed text-white", children: item.title || "بدون عنوان" }),
+                item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
+              ]
+            }),
+            jsx("p", { className: "mt-1 text-sm text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
+            item.notes && jsx("p", { className: "mt-2 line-clamp-2 text-sm leading-relaxed text-gray-400", children: item.notes }),
+            item.tags?.length > 0 && jsx("div", {
+              className: "mt-3 flex flex-wrap gap-1.5",
+              children: item.tags.slice(0, 8).map((tag) => jsx("span", {
+                className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+                children: tag
+              }, tag))
+            }),
+            jsx("p", { className: "mt-3 text-xs text-gray-600", children: item.updatedAt ? `آخر تحديث: ${formatDateTime(item.updatedAt)}` : "لم يسجل تحديث" })
+          ]
+        }),
+        jsx("button", {
+          type: "button",
+          onClick: onOpen,
+          className: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+          children: [jsx(Video, { className: "h-4 w-4" }), "فتح التفاصيل"]
+        })
+      ]
+    })
+  }, item.id);
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+  return jsxs("div", {
+    className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    children: [
+      jsx("button", {
+        type: "button",
+        onClick: () => onPageChange(currentPage - 1),
+        disabled: currentPage <= 1,
+        className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
+        children: "السابق"
+      }),
+      jsx("p", { className: "text-sm text-gray-500", children: `الصفحة ${formatNumber(currentPage)} من ${formatNumber(totalPages)}` }),
+      jsx("button", {
+        type: "button",
+        onClick: () => onPageChange(currentPage + 1),
+        disabled: currentPage >= totalPages,
+        className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
+        children: "التالي"
+      })
+    ]
+  });
+}
+
+export function SearchPage() {
+  const {
+    videoItems = [],
+    contentTypes = [],
+    settings = {},
+    setCurrentPage,
+    setSelectedItemId,
+    setSearchQuery,
+    setFilterType,
+    setFilterSubtype,
+    addRecentSearch
+  } = useAppStore();
+
+  const initialRouteState = legacyReact.useMemo(() => parseSearchRouteParams(parseAppRoute().params), []);
+  const [query, setQuery] = legacyReact.useState(initialRouteState.query || "");
+  const [type, setType] = legacyReact.useState(initialRouteState.type || "all");
+  const [subtype, setSubtype] = legacyReact.useState(initialRouteState.subtype || "all");
+  const [favoritesOnly, setFavoritesOnly] = legacyReact.useState(initialRouteState.favoritesOnly || false);
+  const [dateFrom, setDateFrom] = legacyReact.useState(initialRouteState.dateFrom || "");
+  const [dateTo, setDateTo] = legacyReact.useState(initialRouteState.dateTo || "");
+  const [page, setPage] = legacyReact.useState(initialRouteState.page || 1);
+  const [pageSize, setPageSize] = legacyReact.useState(initialRouteState.pageSize || 24);
+  const skipInitialPageReset = legacyReact.useRef(true);
+  const isApplyingRouteState = legacyReact.useRef(false);
+
+  const typeById = legacyReact.useMemo(() => new Map(contentTypes.map((item) => [item.id, item])), [contentTypes]);
+  const activeType = typeById.get(type);
+  const subtypes = activeType?.subtypes || [];
+  const activeFilterCount = getSearchActiveFilterCount({ query, type, subtype, favoritesOnly, dateFrom, dateTo });
+
+  const results = legacyReact.useMemo(() => getSearchResults({
+    videoItems,
+    query,
+    type,
+    subtype,
+    favoritesOnly,
+    dateFrom,
+    dateTo
+  }), [dateFrom, dateTo, favoritesOnly, query, subtype, type, videoItems]);
+
+  const totalPages = Math.max(1, Math.ceil(results.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const visibleResults = results.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  legacyReact.useEffect(() => {
+    const applyRouteState = () => {
+      const nextState = parseSearchRouteParams(parseAppRoute().params);
+      isApplyingRouteState.current = true;
+      setQuery(nextState.query);
+      setType(nextState.type);
+      setSubtype(nextState.subtype);
+      setFavoritesOnly(nextState.favoritesOnly);
+      setDateFrom(nextState.dateFrom);
+      setDateTo(nextState.dateTo);
+      setPage(nextState.page);
+      setPageSize(nextState.pageSize);
+    };
+    window.addEventListener("hashchange", applyRouteState);
+    window.addEventListener("popstate", applyRouteState);
+    return () => {
+      window.removeEventListener("hashchange", applyRouteState);
+      window.removeEventListener("popstate", applyRouteState);
+    };
+  }, []);
+
+  legacyReact.useEffect(() => {
+    const handle = window.setTimeout(() => {
+      const params = createSearchRouteParams({ query, type, subtype, favoritesOnly, dateFrom, dateTo, page: currentPage, pageSize });
+      writeAppRoute("search", { params }, settings, true);
+      setSearchQuery?.(query);
+      if (query.trim()) addRecentSearch?.(query.trim());
+    }, 120);
+    return () => window.clearTimeout(handle);
+  }, [addRecentSearch, currentPage, dateFrom, dateTo, favoritesOnly, pageSize, query, settings, setSearchQuery, subtype, type]);
+
+  legacyReact.useEffect(() => {
+    if (skipInitialPageReset.current) {
+      skipInitialPageReset.current = false;
+      return;
+    }
+    if (isApplyingRouteState.current) {
+      isApplyingRouteState.current = false;
+      return;
+    }
+    setPage(1);
+  }, [dateFrom, dateTo, favoritesOnly, pageSize, query, subtype, type]);
+
+  legacyReact.useEffect(() => {
+    if (page !== currentPage) setPage(currentPage);
+  }, [currentPage, page]);
+
+  const resetSearch = () => {
+    setQuery("");
+    setType("all");
+    setSubtype("all");
+    setFavoritesOnly(false);
+    setDateFrom("");
+    setDateTo("");
+    setPage(1);
+  };
+
+  const openItem = (item) => {
+    setSelectedItemId?.(item.id);
+    setCurrentPage?.("detail");
+  };
+
+  const openInArchive = () => {
+    setSearchQuery?.(query);
+    setFilterType?.(type);
+    setFilterSubtype?.(subtype);
+    const params = createArchiveRouteParams({
+      searchQuery: query,
+      filterType: type,
+      filterSubtype: subtype,
+      showFavoritesOnly: favoritesOnly
+    });
+    writeAppRoute("archive", { params }, settings, false);
+    setCurrentPage?.("archive");
+  };
+
+  const typeLabel = (item) => typeById.get(item.type)?.name || item.type || "";
+  const subtypeLabel = (item) => typeById.get(item.type)?.subtypes?.find((sub) => sub.id === item.subtype)?.name || item.subtype || "";
+
+  return jsxs(motion.div, {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.2 },
+    className: "space-y-6 p-4 sm:p-6",
+    dir: "rtl",
+    children: [
+      jsxs("section", {
+        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        children: [
+          jsxs("div", {
+            className: "flex flex-wrap items-start justify-between gap-4",
+            children: [
+              jsxs("div", {
+                className: "min-w-0",
+                children: [
+                  jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Search, { className: "h-6 w-6 text-emerald-400" }), "البحث المتقدم"] }),
+                  jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "بحث لحظي داخل الأرشيف مع فلاتر مباشرة ونتائج مصغرة بدون مغادرة الصفحة." })
+                ]
+              }),
+              jsxs("div", {
+                className: "flex flex-wrap gap-2",
+                children: [
+                  jsx("button", { type: "button", onClick: openInArchive, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-white/5", children: [jsx(Archive, { className: "h-4 w-4" }), "عرض في الأرشيف"] }),
+                  jsx("button", { type: "button", onClick: () => setCurrentPage?.("add"), className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"] })
+                ]
+              })
+            ]
+          })
+        ]
+      }),
+      jsx("section", {
+        className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
+        children: [
+          jsx(SearchMetric, { label: "نتائج البحث", value: formatNumber(results.length), hint: results.length ? `عرض ${formatNumber(visibleResults.length)} الآن` : "لا توجد نتائج" }),
+          jsx(SearchMetric, { label: "الفلاتر", value: formatNumber(activeFilterCount), hint: activeFilterCount ? "فلاتر مطبقة" : "بحث واسع" }),
+          jsx(SearchMetric, { label: "المفضلة", value: formatNumber(results.filter((item) => item.isFavorite).length), hint: "ضمن النتائج" }),
+          jsx(SearchMetric, { label: "كل العناصر", value: formatNumber(videoItems.filter((item) => !item.isDeleted).length), hint: "نشطة في الأرشيف" })
+        ]
+      }),
+      jsxs("section", {
+        className: "rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
+        children: [
+          jsxs("div", {
+            className: "grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_180px_160px]",
+            children: [
+              jsxs("label", {
+                className: "relative block",
+                children: [
+                  jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
+                  jsx("input", {
+                    value: query,
+                    onChange: (event) => setQuery(event.target.value),
+                    placeholder: "ابحث في العنوان أو الوسوم أو الملاحظات",
+                    className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                  })
+                ]
+              }),
+              jsxs("select", {
+                value: type,
+                onChange: (event) => {
+                  setType(event.target.value);
+                  setSubtype("all");
+                },
+                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                children: [
+                  jsx("option", { value: "all", children: "كل الأنواع" }),
+                  ...contentTypes.map((item) => jsx("option", { value: item.id, children: item.name || item.id }, item.id))
+                ]
+              }),
+              jsxs("select", {
+                value: subtype,
+                onChange: (event) => setSubtype(event.target.value),
+                disabled: !subtypes.length,
+                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white disabled:opacity-50",
+                children: [
+                  jsx("option", { value: "all", children: "كل الفروع" }),
+                  ...subtypes.map((item) => jsx("option", { value: item.id, children: item.name || item.id }, item.id))
+                ]
+              }),
+              jsxs("select", {
+                value: pageSize,
+                onChange: (event) => setPageSize(Number(event.target.value)),
+                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                children: PAGE_SIZE_OPTIONS.map((value) => jsx("option", { value, children: `${formatNumber(value)} نتيجة` }, value))
+              })
+            ]
+          }),
+          jsxs("div", {
+            className: "mt-3 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]",
+            children: [
+              jsxs("label", {
+                className: "block rounded-xl border border-white/10 bg-gray-950/35 p-3",
+                children: [
+                  jsx("span", { className: "text-xs text-gray-500", children: "من تاريخ" }),
+                  jsx("input", { type: "date", value: dateFrom, onChange: (event) => setDateFrom(event.target.value), className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white" })
+                ]
+              }),
+              jsxs("label", {
+                className: "block rounded-xl border border-white/10 bg-gray-950/35 p-3",
+                children: [
+                  jsx("span", { className: "text-xs text-gray-500", children: "إلى تاريخ" }),
+                  jsx("input", { type: "date", value: dateTo, onChange: (event) => setDateTo(event.target.value), className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white" })
+                ]
+              }),
+              jsx("button", {
+                type: "button",
+                onClick: () => setFavoritesOnly((value) => !value),
+                className: `rounded-xl border px-4 py-2 text-sm font-semibold transition-colors ${favoritesOnly ? "border-amber-500/30 bg-amber-500/10 text-amber-100" : "border-white/10 text-gray-300 hover:bg-white/5"}`,
+                children: "المفضلة فقط"
+              }),
+              activeFilterCount > 0 && jsx("button", {
+                type: "button",
+                onClick: resetSearch,
+                className: "inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-white/5",
+                children: [jsx(RefreshCw, { className: "h-4 w-4" }), "مسح"]
+              })
+            ]
+          })
+        ]
+      }),
+      results.length === 0 ? jsxs("section", {
+        className: "rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
+        children: [
+          jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-500" }),
+          jsx("h2", { className: "mt-4 text-lg font-bold text-white", children: activeFilterCount ? "لا توجد نتائج مطابقة" : "ابدأ بكتابة كلمة بحث" }),
+          jsx("p", { className: "mx-auto mt-2 max-w-xl text-sm leading-relaxed text-gray-500", children: activeFilterCount ? "جرّب كلمة أقصر، أو امسح بعض الفلاتر، أو افتح الأرشيف لاستعراض كل العناصر." : "اكتب جزءاً من العنوان أو الوسم أو الملاحظة لتظهر النتائج هنا مباشرة." }),
+          activeFilterCount > 0 && jsx("button", { type: "button", onClick: resetSearch, className: "mt-5 inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(RefreshCw, { className: "h-4 w-4" }), "مسح البحث"] })
+        ]
+      }) : jsxs("section", {
+        className: "space-y-4",
+        children: [
+          jsxs("div", {
+            className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
+            children: [
+              jsx("p", { className: "font-semibold text-white", children: `عرض ${formatNumber(visibleResults.length)} من ${formatNumber(results.length)} نتيجة` }),
+              jsx("p", { className: "text-xs text-gray-500", children: query ? `بحث عن: ${query}` : "كل النتائج حسب الفلاتر" })
+            ]
+          }),
+          jsx("div", {
+            className: "space-y-3",
+            children: visibleResults.map((item, index) => jsx(SearchResultCard, {
+              item,
+              index,
+              typeLabel: typeLabel(item),
+              subtypeLabel: subtypeLabel(item),
+              onOpen: () => openItem(item)
+            }, item.id))
+          }),
+          jsx(Pagination, { currentPage, totalPages, onPageChange: (nextPage) => setPage(Math.min(Math.max(nextPage, 1), totalPages)) })
+        ]
+      })
+    ]
+  });
+}
+
+SearchPage.pageId = "search";
+SearchPage.migrationStatus = "native";
 
 export default SearchPage;

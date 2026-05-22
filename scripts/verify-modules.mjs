@@ -32,6 +32,12 @@ import {
   shortcutMatches
 } from "../src/features/settings/keyboardShortcuts.js";
 import {
+  createSearchRouteParams,
+  getSearchActiveFilterCount,
+  getSearchResults,
+  parseSearchRouteParams
+} from "../src/features/search/viewModel.js";
+import {
   HELP_FAQ_ITEMS,
   HELP_QUICK_SECTION_LINKS
 } from "../src/features/help/content.js";
@@ -188,6 +194,46 @@ run("keyboard shortcut helpers", () => {
   assert.equal(isTextEntryTarget({ tagName: "INPUT" }), true);
 });
 
+run("search view model", () => {
+  const params = createSearchRouteParams({
+    query: "لقطة",
+    type: "clip",
+    subtype: "social",
+    favoritesOnly: true,
+    dateFrom: "2026-01-01",
+    dateTo: "2026-01-31",
+    page: 2,
+    pageSize: 48
+  });
+  const parsed = parseSearchRouteParams(params);
+  assert.deepEqual(parsed, {
+    query: "لقطة",
+    type: "clip",
+    subtype: "social",
+    favoritesOnly: true,
+    dateFrom: "2026-01-01",
+    dateTo: "2026-01-31",
+    page: 2,
+    pageSize: 48
+  });
+  assert.equal(getSearchActiveFilterCount(parsed), 6);
+
+  const results = getSearchResults({
+    videoItems: [
+      { id: "1", title: "لقطة مؤتمر", type: "clip", subtype: "social", isFavorite: true, createdAt: "2026-01-15", updatedAt: "2026-01-16" },
+      { id: "2", title: "لقطة قديمة", type: "clip", subtype: "social", isFavorite: true, createdAt: "2025-12-20", updatedAt: "2026-01-16" },
+      { id: "3", title: "مؤتمر", type: "clip", subtype: "social", isFavorite: false, createdAt: "2026-01-15" }
+    ],
+    query: "لقطة",
+    type: "clip",
+    subtype: "social",
+    favoritesOnly: true,
+    dateFrom: "2026-01-01",
+    dateTo: "2026-01-31"
+  });
+  assert.deepEqual(results.map((item) => item.id), ["1"]);
+});
+
 run("global shortcut action resolver", () => {
   const ctrlK = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "k", target: { tagName: "BODY" } };
   const ctrlSlashInInput = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "/", target: { tagName: "INPUT" } };
@@ -312,13 +358,15 @@ run("page migration wrappers", () => {
   const status = getPageMigrationStatus();
   const summary = getPageMigrationSummary(status);
   assert.equal(summary.total, 15);
-  assert.equal(summary.native, 5);
-  assert.equal(summary.legacyWrapped, 10);
+  assert.equal(summary.native, 7);
+  assert.equal(summary.legacyWrapped, 8);
   assert.equal(status.find((page) => page.id === "archive")?.status, "native");
   assert.equal(status.find((page) => page.id === "dashboard")?.status, "native");
   assert.equal(status.find((page) => page.id === "backup")?.status, "native");
   assert.equal(status.find((page) => page.id === "reports")?.status, "native");
   assert.equal(status.find((page) => page.id === "help")?.status, "native");
+  assert.equal(status.find((page) => page.id === "settings")?.status, "native");
+  assert.equal(status.find((page) => page.id === "search")?.status, "native");
 });
 
 run("data portability JSON safety", () => {
