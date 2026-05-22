@@ -1,6 +1,11 @@
 import { normalizeArabicSearchText } from "../../utils/formatting.js";
 
 const ARCHIVE_SORT_FIELDS = new Set(["title", "createdAt", "updatedAt"]);
+const ARCHIVE_VIEW_MODES = new Set(["grid", "list", "table"]);
+
+export function normalizeArchiveViewMode(viewMode = "grid") {
+  return ARCHIVE_VIEW_MODES.has(viewMode) ? viewMode : "grid";
+}
 
 export function getFilteredArchiveItems({
   videoItems = [],
@@ -75,7 +80,9 @@ export function createArchiveRouteParams({
   showDeleted = false,
   showFavoritesOnly = false,
   sortField = "updatedAt",
-  sortDirection = "desc"
+  sortDirection = "desc",
+  viewMode = "grid",
+  openImport = false
 } = {}) {
   const params = new URLSearchParams();
   if (searchQuery.trim()) params.set("q", searchQuery.trim());
@@ -85,6 +92,9 @@ export function createArchiveRouteParams({
   if (showFavoritesOnly) params.set("favorites", "1");
   if (sortField !== "updatedAt") params.set("sort", sortField);
   if (sortDirection !== "desc") params.set("dir", sortDirection);
+  const normalizedViewMode = normalizeArchiveViewMode(viewMode);
+  if (normalizedViewMode !== "grid") params.set("view", normalizedViewMode);
+  if (openImport) params.set("import", "1");
   return params;
 }
 
@@ -97,6 +107,8 @@ export function parseArchiveRouteParams(params = new URLSearchParams()) {
     showDeleted: params.get("deleted") === "1",
     showFavoritesOnly: params.get("favorites") === "1",
     sortField: ARCHIVE_SORT_FIELDS.has(sortField) ? sortField : "updatedAt",
-    sortDirection: params.get("dir") === "asc" ? "asc" : "desc"
+    sortDirection: params.get("dir") === "asc" ? "asc" : "desc",
+    viewMode: normalizeArchiveViewMode(params.get("view") || "grid"),
+    openImport: params.get("import") === "1"
   };
 }

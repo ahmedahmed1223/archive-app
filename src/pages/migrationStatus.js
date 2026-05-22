@@ -2,7 +2,7 @@ import { PAGE_MANIFEST } from "../app/pageManifest.js";
 
 export const LEGACY_PAGE_MIGRATION = {
   dashboard: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/DashboardPage.jsx; it still uses legacy React bridge until shared UI primitives are native." },
-  archive: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/ArchivePage.jsx; item mutations still use legacy store actions during the transition." },
+  archive: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/ArchivePage.jsx with native grid/list/table modes; file import wizard is exposed through a feature adapter while scanner internals remain legacy." },
   add: { legacyComponentName: "VideoForm", status: "legacy-wrapper" },
   detail: { legacyComponentName: "VideoDetail", status: "legacy-wrapper" },
   types: { legacyComponentName: "TypeManager", status: "legacy-wrapper" },

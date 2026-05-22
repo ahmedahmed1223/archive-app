@@ -10,7 +10,9 @@ import {
   Video,
   appConfirm,
   legacyJsxRuntime,
+  legacyMotion,
   legacyReact,
+  LayoutGrid,
   parseAppRoute,
   useAppStore,
   writeAppRoute
@@ -21,8 +23,10 @@ import {
   getArchiveResultRangeText,
   getFilteredArchiveItems,
   hasArchiveContentFilters,
+  normalizeArchiveViewMode,
   parseArchiveRouteParams
 } from "../features/archive/viewModel.js";
+import { FileArchiveWizard } from "../features/archive/FileArchiveWizard.jsx";
 import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
@@ -33,6 +37,7 @@ import {
 } from "../utils/formatting.js";
 
 const { jsx, jsxs } = legacyJsxRuntime;
+const motion = legacyMotion;
 
 function ToolbarButton({ children, onClick, active = false, danger = false, icon }) {
   return jsxs("button", {
@@ -157,6 +162,159 @@ function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen,
   });
 }
 
+function AnimatedItem({ index, children, as = "div", className = "" }) {
+  const Component = motion[as] || motion.div;
+  return jsx(Component, {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
+    className,
+    children
+  });
+}
+
+function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted }) {
+  return jsxs("article", {
+    className: `group grid gap-3 rounded-2xl border bg-gray-900/45 p-3 text-right transition-colors sm:grid-cols-[180px_minmax(0,1fr)_auto] ${
+      selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
+    }`,
+    dir: "rtl",
+    children: [
+      jsx("button", {
+        type: "button",
+        onClick: onPreview,
+        className: "overflow-hidden rounded-xl border border-white/10 bg-gray-950 text-right",
+        children: jsx("div", { className: "aspect-video", children: jsx(VideoThumb, { item }) })
+      }),
+      jsxs("button", {
+        type: "button",
+        onClick: onPreview,
+        className: "min-w-0 text-right",
+        children: [
+          jsxs("div", {
+            className: "flex flex-wrap items-center gap-2",
+            children: [
+              jsx("h3", { className: "line-clamp-2 text-base font-bold leading-relaxed text-white", children: item.title || "بدون عنوان" }),
+              item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
+            ]
+          }),
+          jsx("p", { className: "mt-1 text-sm text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
+          item.notes && jsx("p", { className: "mt-2 line-clamp-2 text-sm leading-relaxed text-gray-400", children: item.notes }),
+          item.tags?.length > 0 && jsx("div", {
+            className: "mt-3 flex flex-wrap gap-1.5",
+            children: item.tags.slice(0, 6).map((tag) => jsx("span", {
+              className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+              children: tag
+            }, tag))
+          }),
+          jsx("p", { className: "mt-3 text-xs text-gray-600", children: item.updatedAt ? formatDateTime(item.updatedAt) : "لم يسجل تحديث" })
+        ]
+      }),
+      jsxs("div", {
+        className: "flex flex-wrap items-center gap-2 sm:w-32 sm:flex-col sm:items-stretch",
+        children: [
+          jsx("button", {
+            type: "button",
+            onClick: onOpen,
+            className: "min-h-9 rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600",
+            children: "التفاصيل"
+          }),
+          !showDeleted && jsx("button", {
+            type: "button",
+            onClick: onFavorite,
+            className: "min-h-9 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5",
+            children: item.isFavorite ? "إزالة" : "مفضلة"
+          }),
+          showDeleted ? jsx("button", {
+            type: "button",
+            onClick: onRestore,
+            className: "min-h-9 rounded-lg border border-emerald-500/20 px-3 py-1.5 text-sm text-emerald-100 hover:bg-emerald-500/10",
+            children: "استعادة"
+          }) : jsx("button", {
+            type: "button",
+            onClick: onDelete,
+            className: "min-h-9 rounded-lg border border-red-500/20 px-3 py-1.5 text-sm text-red-100 hover:bg-red-500/10",
+            children: "حذف"
+          })
+        ]
+      })
+    ]
+  });
+}
+
+function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore }) {
+  return jsx("div", {
+    className: "overflow-hidden rounded-2xl border border-white/10 bg-gray-900/45",
+    dir: "rtl",
+    children: jsx("div", {
+      className: "overflow-x-auto",
+      children: jsxs("table", {
+        className: "min-w-[820px] w-full text-right text-sm",
+        children: [
+          jsx("thead", {
+            className: "border-b border-white/10 bg-gray-950/45 text-xs text-gray-500",
+            children: jsxs("tr", {
+              children: [
+                jsx("th", { className: "px-4 py-3 font-medium", children: "العنوان" }),
+                jsx("th", { className: "px-4 py-3 font-medium", children: "النوع" }),
+                jsx("th", { className: "px-4 py-3 font-medium", children: "الوسوم" }),
+                jsx("th", { className: "px-4 py-3 font-medium", children: "آخر تحديث" }),
+                jsx("th", { className: "px-4 py-3 font-medium", children: "إجراءات" })
+              ]
+            })
+          }),
+          jsx("tbody", {
+            className: "divide-y divide-white/5",
+            children: items.map((item, index) => jsx(motion.tr, {
+              initial: { opacity: 0, y: 6 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.16, delay: Math.min(index, 10) * 0.02 },
+              className: previewItem?.id === item.id ? "bg-emerald-500/10" : "hover:bg-white/[0.03]",
+              children: [
+                jsxs("td", {
+                  className: "px-4 py-3",
+                  children: [
+                    jsx("button", {
+                      type: "button",
+                      onClick: () => onPreview(item),
+                      className: "line-clamp-2 text-right font-semibold leading-relaxed text-white hover:text-emerald-300",
+                      children: item.title || "بدون عنوان"
+                    }),
+                    item.isFavorite && jsx("span", { className: "mt-1 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
+                  ]
+                }),
+                jsx("td", { className: "px-4 py-3 text-gray-400", children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف" }),
+                jsx("td", {
+                  className: "px-4 py-3",
+                  children: item.tags?.length ? jsx("div", {
+                    className: "flex flex-wrap gap-1.5",
+                    children: item.tags.slice(0, 4).map((tag) => jsx("span", {
+                      className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+                      children: tag
+                    }, tag))
+                  }) : jsx("span", { className: "text-gray-600", children: "—" })
+                }),
+                jsx("td", { className: "px-4 py-3 text-xs text-gray-500", children: item.updatedAt ? formatDateTime(item.updatedAt) : "—" }),
+                jsx("td", {
+                  className: "px-4 py-3",
+                  children: jsxs("div", {
+                    className: "flex flex-wrap gap-2",
+                    children: [
+                      jsx("button", { type: "button", onClick: () => onOpen(item), className: "rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "فتح" }),
+                      !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: "rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5", children: item.isFavorite ? "إزالة" : "مفضلة" }),
+                      showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: "rounded-lg border border-emerald-500/20 px-3 py-1.5 text-xs text-emerald-100 hover:bg-emerald-500/10", children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: "rounded-lg border border-red-500/20 px-3 py-1.5 text-xs text-red-100 hover:bg-red-500/10", children: "حذف" })
+                    ]
+                  })
+                })
+              ]
+            }, item.id))
+          })
+        ]
+      })
+    })
+  });
+}
+
 function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
   if (!item) {
     return jsxs("aside", {
@@ -214,14 +372,17 @@ export function ArchivePage() {
     filterType = "all",
     filterSubtype = "all",
     settings = {},
+    viewMode = settings.defaultView || "grid",
     setCurrentPage,
     setSelectedItemId,
     setSearchQuery,
     setFilterType,
     setFilterSubtype,
+    setViewMode,
     toggleFavorite,
     deleteVideoItem,
     restoreVideoItem,
+    addVideoItem,
     addRecentSearch,
     showToast
   } = useAppStore();
@@ -234,12 +395,29 @@ export function ArchivePage() {
   const [showFavoritesOnly, setShowFavoritesOnly] = legacyReact.useState(initialRouteState.showFavoritesOnly || false);
   const [page, setPage] = legacyReact.useState(1);
   const [previewId, setPreviewId] = legacyReact.useState(null);
+  const [showFileImportWizard, setShowFileImportWizard] = legacyReact.useState(initialRouteState.openImport || false);
+  const activeViewMode = normalizeArchiveViewMode(viewMode || initialRouteState.viewMode || settings.defaultView || "grid");
 
   legacyReact.useEffect(() => {
     if (initialRouteState.searchQuery) setSearchQuery?.(initialRouteState.searchQuery);
     if (initialRouteState.filterType && initialRouteState.filterType !== filterType) setFilterType?.(initialRouteState.filterType);
     if (initialRouteState.filterSubtype && initialRouteState.filterSubtype !== filterSubtype) setFilterSubtype?.(initialRouteState.filterSubtype);
+    if (initialRouteState.viewMode && initialRouteState.viewMode !== viewMode) setViewMode?.(initialRouteState.viewMode);
   }, []);
+
+  legacyReact.useEffect(() => {
+    const applyRouteFlags = () => {
+      const nextRouteState = parseArchiveRouteParams(parseAppRoute().params);
+      if (nextRouteState.openImport) setShowFileImportWizard(true);
+      if (nextRouteState.viewMode && nextRouteState.viewMode !== viewMode) setViewMode?.(nextRouteState.viewMode);
+    };
+    window.addEventListener("hashchange", applyRouteFlags);
+    window.addEventListener("popstate", applyRouteFlags);
+    return () => {
+      window.removeEventListener("hashchange", applyRouteFlags);
+      window.removeEventListener("popstate", applyRouteFlags);
+    };
+  }, [setViewMode, viewMode]);
 
   legacyReact.useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -268,11 +446,13 @@ export function ArchivePage() {
       showDeleted,
       showFavoritesOnly,
       sortField,
-      sortDirection
+      sortDirection,
+      viewMode: activeViewMode,
+      openImport: showFileImportWizard
     });
     writeAppRoute("archive", { params }, settings, true);
     setPage(1);
-  }, [filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, sortDirection, sortField]);
+  }, [activeViewMode, filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
 
   const typeById = legacyReact.useMemo(() => new Map(contentTypes.map((type) => [type.id, type])), [contentTypes]);
   const activeType = typeById.get(filterType);
@@ -303,10 +483,8 @@ export function ArchivePage() {
     setCurrentPage?.("detail");
   };
 
-  const openImport = async () => {
-    await useAppStore.getState().updateSettings?.({ ui: { ...(settings.ui || {}), lastDataCenterTab: "import" } });
-    setCurrentPage?.("backup");
-    window.dispatchEvent(new CustomEvent("videoarchive:data-tab", { detail: { tab: "import" } }));
+  const openImport = () => {
+    setShowFileImportWizard(true);
   };
 
   const confirmDelete = async (item) => {
@@ -322,6 +500,51 @@ export function ArchivePage() {
 
   const typeLabel = (item) => typeById.get(item.type)?.name || item.type || "";
   const subtypeLabel = (item) => typeById.get(item.type)?.subtypes?.find((subtype) => subtype.id === item.subtype)?.name || item.subtype || "";
+  const itemActions = (item) => ({
+    item,
+    typeLabel: typeLabel(item),
+    subtypeLabel: subtypeLabel(item),
+    selected: previewItem?.id === item.id,
+    showDeleted,
+    onPreview: () => setPreviewId(item.id),
+    onOpen: () => openItem(item),
+    onFavorite: () => toggleFavorite?.(item.id),
+    onDelete: () => confirmDelete(item),
+    onRestore: () => restoreVideoItem?.(item.id)
+  });
+
+  const renderArchiveItems = () => {
+    if (activeViewMode === "list") {
+      return jsx("div", {
+        className: "space-y-3",
+        children: visibleItems.map((item, index) => jsx(AnimatedItem, {
+          index,
+          children: jsx(VideoListItem, itemActions(item))
+        }, item.id))
+      });
+    }
+    if (activeViewMode === "table") {
+      return jsx(VideoTableView, {
+        items: visibleItems,
+        previewItem,
+        typeLabel,
+        subtypeLabel,
+        showDeleted,
+        onPreview: (item) => setPreviewId(item.id),
+        onOpen: openItem,
+        onFavorite: (item) => toggleFavorite?.(item.id),
+        onDelete: confirmDelete,
+        onRestore: (item) => restoreVideoItem?.(item.id)
+      });
+    }
+    return jsx("div", {
+      className: "grid gap-4 sm:grid-cols-2 2xl:grid-cols-3",
+      children: visibleItems.map((item, index) => jsx(AnimatedItem, {
+        index,
+        children: jsx(VideoCard, itemActions(item))
+      }, item.id))
+    });
+  };
 
   return jsxs("div", {
     className: "space-y-6 p-4 sm:p-6",
@@ -343,7 +566,7 @@ export function ArchivePage() {
               jsxs("div", {
                 className: "flex flex-wrap gap-2",
                 children: [
-                  jsx(ToolbarButton, { onClick: openImport, icon: jsx(Upload, { className: "h-4 w-4" }), children: "استيراد" }),
+                  jsx(ToolbarButton, { onClick: openImport, icon: jsx(Upload, { className: "h-4 w-4" }), children: "استيراد ملفات" }),
                   jsx("button", {
                     type: "button",
                     onClick: openAdd,
@@ -355,6 +578,14 @@ export function ArchivePage() {
             ]
           })
         ]
+      }),
+      jsx(FileArchiveWizard, {
+        open: showFileImportWizard,
+        onOpenChange: setShowFileImportWizard,
+        contentTypes,
+        videoItems,
+        addVideoItem,
+        showToast
       }),
       jsx("section", {
         className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
@@ -422,6 +653,31 @@ export function ArchivePage() {
           jsxs("div", {
             className: "mt-3 flex flex-wrap items-center gap-2",
             children: [
+              jsxs("div", {
+                className: "inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+                role: "group",
+                "aria-label": "وضع عرض الأرشيف",
+                children: [
+                  jsx("button", {
+                    type: "button",
+                    onClick: () => setViewMode?.("grid"),
+                    className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "grid" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                    children: [jsx(LayoutGrid, { className: "h-4 w-4" }), "شبكة"]
+                  }),
+                  jsx("button", {
+                    type: "button",
+                    onClick: () => setViewMode?.("list"),
+                    className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "list" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                    children: [jsx(Archive, { className: "h-4 w-4" }), "قائمة"]
+                  }),
+                  jsx("button", {
+                    type: "button",
+                    onClick: () => setViewMode?.("table"),
+                    className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "table" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                    children: [jsx(FolderOpen, { className: "h-4 w-4" }), "جدول"]
+                  })
+                ]
+              }),
               jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة فقط" }),
               jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "سلة المحذوفات" }),
               (hasFilters || showDeleted) && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح الفلاتر" })
@@ -449,21 +705,7 @@ export function ArchivePage() {
           }) : jsxs("div", {
             className: "space-y-4",
             children: [
-              jsx("div", {
-                className: "grid gap-4 sm:grid-cols-2 2xl:grid-cols-3",
-                children: visibleItems.map((item) => jsx(VideoCard, {
-                  item,
-                  typeLabel: typeLabel(item),
-                  subtypeLabel: subtypeLabel(item),
-                  selected: previewItem?.id === item.id,
-                  showDeleted,
-                  onPreview: () => setPreviewId(item.id),
-                  onOpen: () => openItem(item),
-                  onFavorite: () => toggleFavorite?.(item.id),
-                  onDelete: () => confirmDelete(item),
-                  onRestore: () => restoreVideoItem?.(item.id)
-                }, item.id))
-              }),
+              renderArchiveItems(),
               visibleItems.length < filteredItems.length && jsx("button", {
                 type: "button",
                 onClick: () => setPage((value) => value + 1),

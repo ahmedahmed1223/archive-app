@@ -149,12 +149,15 @@ run("archive view model", () => {
   assert.equal(hasArchiveContentFilters({ showDeleted: true }), false);
   assert.equal(getArchiveResultRangeText({ total: 55, page: 3, itemsPerPage: 20 }), "عرض 41-55 من 55");
 
-  const params = createArchiveRouteParams({ searchQuery: "test", filterType: "movie", showFavoritesOnly: true, sortDirection: "asc" });
+  const params = createArchiveRouteParams({ searchQuery: "test", filterType: "movie", showFavoritesOnly: true, sortDirection: "asc", viewMode: "table", openImport: true });
   const parsed = parseArchiveRouteParams(params);
   assert.equal(parsed.searchQuery, "test");
   assert.equal(parsed.filterType, "movie");
   assert.equal(parsed.showFavoritesOnly, true);
   assert.equal(parsed.sortDirection, "asc");
+  assert.equal(parsed.viewMode, "table");
+  assert.equal(parsed.openImport, true);
+  assert.equal(parseArchiveRouteParams(new URLSearchParams("view=missing")).viewMode, "grid");
 });
 
 run("keyboard shortcut helpers", () => {
