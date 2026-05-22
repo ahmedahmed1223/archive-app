@@ -19,6 +19,9 @@ import {
   getArchiveResultRangeText,
   getFilteredArchiveItems,
   hasArchiveContentFilters,
+  normalizeArchiveItemSize,
+  normalizeArchivePage,
+  normalizeArchivePageSize,
   parseArchiveRouteParams
 } from "../src/features/archive/viewModel.js";
 import {
@@ -46,9 +49,12 @@ import {
 } from "../src/features/settings/viewModel.js";
 import {
   createOnboardingUiPatch,
+  createOnboardingCompletionPatch,
+  getOnboardingDestination,
   getFirstTaskDestination,
   getNextOnboardingStep,
   getOnboardingStepIndex,
+  shouldShowStartupOnboarding,
   shouldShowV1Tour
 } from "../src/features/onboarding/viewModel.js";
 import {
@@ -149,7 +155,7 @@ run("archive view model", () => {
   assert.equal(hasArchiveContentFilters({ showDeleted: true }), false);
   assert.equal(getArchiveResultRangeText({ total: 55, page: 3, itemsPerPage: 20 }), "عرض 41-55 من 55");
 
-  const params = createArchiveRouteParams({ searchQuery: "test", filterType: "movie", showFavoritesOnly: true, sortDirection: "asc", viewMode: "table", openImport: true });
+  const params = createArchiveRouteParams({ searchQuery: "test", filterType: "movie", showFavoritesOnly: true, sortDirection: "asc", viewMode: "table", openImport: true, page: 3, pageSize: 48, itemSize: "compact" });
   const parsed = parseArchiveRouteParams(params);
   assert.equal(parsed.searchQuery, "test");
   assert.equal(parsed.filterType, "movie");
@@ -157,7 +163,13 @@ run("archive view model", () => {
   assert.equal(parsed.sortDirection, "asc");
   assert.equal(parsed.viewMode, "table");
   assert.equal(parsed.openImport, true);
+  assert.equal(parsed.page, 3);
+  assert.equal(parsed.pageSize, 48);
+  assert.equal(parsed.itemSize, "compact");
   assert.equal(parseArchiveRouteParams(new URLSearchParams("view=missing")).viewMode, "grid");
+  assert.equal(normalizeArchiveItemSize("huge"), "comfortable");
+  assert.equal(normalizeArchivePageSize(999), 24);
+  assert.equal(normalizeArchivePage("-1"), 1);
 });
 
 run("keyboard shortcut helpers", () => {
@@ -247,6 +259,9 @@ run("onboarding view model", () => {
   assert.equal(getOnboardingStepIndex("appearance"), 3);
   assert.equal(getNextOnboardingStep("appearance").id, "interface");
   assert.equal(getFirstTaskDestination("import-backup"), "backup");
+  assert.equal(getOnboardingDestination("create-type"), "types");
+  assert.equal(shouldShowStartupOnboarding({ authState: "setup", settings: { ui: { v1OnboardingCompleted: false } } }), true);
+  assert.equal(shouldShowStartupOnboarding({ authState: "login", settings: { ui: { v1OnboardingCompleted: false } } }), false);
   assert.equal(shouldShowV1Tour({ settings: { ui: { v1OnboardingCompleted: true, v1TourCompleted: false } }, currentPage: "dashboard" }), true);
   assert.deepEqual(createOnboardingUiPatch({
     stepId: "interface",
@@ -263,6 +278,26 @@ run("onboarding view model", () => {
     v1OnboardingCompleted: true,
     onboardingSkippedAt: null,
     onboardingCoreUiSeenAt: "2026-01-01T00:00:00.000Z"
+  });
+  assert.deepEqual(createOnboardingCompletionPatch({
+    securityMode: "quick",
+    themeChoice: "light",
+    accentColor: "indigo",
+    visualDensity: "compact",
+    firstTaskChoice: "create-type",
+    now: "2026-01-01T00:00:00.000Z"
+  }).ui, {
+    onboardingCompleted: true,
+    v1OnboardingCompleted: true,
+    onboardingSecurityMode: "quick",
+    onboardingThemeChoice: "light",
+    onboardingCoreUiSeenAt: "2026-01-01T00:00:00.000Z",
+    onboardingSkippedAt: "2026-01-01T00:00:00.000Z",
+    firstTaskChoice: "create-type",
+    lastOnboardingStep: "completed",
+    visualDensity: "compact",
+    onboardingReplayCompletedAt: null,
+    firstTaskChoiceUsed: false
   });
 });
 

@@ -72,6 +72,8 @@ export function getDefaultSettings() {
       onboardingSecurityMode: "secure",
       onboardingThemeChoice: "dark",
       onboardingCoreUiSeenAt: null,
+      onboardingReplayRequestedAt: null,
+      onboardingReplayCompletedAt: null,
       visualDensity: "comfortable",
       lastHelpSection: "getting-started",
       v1OnboardingCompleted: false,

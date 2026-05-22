@@ -2,9 +2,25 @@ import { normalizeArabicSearchText } from "../../utils/formatting.js";
 
 const ARCHIVE_SORT_FIELDS = new Set(["title", "createdAt", "updatedAt"]);
 const ARCHIVE_VIEW_MODES = new Set(["grid", "list", "table"]);
+const ARCHIVE_ITEM_SIZES = new Set(["compact", "comfortable", "large"]);
+const ARCHIVE_PAGE_SIZES = new Set([12, 24, 48, 96]);
 
 export function normalizeArchiveViewMode(viewMode = "grid") {
   return ARCHIVE_VIEW_MODES.has(viewMode) ? viewMode : "grid";
+}
+
+export function normalizeArchiveItemSize(itemSize = "comfortable") {
+  return ARCHIVE_ITEM_SIZES.has(itemSize) ? itemSize : "comfortable";
+}
+
+export function normalizeArchivePageSize(pageSize = 24) {
+  const value = Number(pageSize);
+  return ARCHIVE_PAGE_SIZES.has(value) ? value : 24;
+}
+
+export function normalizeArchivePage(page = 1) {
+  const value = Number(page);
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
 }
 
 export function getFilteredArchiveItems({
@@ -82,7 +98,10 @@ export function createArchiveRouteParams({
   sortField = "updatedAt",
   sortDirection = "desc",
   viewMode = "grid",
-  openImport = false
+  openImport = false,
+  page = 1,
+  pageSize = 24,
+  itemSize = "comfortable"
 } = {}) {
   const params = new URLSearchParams();
   if (searchQuery.trim()) params.set("q", searchQuery.trim());
@@ -94,6 +113,12 @@ export function createArchiveRouteParams({
   if (sortDirection !== "desc") params.set("dir", sortDirection);
   const normalizedViewMode = normalizeArchiveViewMode(viewMode);
   if (normalizedViewMode !== "grid") params.set("view", normalizedViewMode);
+  const normalizedPage = normalizeArchivePage(page);
+  if (normalizedPage > 1) params.set("page", String(normalizedPage));
+  const normalizedPageSize = normalizeArchivePageSize(pageSize);
+  if (normalizedPageSize !== 24) params.set("per", String(normalizedPageSize));
+  const normalizedItemSize = normalizeArchiveItemSize(itemSize);
+  if (normalizedItemSize !== "comfortable") params.set("size", normalizedItemSize);
   if (openImport) params.set("import", "1");
   return params;
 }
@@ -109,6 +134,9 @@ export function parseArchiveRouteParams(params = new URLSearchParams()) {
     sortField: ARCHIVE_SORT_FIELDS.has(sortField) ? sortField : "updatedAt",
     sortDirection: params.get("dir") === "asc" ? "asc" : "desc",
     viewMode: normalizeArchiveViewMode(params.get("view") || "grid"),
-    openImport: params.get("import") === "1"
+    openImport: params.get("import") === "1",
+    page: normalizeArchivePage(params.get("page") || 1),
+    pageSize: normalizeArchivePageSize(params.get("per") || 24),
+    itemSize: normalizeArchiveItemSize(params.get("size") || "comfortable")
   };
 }

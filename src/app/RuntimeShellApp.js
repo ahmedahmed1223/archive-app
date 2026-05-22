@@ -34,6 +34,10 @@ import {
 } from "../runtime/legacyAdapter.js";
 import { getGlobalShortcutAction } from "../stores/globalShortcuts.js";
 import { applyAccentColor } from "../theme/accentColor.js";
+import {
+  V1OnboardingWizard,
+  shouldShowStartupOnboarding
+} from "../features/onboarding/index.js";
 
 const { jsx, jsxs } = legacyJsxRuntime;
 const motion = legacyMotion;
@@ -64,6 +68,7 @@ export function App() {
   const [showSplash, setShowSplash] = legacyReact.useState(true);
   const [startupProgress, setStartupProgress] = legacyReact.useState(() => createStartupProgressState({ progress: 1 }));
   const [startupRecovery, setStartupRecovery] = legacyReact.useState(null);
+  const [onboardingWizardMode, setOnboardingWizardMode] = legacyReact.useState(null);
   const [authState, setAuthState] = legacyReact.useState("loading");
   const loadInitRef = legacyReact.useRef(false);
   const initialSyncRef = legacyReact.useRef(false);
@@ -224,6 +229,14 @@ export function App() {
         setAuthState("setup");
         return;
       }
+      if (!isPasswordSet && hasUsers && settings.ui?.onboardingSecurityMode === "quick" && settings.ui?.v1OnboardingCompleted) {
+        const activeUser = appStore.users.find((user) => user.username === "admin" && user.isActive) || appStore.users.find((user) => user.isActive);
+        if (activeUser && !useAuthStore.getState().currentUser) {
+          useAuthStore.setState({ currentUser: activeUser, isAuthenticated: true, authError: null });
+        }
+        setAuthState("ready");
+        return;
+      }
       if (!isPasswordSet && hasUsers) {
         setAuthState("login");
         return;
@@ -233,6 +246,27 @@ export function App() {
     }
     setAuthState("login");
   }, [isLoading, isAuthenticated, currentUser, isLocked, isPasswordSet, isIdleLocked]);
+
+  legacyReact.useEffect(() => {
+    const openOnboarding = (event) => {
+      setOnboardingWizardMode(event.detail?.mode === "replay" ? "replay" : "startup");
+    };
+    const closeOnboarding = () => setOnboardingWizardMode(null);
+    window.addEventListener("videoarchive:onboarding-open", openOnboarding);
+    window.addEventListener("videoarchive:onboarding-close", closeOnboarding);
+    return () => {
+      window.removeEventListener("videoarchive:onboarding-open", openOnboarding);
+      window.removeEventListener("videoarchive:onboarding-close", closeOnboarding);
+    };
+  }, []);
+
+  legacyReact.useEffect(() => {
+    if (shouldShowStartupOnboarding({ authState, settings })) {
+      setOnboardingWizardMode((mode) => mode || "startup");
+    } else if (onboardingWizardMode === "startup" && authState !== "setup") {
+      setOnboardingWizardMode(null);
+    }
+  }, [authState, onboardingWizardMode, settings]);
 
   legacyReact.useEffect(() => {
     if (!currentUser) {
@@ -444,6 +478,15 @@ export function App() {
 
   if (startupRecovery?.fatalError) {
     return jsx(StartupRecoveryScreen, { report: startupRecovery, onRetry: retryStartup, onOpenDiagnostics: openStartupDiagnostics });
+  }
+
+  if (onboardingWizardMode) {
+    return jsx(V1OnboardingWizard, {
+      open: true,
+      mode: onboardingWizardMode,
+      onComplete: () => setOnboardingWizardMode(null),
+      onCancel: () => setOnboardingWizardMode(null)
+    });
   }
 
   if (isLoading) {

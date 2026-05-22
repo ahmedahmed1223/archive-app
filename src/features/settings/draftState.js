@@ -13,7 +13,9 @@ export const TRANSIENT_UI_SETTINGS_KEYS = [
   "shortcutDialogQuery",
   "commandPaletteLastQuery",
   "lastOnboardingStep",
-  "startupRecoveryDismissedAt"
+  "startupRecoveryDismissedAt",
+  "onboardingReplayRequestedAt",
+  "onboardingReplayCompletedAt"
 ];
 
 export function getComparableSettingsForDraft(settings = {}, themeValue = "dark") {

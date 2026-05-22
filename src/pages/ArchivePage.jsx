@@ -23,6 +23,9 @@ import {
   getArchiveResultRangeText,
   getFilteredArchiveItems,
   hasArchiveContentFilters,
+  normalizeArchiveItemSize,
+  normalizeArchivePage,
+  normalizeArchivePageSize,
   normalizeArchiveViewMode,
   parseArchiveRouteParams
 } from "../features/archive/viewModel.js";
@@ -38,6 +41,106 @@ import {
 
 const { jsx, jsxs } = legacyJsxRuntime;
 const motion = legacyMotion;
+
+const ARCHIVE_ITEM_SIZE_OPTIONS = [
+  { value: "compact", label: "صغير" },
+  { value: "comfortable", label: "متوسط" },
+  { value: "large", label: "كبير" }
+];
+
+const ARCHIVE_PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
+
+const ARCHIVE_GRID_CLASSES = {
+  compact: "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
+  comfortable: "grid gap-4 sm:grid-cols-2 2xl:grid-cols-3",
+  large: "grid gap-5 lg:grid-cols-2"
+};
+
+const ARCHIVE_CARD_SIZE = {
+  compact: {
+    body: "space-y-2 p-3",
+    footer: "gap-1.5 p-2.5",
+    title: "line-clamp-2 text-sm",
+    meta: "text-[11px]",
+    button: "min-h-8 px-2.5 py-1 text-xs",
+    tags: 2
+  },
+  comfortable: {
+    body: "space-y-3 p-4",
+    footer: "gap-2 p-3",
+    title: "line-clamp-2 text-sm",
+    meta: "text-xs",
+    button: "min-h-9 px-3 py-1.5 text-sm",
+    tags: 3
+  },
+  large: {
+    body: "space-y-4 p-5",
+    footer: "gap-2.5 p-4",
+    title: "line-clamp-2 text-base",
+    meta: "text-sm",
+    button: "min-h-10 px-4 py-2 text-sm",
+    tags: 6
+  }
+};
+
+const ARCHIVE_LIST_SIZE = {
+  compact: {
+    article: "gap-2 p-2.5 sm:grid-cols-[132px_minmax(0,1fr)_auto]",
+    title: "text-sm",
+    meta: "text-xs",
+    notes: "mt-1 line-clamp-1 text-xs leading-relaxed",
+    tags: 3,
+    actionColumn: "sm:w-28",
+    actionButton: "min-h-8 px-2.5 py-1 text-xs"
+  },
+  comfortable: {
+    article: "gap-3 p-3 sm:grid-cols-[180px_minmax(0,1fr)_auto]",
+    title: "text-base",
+    meta: "text-sm",
+    notes: "mt-2 line-clamp-2 text-sm leading-relaxed",
+    tags: 6,
+    actionColumn: "sm:w-32",
+    actionButton: "min-h-9 px-3 py-1.5 text-sm"
+  },
+  large: {
+    article: "gap-4 p-4 sm:grid-cols-[220px_minmax(0,1fr)_auto]",
+    title: "text-lg",
+    meta: "text-sm",
+    notes: "mt-3 line-clamp-3 text-sm leading-relaxed",
+    tags: 8,
+    actionColumn: "sm:w-36",
+    actionButton: "min-h-10 px-4 py-2 text-sm"
+  }
+};
+
+const ARCHIVE_TABLE_SIZE = {
+  compact: { table: "min-w-[760px]", cell: "px-3 py-2", actionButton: "px-2.5 py-1 text-[11px]", tags: 3 },
+  comfortable: { table: "min-w-[820px]", cell: "px-4 py-3", actionButton: "px-3 py-1.5 text-xs", tags: 4 },
+  large: { table: "min-w-[920px]", cell: "px-5 py-4", actionButton: "px-4 py-2 text-sm", tags: 6 }
+};
+
+const ARCHIVE_ITEM_SIZE_LABELS = {
+  compact: "صغير",
+  comfortable: "متوسط",
+  large: "كبير"
+};
+
+function getArchivePaginationSlots(currentPage, totalPages) {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  const slots = [1];
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+
+  if (start > 2) slots.push("start-ellipsis");
+  for (let pageNumber = start; pageNumber <= end; pageNumber += 1) {
+    slots.push(pageNumber);
+  }
+  if (end < totalPages - 1) slots.push("end-ellipsis");
+  slots.push(totalPages);
+
+  return slots;
+}
 
 function ToolbarButton({ children, onClick, active = false, danger = false, icon }) {
   return jsxs("button", {
@@ -68,6 +171,48 @@ function ArchiveMetric({ label, value, hint }) {
   });
 }
 
+function ArchivePagination({ currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+
+  const pageSlots = getArchivePaginationSlots(currentPage, totalPages);
+  const buttonBase = "inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors";
+
+  return jsxs("nav", {
+    className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    dir: "rtl",
+    "aria-label": "صفحات الأرشيف",
+    children: [
+      jsx("button", {
+        type: "button",
+        onClick: () => onPageChange(currentPage - 1),
+        disabled: currentPage <= 1,
+        className: `${buttonBase} border-white/10 text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40`,
+        children: "السابق"
+      }),
+      jsx("div", {
+        className: "flex flex-wrap justify-center gap-1.5",
+        children: pageSlots.map((slot) => typeof slot === "number" ? jsx("button", {
+          type: "button",
+          onClick: () => onPageChange(slot),
+          className: `${buttonBase} ${slot === currentPage ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100" : "border-white/10 text-gray-400 hover:bg-white/5 hover:text-white"}`,
+          "aria-current": slot === currentPage ? "page" : undefined,
+          children: formatNumber(slot)
+        }, slot) : jsx("span", {
+          className: "inline-flex min-h-9 min-w-9 items-center justify-center px-2 text-gray-600",
+          children: "..."
+        }, slot))
+      }),
+      jsx("button", {
+        type: "button",
+        onClick: () => onPageChange(currentPage + 1),
+        disabled: currentPage >= totalPages,
+        className: `${buttonBase} border-white/10 text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40`,
+        children: "التالي"
+      })
+    ]
+  });
+}
+
 function VideoThumb({ item }) {
   const previewSource = getHtml5VideoPreviewSource(item.path || item.filePath || item.url || "");
   if (previewSource) {
@@ -89,7 +234,28 @@ function VideoThumb({ item }) {
   });
 }
 
-function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted }) {
+function SegmentedControl({ label, value, options, onChange }) {
+  return jsxs("div", {
+    className: "flex flex-wrap items-center gap-2",
+    children: [
+      label && jsx("span", { className: "text-xs text-gray-500", children: label }),
+      jsx("div", {
+        className: "inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+        role: "group",
+        "aria-label": label,
+        children: options.map((option) => jsx("button", {
+          type: "button",
+          onClick: () => onChange(option.value),
+          className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${value === option.value ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+          children: [option.icon, option.label]
+        }, option.value))
+      })
+    ]
+  });
+}
+
+function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable" }) {
+  const size = ARCHIVE_CARD_SIZE[itemSize] || ARCHIVE_CARD_SIZE.comfortable;
   return jsxs("article", {
     className: `group overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
       selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
@@ -103,7 +269,7 @@ function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen,
         children: [
           jsx("div", { className: "aspect-video overflow-hidden border-b border-white/5 bg-gray-950", children: jsx(VideoThumb, { item }) }),
           jsxs("div", {
-            className: "space-y-3 p-4",
+            className: size.body,
             children: [
               jsxs("div", {
                 className: "flex items-start justify-between gap-3",
@@ -111,8 +277,8 @@ function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen,
                   jsxs("div", {
                     className: "min-w-0",
                     children: [
-                      jsx("h3", { className: "line-clamp-2 text-sm font-bold leading-relaxed text-white", children: item.title || "بدون عنوان" }),
-                      jsx("p", { className: "mt-1 truncate text-xs text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" })
+                      jsx("h3", { className: `${size.title} font-bold leading-relaxed text-white`, children: item.title || "بدون عنوان" }),
+                      jsx("p", { className: `mt-1 truncate ${size.meta} text-gray-500`, children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" })
                     ]
                   }),
                   item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
@@ -120,40 +286,40 @@ function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen,
               }),
               item.tags?.length > 0 && jsxs("div", {
                 className: "flex flex-wrap gap-1.5",
-                children: item.tags.slice(0, 3).map((tag) => jsx("span", {
+                children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
                   className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
                   children: tag
                 }, tag))
               }),
-              jsx("p", { className: "text-xs text-gray-600", children: item.updatedAt ? formatDateTime(item.updatedAt) : "لم يسجل تحديث" })
+              jsx("p", { className: `${size.meta} text-gray-600`, children: item.updatedAt ? formatDateTime(item.updatedAt) : "لم يسجل تحديث" })
             ]
           })
         ]
       }),
       jsxs("div", {
-        className: "flex flex-wrap items-center gap-2 border-t border-white/5 p-3",
+        className: `flex flex-wrap items-center border-t border-white/5 ${size.footer}`,
         children: [
           jsx("button", {
             type: "button",
             onClick: onOpen,
-            className: "min-h-9 rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600",
+            className: `${size.button} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
             children: "فتح التفاصيل"
           }),
           !showDeleted && jsx("button", {
             type: "button",
             onClick: onFavorite,
-            className: "min-h-9 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5",
+            className: `${size.button} rounded-lg border border-white/10 text-gray-300 hover:bg-white/5`,
             children: item.isFavorite ? "إزالة المفضلة" : "مفضلة"
           }),
           showDeleted ? jsx("button", {
             type: "button",
             onClick: onRestore,
-            className: "inline-flex min-h-9 items-center gap-2 rounded-lg border border-emerald-500/20 px-3 py-1.5 text-sm text-emerald-100 hover:bg-emerald-500/10",
+            className: `inline-flex items-center gap-2 rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10 ${size.button}`,
             children: [jsx(RotateCcw, { className: "h-4 w-4" }), "استعادة"]
           }) : jsx("button", {
             type: "button",
             onClick: onDelete,
-            className: "inline-flex min-h-9 items-center gap-2 rounded-lg border border-red-500/20 px-3 py-1.5 text-sm text-red-100 hover:bg-red-500/10",
+            className: `inline-flex items-center gap-2 rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10 ${size.button}`,
             children: [jsx(Trash2, { className: "h-4 w-4" }), "حذف"]
           })
         ]
@@ -173,9 +339,11 @@ function AnimatedItem({ index, children, as = "div", className = "" }) {
   });
 }
 
-function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted }) {
+function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable" }) {
+  const size = ARCHIVE_LIST_SIZE[itemSize] || ARCHIVE_LIST_SIZE.comfortable;
+
   return jsxs("article", {
-    className: `group grid gap-3 rounded-2xl border bg-gray-900/45 p-3 text-right transition-colors sm:grid-cols-[180px_minmax(0,1fr)_auto] ${
+    className: `group grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
       selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
     }`,
     dir: "rtl",
@@ -194,15 +362,15 @@ function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onO
           jsxs("div", {
             className: "flex flex-wrap items-center gap-2",
             children: [
-              jsx("h3", { className: "line-clamp-2 text-base font-bold leading-relaxed text-white", children: item.title || "بدون عنوان" }),
+              jsx("h3", { className: `line-clamp-2 ${size.title} font-bold leading-relaxed text-white`, children: item.title || "بدون عنوان" }),
               item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
             ]
           }),
-          jsx("p", { className: "mt-1 text-sm text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
-          item.notes && jsx("p", { className: "mt-2 line-clamp-2 text-sm leading-relaxed text-gray-400", children: item.notes }),
+          jsx("p", { className: `mt-1 ${size.meta} text-gray-500`, children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
+          item.notes && jsx("p", { className: `${size.notes} text-gray-400`, children: item.notes }),
           item.tags?.length > 0 && jsx("div", {
             className: "mt-3 flex flex-wrap gap-1.5",
-            children: item.tags.slice(0, 6).map((tag) => jsx("span", {
+            children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
               className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
               children: tag
             }, tag))
@@ -211,29 +379,29 @@ function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onO
         ]
       }),
       jsxs("div", {
-        className: "flex flex-wrap items-center gap-2 sm:w-32 sm:flex-col sm:items-stretch",
+        className: `flex flex-wrap items-center gap-2 sm:flex-col sm:items-stretch ${size.actionColumn}`,
         children: [
           jsx("button", {
             type: "button",
             onClick: onOpen,
-            className: "min-h-9 rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600",
+            className: `${size.actionButton} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
             children: "التفاصيل"
           }),
           !showDeleted && jsx("button", {
             type: "button",
             onClick: onFavorite,
-            className: "min-h-9 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5",
+            className: `${size.actionButton} rounded-lg border border-white/10 text-gray-300 hover:bg-white/5`,
             children: item.isFavorite ? "إزالة" : "مفضلة"
           }),
           showDeleted ? jsx("button", {
             type: "button",
             onClick: onRestore,
-            className: "min-h-9 rounded-lg border border-emerald-500/20 px-3 py-1.5 text-sm text-emerald-100 hover:bg-emerald-500/10",
+            className: `${size.actionButton} rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10`,
             children: "استعادة"
           }) : jsx("button", {
             type: "button",
             onClick: onDelete,
-            className: "min-h-9 rounded-lg border border-red-500/20 px-3 py-1.5 text-sm text-red-100 hover:bg-red-500/10",
+            className: `${size.actionButton} rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10`,
             children: "حذف"
           })
         ]
@@ -242,24 +410,26 @@ function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onO
   });
 }
 
-function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore }) {
+function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable" }) {
+  const size = ARCHIVE_TABLE_SIZE[itemSize] || ARCHIVE_TABLE_SIZE.comfortable;
+
   return jsx("div", {
     className: "overflow-hidden rounded-2xl border border-white/10 bg-gray-900/45",
     dir: "rtl",
     children: jsx("div", {
       className: "overflow-x-auto",
       children: jsxs("table", {
-        className: "min-w-[820px] w-full text-right text-sm",
+        className: `${size.table} w-full text-right text-sm`,
         children: [
           jsx("thead", {
             className: "border-b border-white/10 bg-gray-950/45 text-xs text-gray-500",
             children: jsxs("tr", {
               children: [
-                jsx("th", { className: "px-4 py-3 font-medium", children: "العنوان" }),
-                jsx("th", { className: "px-4 py-3 font-medium", children: "النوع" }),
-                jsx("th", { className: "px-4 py-3 font-medium", children: "الوسوم" }),
-                jsx("th", { className: "px-4 py-3 font-medium", children: "آخر تحديث" }),
-                jsx("th", { className: "px-4 py-3 font-medium", children: "إجراءات" })
+                jsx("th", { className: `${size.cell} font-medium`, children: "العنوان" }),
+                jsx("th", { className: `${size.cell} font-medium`, children: "النوع" }),
+                jsx("th", { className: `${size.cell} font-medium`, children: "الوسوم" }),
+                jsx("th", { className: `${size.cell} font-medium`, children: "آخر تحديث" }),
+                jsx("th", { className: `${size.cell} font-medium`, children: "إجراءات" })
               ]
             })
           }),
@@ -272,7 +442,7 @@ function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDelet
               className: previewItem?.id === item.id ? "bg-emerald-500/10" : "hover:bg-white/[0.03]",
               children: [
                 jsxs("td", {
-                  className: "px-4 py-3",
+                  className: size.cell,
                   children: [
                     jsx("button", {
                       type: "button",
@@ -283,26 +453,26 @@ function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDelet
                     item.isFavorite && jsx("span", { className: "mt-1 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
                   ]
                 }),
-                jsx("td", { className: "px-4 py-3 text-gray-400", children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف" }),
+                jsx("td", { className: `${size.cell} text-gray-400`, children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف" }),
                 jsx("td", {
-                  className: "px-4 py-3",
+                  className: size.cell,
                   children: item.tags?.length ? jsx("div", {
                     className: "flex flex-wrap gap-1.5",
-                    children: item.tags.slice(0, 4).map((tag) => jsx("span", {
+                    children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
                       className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
                       children: tag
                     }, tag))
                   }) : jsx("span", { className: "text-gray-600", children: "—" })
                 }),
-                jsx("td", { className: "px-4 py-3 text-xs text-gray-500", children: item.updatedAt ? formatDateTime(item.updatedAt) : "—" }),
+                jsx("td", { className: `${size.cell} text-xs text-gray-500`, children: item.updatedAt ? formatDateTime(item.updatedAt) : "—" }),
                 jsx("td", {
-                  className: "px-4 py-3",
+                  className: size.cell,
                   children: jsxs("div", {
                     className: "flex flex-wrap gap-2",
                     children: [
-                      jsx("button", { type: "button", onClick: () => onOpen(item), className: "rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "فتح" }),
-                      !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: "rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5", children: item.isFavorite ? "إزالة" : "مفضلة" }),
-                      showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: "rounded-lg border border-emerald-500/20 px-3 py-1.5 text-xs text-emerald-100 hover:bg-emerald-500/10", children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: "rounded-lg border border-red-500/20 px-3 py-1.5 text-xs text-red-100 hover:bg-red-500/10", children: "حذف" })
+                      jsx("button", { type: "button", onClick: () => onOpen(item), className: `rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600 ${size.actionButton}`, children: "فتح" }),
+                      !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: `rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 ${size.actionButton}`, children: item.isFavorite ? "إزالة" : "مفضلة" }),
+                      showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: `rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10 ${size.actionButton}`, children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: `rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10 ${size.actionButton}`, children: "حذف" })
                     ]
                   })
                 })
@@ -393,10 +563,14 @@ export function ArchivePage() {
   const [sortDirection, setSortDirection] = legacyReact.useState(initialRouteState.sortDirection || "desc");
   const [showDeleted, setShowDeleted] = legacyReact.useState(initialRouteState.showDeleted || false);
   const [showFavoritesOnly, setShowFavoritesOnly] = legacyReact.useState(initialRouteState.showFavoritesOnly || false);
-  const [page, setPage] = legacyReact.useState(1);
+  const [page, setPage] = legacyReact.useState(initialRouteState.page || 1);
+  const [pageSize, setPageSize] = legacyReact.useState(initialRouteState.pageSize || 24);
+  const [itemSize, setItemSize] = legacyReact.useState(initialRouteState.itemSize || "comfortable");
   const [previewId, setPreviewId] = legacyReact.useState(null);
   const [showFileImportWizard, setShowFileImportWizard] = legacyReact.useState(initialRouteState.openImport || false);
   const activeViewMode = normalizeArchiveViewMode(viewMode || initialRouteState.viewMode || settings.defaultView || "grid");
+  const activePageSize = normalizeArchivePageSize(pageSize);
+  const activeItemSize = normalizeArchiveItemSize(itemSize);
 
   legacyReact.useEffect(() => {
     if (initialRouteState.searchQuery) setSearchQuery?.(initialRouteState.searchQuery);
@@ -410,6 +584,9 @@ export function ArchivePage() {
       const nextRouteState = parseArchiveRouteParams(parseAppRoute().params);
       if (nextRouteState.openImport) setShowFileImportWizard(true);
       if (nextRouteState.viewMode && nextRouteState.viewMode !== viewMode) setViewMode?.(nextRouteState.viewMode);
+      if (nextRouteState.page !== page) setPage(nextRouteState.page);
+      if (nextRouteState.pageSize !== activePageSize) setPageSize(nextRouteState.pageSize);
+      if (nextRouteState.itemSize !== activeItemSize) setItemSize(nextRouteState.itemSize);
     };
     window.addEventListener("hashchange", applyRouteFlags);
     window.addEventListener("popstate", applyRouteFlags);
@@ -417,7 +594,7 @@ export function ArchivePage() {
       window.removeEventListener("hashchange", applyRouteFlags);
       window.removeEventListener("popstate", applyRouteFlags);
     };
-  }, [setViewMode, viewMode]);
+  }, [activeItemSize, activePageSize, page, setViewMode, viewMode]);
 
   legacyReact.useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -438,6 +615,36 @@ export function ArchivePage() {
     showFavoritesOnly
   }), [filterType, filterSubtype, localSearch, showDeleted, showFavoritesOnly, sortDirection, sortField, videoItems]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / activePageSize));
+  const currentPage = Math.min(normalizeArchivePage(page), totalPages);
+  const visibleItems = filteredItems.slice((currentPage - 1) * activePageSize, currentPage * activePageSize);
+  const rangeText = getArchiveResultRangeText({ total: filteredItems.length, page: currentPage, itemsPerPage: activePageSize });
+  const initialFilterHydrationSkips = legacyReact.useRef(
+    initialRouteState.page > 1
+    || initialRouteState.searchQuery
+    || initialRouteState.filterType !== "all"
+    || initialRouteState.filterSubtype !== "all"
+    || initialRouteState.showDeleted
+    || initialRouteState.showFavoritesOnly
+    || initialRouteState.sortField !== "updatedAt"
+    || initialRouteState.sortDirection !== "desc"
+      ? 2
+      : 1
+  );
+  const resetPageAfterFilterChange = legacyReact.useRef(0);
+
+  legacyReact.useEffect(() => {
+    resetPageAfterFilterChange.current += 1;
+    if (resetPageAfterFilterChange.current <= initialFilterHydrationSkips.current) {
+      return;
+    }
+    setPage(1);
+  }, [activePageSize, filterType, filterSubtype, localSearch, showDeleted, showFavoritesOnly, sortDirection, sortField]);
+
+  legacyReact.useEffect(() => {
+    if (page !== currentPage) setPage(currentPage);
+  }, [currentPage, page]);
+
   legacyReact.useEffect(() => {
     const params = createArchiveRouteParams({
       searchQuery: localSearch,
@@ -448,20 +655,30 @@ export function ArchivePage() {
       sortField,
       sortDirection,
       viewMode: activeViewMode,
-      openImport: showFileImportWizard
+      openImport: showFileImportWizard,
+      page: currentPage,
+      pageSize: activePageSize,
+      itemSize: activeItemSize
     });
     writeAppRoute("archive", { params }, settings, true);
-    setPage(1);
-  }, [activeViewMode, filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
+  }, [activeItemSize, activePageSize, activeViewMode, currentPage, filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
 
   const typeById = legacyReact.useMemo(() => new Map(contentTypes.map((type) => [type.id, type])), [contentTypes]);
   const activeType = typeById.get(filterType);
   const subtypes = activeType?.subtypes || [];
-  const perPage = 24;
-  const visibleItems = filteredItems.slice(0, page * perPage);
   const previewItem = filteredItems.find((item) => item.id === previewId) || visibleItems[0] || null;
   const activeFilterCount = getArchiveActiveFilterCount({ searchQuery: localSearch, filterType, filterSubtype, showDeleted, showFavoritesOnly });
   const hasFilters = hasArchiveContentFilters({ searchQuery: localSearch, filterType, filterSubtype, showFavoritesOnly });
+
+  const goToPage = (nextPage) => {
+    const normalized = normalizeArchivePage(nextPage);
+    setPage(Math.min(Math.max(normalized, 1), totalPages));
+  };
+
+  const changePageSize = (nextPageSize) => {
+    setPageSize(normalizeArchivePageSize(nextPageSize));
+    setPage(1);
+  };
 
   const resetFilters = () => {
     setLocalSearch("");
@@ -471,6 +688,7 @@ export function ArchivePage() {
     setShowFavoritesOnly(false);
     setSortField("updatedAt");
     setSortDirection("desc");
+    setPage(1);
   };
 
   const openAdd = () => {
@@ -506,6 +724,7 @@ export function ArchivePage() {
     subtypeLabel: subtypeLabel(item),
     selected: previewItem?.id === item.id,
     showDeleted,
+    itemSize: activeItemSize,
     onPreview: () => setPreviewId(item.id),
     onOpen: () => openItem(item),
     onFavorite: () => toggleFavorite?.(item.id),
@@ -530,6 +749,7 @@ export function ArchivePage() {
         typeLabel,
         subtypeLabel,
         showDeleted,
+        itemSize: activeItemSize,
         onPreview: (item) => setPreviewId(item.id),
         onOpen: openItem,
         onFavorite: (item) => toggleFavorite?.(item.id),
@@ -538,7 +758,7 @@ export function ArchivePage() {
       });
     }
     return jsx("div", {
-      className: "grid gap-4 sm:grid-cols-2 2xl:grid-cols-3",
+      className: ARCHIVE_GRID_CLASSES[activeItemSize] || ARCHIVE_GRID_CLASSES.comfortable,
       children: visibleItems.map((item, index) => jsx(AnimatedItem, {
         index,
         children: jsx(VideoCard, itemActions(item))
@@ -590,7 +810,7 @@ export function ArchivePage() {
       jsx("section", {
         className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
         children: [
-          jsx(ArchiveMetric, { label: "النتائج الحالية", value: formatNumber(filteredItems.length), hint: getArchiveResultRangeText({ total: filteredItems.length, page, itemsPerPage: perPage }) }),
+          jsx(ArchiveMetric, { label: "النتائج الحالية", value: formatNumber(filteredItems.length), hint: rangeText }),
           jsx(ArchiveMetric, { label: "كل العناصر", value: formatNumber(videoItems.length), hint: `${formatNumber(videoItems.filter((item) => !item.isDeleted).length)} نشط` }),
           jsx(ArchiveMetric, { label: "الفلاتر", value: formatNumber(activeFilterCount), hint: activeFilterCount ? "فلاتر مطبقة" : "بدون فلاتر" }),
           jsx(ArchiveMetric, { label: "قابل للمعاينة", value: formatNumber(filteredItems.filter((item) => isHtml5PreviewableVideo(item.path || item.filePath || item.url || "")).length), hint: "HTML5 داخل التطبيق" })
@@ -678,6 +898,24 @@ export function ArchivePage() {
                   })
                 ]
               }),
+              jsx(SegmentedControl, {
+                label: "حجم العناصر",
+                value: activeItemSize,
+                options: ARCHIVE_ITEM_SIZE_OPTIONS,
+                onChange: (value) => setItemSize(normalizeArchiveItemSize(value))
+              }),
+              jsxs("label", {
+                className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-3 py-1.5 text-sm text-gray-400",
+                children: [
+                  jsx("span", { className: "text-xs text-gray-500", children: "في الصفحة" }),
+                  jsx("select", {
+                    value: activePageSize,
+                    onChange: (event) => changePageSize(event.target.value),
+                    className: "min-h-7 rounded-lg border-0 bg-transparent px-1 text-sm font-semibold text-white outline-none",
+                    children: ARCHIVE_PAGE_SIZE_OPTIONS.map((option) => jsx("option", { value: option, children: formatNumber(option) }, option))
+                  })
+                ]
+              }),
               jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة فقط" }),
               jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "سلة المحذوفات" }),
               (hasFilters || showDeleted) && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح الفلاتر" })
@@ -705,12 +943,31 @@ export function ArchivePage() {
           }) : jsxs("div", {
             className: "space-y-4",
             children: [
+              jsxs("div", {
+                className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
+                children: [
+                  jsxs("div", {
+                    className: "min-w-0",
+                    children: [
+                      jsx("p", { className: "font-semibold text-white", children: rangeText }),
+                      jsx("p", { className: "mt-0.5 text-xs text-gray-500", children: `الصفحة ${formatNumber(currentPage)} من ${formatNumber(totalPages)}` })
+                    ]
+                  }),
+                  jsxs("div", {
+                    className: "flex flex-wrap gap-2 text-xs text-gray-400",
+                    children: [
+                      jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: `العرض: ${activeViewMode === "grid" ? "شبكة" : activeViewMode === "list" ? "قائمة" : "جدول"}` }),
+                      jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: `الحجم: ${ARCHIVE_ITEM_SIZE_LABELS[activeItemSize]}` }),
+                      jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: `${formatNumber(activePageSize)} عنصر/صفحة` })
+                    ]
+                  })
+                ]
+              }),
               renderArchiveItems(),
-              visibleItems.length < filteredItems.length && jsx("button", {
-                type: "button",
-                onClick: () => setPage((value) => value + 1),
-                className: "w-full rounded-xl border border-white/10 bg-gray-950/35 px-4 py-3 text-sm font-semibold text-gray-300 hover:bg-white/5",
-                children: `عرض المزيد (${formatNumber(filteredItems.length - visibleItems.length)} متبقية)`
+              jsx(ArchivePagination, {
+                currentPage,
+                totalPages,
+                onPageChange: goToPage
               })
             ]
           }),

@@ -63,6 +63,52 @@ export function getFirstTaskDestination(firstTaskChoice = "dashboard") {
   return destinations[firstTaskChoice] || "dashboard";
 }
 
+export function getOnboardingDestination(firstTaskChoice = "dashboard") {
+  return getFirstTaskDestination(firstTaskChoice);
+}
+
+export function shouldShowStartupOnboarding({ authState = "loading", settings = {} } = {}) {
+  return authState === "setup" && !settings.ui?.v1OnboardingCompleted;
+}
+
+export function createOnboardingCompletionPatch({
+  securityMode = "secure",
+  themeChoice = "dark",
+  accentColor = "teal",
+  visualDensity = "comfortable",
+  firstTaskChoice = "dashboard",
+  replayMode = false,
+  now = new Date().toISOString()
+} = {}) {
+  const normalizedSecurityMode = normalizeOnboardingSecurityMode(securityMode);
+  const normalizedThemeChoice = normalizeOnboardingThemeChoice(themeChoice);
+  const normalizedAccentColor = normalizeOnboardingAccentChoice(accentColor);
+  const ui = {
+    onboardingCompleted: true,
+    v1OnboardingCompleted: true,
+    onboardingSecurityMode: normalizedSecurityMode,
+    onboardingThemeChoice: normalizedThemeChoice,
+    onboardingCoreUiSeenAt: now,
+    onboardingSkippedAt: normalizedSecurityMode === "quick" ? now : null,
+    firstTaskChoice: firstTaskChoice || "dashboard",
+    lastOnboardingStep: replayMode ? "replay-completed" : "completed",
+    visualDensity: visualDensity === "compact" ? "compact" : "comfortable",
+    onboardingReplayCompletedAt: replayMode ? now : null
+  };
+  if (!replayMode) {
+    ui.firstTaskChoiceUsed = false;
+  }
+  return {
+    theme: normalizedThemeChoice,
+    accentColor: normalizedAccentColor,
+    onboardingRequired: false,
+    initialAdminPassword: undefined,
+    initialAdminPasswordShown: true,
+    helpAutoOpenPending: false,
+    ui
+  };
+}
+
 export function shouldShowV1Tour({ settings = {}, currentPage = "dashboard", hasDirectRoute = false } = {}) {
   if (hasDirectRoute || currentPage !== "dashboard") return false;
   return Boolean(settings.ui?.v1OnboardingCompleted && !settings.ui?.v1TourCompleted);

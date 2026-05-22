@@ -7,7 +7,7 @@ export const LEGACY_PAGE_MIGRATION = {
   detail: { legacyComponentName: "VideoDetail", status: "legacy-wrapper" },
   types: { legacyComponentName: "TypeManager", status: "legacy-wrapper" },
   search: { legacyComponentName: "SearchPanel", status: "legacy-wrapper" },
-  settings: { legacyComponentName: "SettingsPanel", status: "legacy-wrapper" },
+  settings: { legacyComponentName: "SettingsPanel", status: "legacy-wrapper", notes: "Settings still wraps the legacy panel, but it can now launch the native v1 onboarding wizard via an app-level event." },
   backup: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/DataCenterPage.jsx; data operations still use legacy store actions and extracted portability services." },
   history: { legacyComponentName: "HistoryPanel", status: "legacy-wrapper" },
   collections: { legacyComponentName: "CollectionsPage", status: "legacy-wrapper" },
