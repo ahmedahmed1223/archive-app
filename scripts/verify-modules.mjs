@@ -38,6 +38,60 @@ import {
   parseSearchRouteParams
 } from "../src/features/search/viewModel.js";
 import {
+  createHistoryRouteParams,
+  getFilteredHistoryRecords,
+  getHistoryActionCounts,
+  parseHistoryRouteParams
+} from "../src/features/history/viewModel.js";
+import {
+  createVocabularyEntryValue,
+  createVocabularyRouteParams,
+  getFilteredVocabularyEntries,
+  getVocabularyCategoryCounts,
+  parseVocabularyAliases,
+  parseVocabularyRouteParams
+} from "../src/features/vocabulary/viewModel.js";
+import {
+  buildHierarchicalTagModel,
+  createHierarchicalTagValue,
+  getDescendantTagIds,
+  getFilteredHierarchicalTags,
+  getHierarchicalTagPath,
+  getNextHierarchicalTagOrder
+} from "../src/features/hierarchical-tags/viewModel.js";
+import {
+  createVirtualCollectionValue,
+  getAvailableCollectionItems,
+  getCollectionSummary,
+  getFilteredCollections,
+  resolveCollectionItems
+} from "../src/features/collections/viewModel.js";
+import {
+  canDeactivateUser,
+  createUserValue,
+  getFilteredUsers,
+  getUserSummary,
+  normalizeUserRole
+} from "../src/features/users/viewModel.js";
+import {
+  createContentTypeValue,
+  createCustomFieldValue,
+  createSubtypeValue,
+  getFieldsForSelection,
+  getFilteredContentTypes,
+  getTypeUsageCounts,
+  normalizeFieldStorageKey,
+  parseFieldOptions
+} from "../src/features/types/viewModel.js";
+import {
+  createLocalFileValue,
+  createVideoItemValue,
+  getSubtypeLabel,
+  getTypeLabel,
+  normalizeLocalFileValue,
+  parseVideoTags
+} from "../src/features/videos/viewModel.js";
+import {
   HELP_FAQ_ITEMS,
   HELP_QUICK_SECTION_LINKS
 } from "../src/features/help/content.js";
@@ -234,6 +288,132 @@ run("search view model", () => {
   assert.deepEqual(results.map((item) => item.id), ["1"]);
 });
 
+run("history view model", () => {
+  const params = createHistoryRouteParams({ query: "عنوان", action: "update", page: 2, pageSize: 100 });
+  assert.deepEqual(parseHistoryRouteParams(params), {
+    query: "عنوان",
+    action: "update",
+    page: 2,
+    pageSize: 100
+  });
+
+  const records = getFilteredHistoryRecords({
+    changeHistory: [
+      { id: "1", itemId: "v1", action: "create", timestamp: "2026-01-01T00:00:00.000Z" },
+      { id: "2", itemId: "v2", action: "update", field: "title", newValue: "عنوان جديد", timestamp: "2026-01-03T00:00:00.000Z" },
+      { id: "3", itemId: "v3", action: "delete", timestamp: "2026-01-02T00:00:00.000Z" }
+    ],
+    query: "عنوان",
+    action: "update",
+    itemTitleById: new Map([["v2", "مادة قديمة"]])
+  });
+  assert.deepEqual(records.map((record) => record.id), ["2"]);
+  assert.equal(getHistoryActionCounts(records).update, 1);
+});
+
+run("vocabulary view model", () => {
+  const aliases = parseVocabularyAliases("القدس, بيت المقدس، أورشليم");
+  assert.deepEqual(aliases, ["القدس", "بيت المقدس", "أورشليم"]);
+  const entry = createVocabularyEntryValue({ term: "القدس", category: "city", aliases });
+  assert.equal(entry.category, "city");
+
+  const params = createVocabularyRouteParams({ query: "قدس", category: "city", page: 3, pageSize: 96 });
+  assert.deepEqual(parseVocabularyRouteParams(params), {
+    query: "قدس",
+    category: "city",
+    page: 3,
+    pageSize: 96
+  });
+
+  const vocabulary = [
+    entry,
+    createVocabularyEntryValue({ term: "رام الله", category: "city" }),
+    createVocabularyEntryValue({ term: "وكالة", category: "organization" })
+  ];
+  assert.deepEqual(getFilteredVocabularyEntries({ vocabulary, query: "بيت", category: "city" }).map((item) => item.term), ["القدس"]);
+  assert.equal(getVocabularyCategoryCounts(vocabulary).city, 2);
+});
+
+run("hierarchical tags view model", () => {
+  const root = createHierarchicalTagValue({ id: "root", name: "الأصل", order: 0 });
+  const child = createHierarchicalTagValue({ id: "child", name: "الفرع", parentId: "root", order: 0 });
+  const grandchild = createHierarchicalTagValue({ id: "grandchild", name: "التفصيل", parentId: "child", order: 0 });
+  const tags = [grandchild, child, root];
+  const model = buildHierarchicalTagModel(tags);
+  assert.deepEqual(model.roots.map((tag) => tag.id), ["root"]);
+  assert.deepEqual(getDescendantTagIds("root", model.childrenByParent), ["child", "grandchild"]);
+  assert.equal(getHierarchicalTagPath("grandchild", tags), "الأصل / الفرع / التفصيل");
+  assert.equal(getNextHierarchicalTagOrder(tags, "root"), 1);
+  assert.deepEqual(getFilteredHierarchicalTags(tags, "فرع").map((tag) => tag.id), ["grandchild", "child"]);
+});
+
+run("collections view model", () => {
+  const items = [
+    { id: "v1", title: "مقابلة خاصة", tags: ["مهم"], updatedAt: "2026-01-01" },
+    { id: "v2", title: "خبر عاجل", isDeleted: true },
+    { id: "v3", title: "تقرير", tags: [] }
+  ];
+  const manual = createVirtualCollectionValue({ id: "c1", name: "مختارات", itemIds: ["v1", "v2"] });
+  const smart = createVirtualCollectionValue({ id: "c2", name: "بحث", type: "smart", filterRules: { query: "مقابلة" } });
+
+  assert.deepEqual(resolveCollectionItems(manual, items).map((item) => item.id), ["v1"]);
+  assert.deepEqual(resolveCollectionItems(smart, items).map((item) => item.id), ["v1"]);
+  assert.deepEqual(getAvailableCollectionItems(manual, items).map((item) => item.id), ["v3"]);
+  assert.deepEqual(getFilteredCollections([manual, smart], "بحث").map((collection) => collection.id), ["c2"]);
+  assert.deepEqual(getCollectionSummary([manual, smart], items), {
+    total: 2,
+    manual: 1,
+    smart: 1,
+    linkedItems: 1
+  });
+});
+
+run("users view model", () => {
+  const admin = createUserValue({ id: "admin", username: "admin", displayName: "المدير", role: "admin", isActive: true });
+  const editor = createUserValue({ id: "editor", username: "editor", displayName: "محرر", role: "editor", isActive: true });
+  const viewer = createUserValue({ id: "viewer", username: "viewer", displayName: "مشاهد", role: "missing", isActive: false });
+  const users = [viewer, editor, admin];
+
+  assert.equal(normalizeUserRole("missing"), "viewer");
+  assert.equal(viewer.role, "viewer");
+  assert.deepEqual(getFilteredUsers(users, "محرر", "all").map((user) => user.id), ["editor"]);
+  assert.equal(getUserSummary(users).activeAdmins, 1);
+  assert.equal(canDeactivateUser(admin, users), false);
+  assert.equal(canDeactivateUser(editor, users), true);
+});
+
+run("types view model", () => {
+  assert.equal(normalizeFieldStorageKey("اسم الحقل !"), "اسم_الحقل");
+  assert.deepEqual(parseFieldOptions("أ، ب, ج"), ["أ", "ب", "ج"]);
+
+  const type = createContentTypeValue({
+    id: "interview",
+    name: "مقابلات",
+    fields: [
+      createCustomFieldValue({ id: "guest", label: "الضيف", type: "text", order: 0 }),
+      createCustomFieldValue({ id: "file", label: "ملف", type: "localFile", order: 1 })
+    ],
+    subtypes: [
+      createSubtypeValue({ id: "full", name: "كاملة", fields: [createCustomFieldValue({ id: "season", label: "الموسم", order: 0 })] })
+    ]
+  });
+  const archived = createContentTypeValue({ id: "old", name: "قديم", status: "archived" });
+  assert.deepEqual(getFilteredContentTypes([archived, type], "مقاب", false).map((item) => item.id), ["interview"]);
+  assert.equal(getTypeUsageCounts([type], [{ id: "v1", type: "interview" }, { id: "v2", type: "interview", isDeleted: true }]).interview, 1);
+  assert.deepEqual(getFieldsForSelection([type], "interview", "full").map((field) => field.id), ["guest", "season", "file"]);
+});
+
+run("videos view model", () => {
+  assert.deepEqual(parseVideoTags("أ، ب,#ج"), ["أ", "ب", "ج"]);
+  const file = createLocalFileValue({ name: "clip.mp4", size: 1024, type: "video/mp4", lastModified: Date.UTC(2026, 0, 1), webkitRelativePath: "clips/clip.mp4" });
+  assert.equal(file.extension, "mp4");
+  assert.equal(normalizeLocalFileValue("D:\\clips\\clip.mp4").name, "clip.mp4");
+  const item = createVideoItemValue({ title: "فيديو", type: "movie", tags: "أ، ب", metadata: { local: file } });
+  assert.deepEqual(item.tags, ["أ", "ب"]);
+  assert.equal(getTypeLabel([{ id: "movie", name: "أفلام", subtypes: [{ id: "full", name: "كامل" }] }], "movie"), "أفلام");
+  assert.equal(getSubtypeLabel([{ id: "movie", subtypes: [{ id: "full", name: "كامل" }] }], "movie", "full"), "كامل");
+});
+
 run("global shortcut action resolver", () => {
   const ctrlK = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "k", target: { tagName: "BODY" } };
   const ctrlSlashInInput = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: "/", target: { tagName: "INPUT" } };
@@ -358,8 +538,8 @@ run("page migration wrappers", () => {
   const status = getPageMigrationStatus();
   const summary = getPageMigrationSummary(status);
   assert.equal(summary.total, 15);
-  assert.equal(summary.native, 7);
-  assert.equal(summary.legacyWrapped, 8);
+  assert.equal(summary.native, 15);
+  assert.equal(summary.legacyWrapped, 0);
   assert.equal(status.find((page) => page.id === "archive")?.status, "native");
   assert.equal(status.find((page) => page.id === "dashboard")?.status, "native");
   assert.equal(status.find((page) => page.id === "backup")?.status, "native");
@@ -367,6 +547,14 @@ run("page migration wrappers", () => {
   assert.equal(status.find((page) => page.id === "help")?.status, "native");
   assert.equal(status.find((page) => page.id === "settings")?.status, "native");
   assert.equal(status.find((page) => page.id === "search")?.status, "native");
+  assert.equal(status.find((page) => page.id === "history")?.status, "native");
+  assert.equal(status.find((page) => page.id === "collections")?.status, "native");
+  assert.equal(status.find((page) => page.id === "vocabulary")?.status, "native");
+  assert.equal(status.find((page) => page.id === "htags")?.status, "native");
+  assert.equal(status.find((page) => page.id === "users")?.status, "native");
+  assert.equal(status.find((page) => page.id === "types")?.status, "native");
+  assert.equal(status.find((page) => page.id === "add")?.status, "native");
+  assert.equal(status.find((page) => page.id === "detail")?.status, "native");
 });
 
 run("data portability JSON safety", () => {
