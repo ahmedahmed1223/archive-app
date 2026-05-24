@@ -385,7 +385,7 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
   };
 
   return jsx("div", {
-    className: "fixed inset-0 z-[70] overflow-y-auto bg-[#07111f] px-4 py-5 text-right text-white sm:px-6 sm:py-8",
+    className: "va-onboarding-shell fixed inset-0 z-[70] overflow-y-auto bg-[#07111f] px-4 py-5 text-right text-white sm:px-6 sm:py-8",
     dir: "rtl",
     role: "dialog",
     "aria-modal": true,
@@ -411,7 +411,7 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
         initial: { opacity: 0, y: 10 },
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0.22 },
-        className: "rounded-3xl border border-white/10 bg-[#0b1626]/95 p-5 shadow-2xl shadow-black/20 sm:p-8",
+        className: "va-onboarding-panel rounded-3xl border border-white/10 bg-[#0b1626]/95 p-5 shadow-2xl shadow-black/20 sm:p-8",
         children: [
           renderStepBody(),
           error && jsxs("div", { className: "mt-5 flex items-start gap-2 rounded-2xl border border-red-500/25 bg-red-500/10 p-4 text-red-100", role: "alert", children: [

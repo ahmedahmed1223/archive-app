@@ -289,11 +289,11 @@ export function ArchivePage() {
   };
 
   return jsxs("div", {
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -301,7 +301,7 @@ export function ArchivePage() {
               jsxs("div", {
                 className: "min-w-0",
                 children: [
-                  jsxs("h2", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Archive, { className: "h-6 w-6 text-emerald-400" }), "الأرشيف"] }),
+                  jsxs("h2", { className: "va-title flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Archive, { className: "h-6 w-6 text-emerald-400" }), "الأرشيف"] }),
                   jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "شبكة سريعة للمعاينة والبحث اللحظي، مع فلاتر محفوظة في الرابط وزر إضافة واضح دائماً." })
                 ]
               }),
@@ -312,7 +312,7 @@ export function ArchivePage() {
                   jsx("button", {
                     type: "button",
                     onClick: openAdd,
-                    className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+                    className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
                     children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
                   })
                 ]
@@ -339,7 +339,7 @@ export function ArchivePage() {
         ]
       }),
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
+        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
         children: [
           jsxs("div", {
             className: "grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_180px_180px]",
@@ -396,7 +396,7 @@ export function ArchivePage() {
             className: "mt-3 flex flex-wrap items-center gap-2",
             children: [
               jsxs("div", {
-                className: "inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+                className: "va-control-surface inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
                 role: "group",
                 "aria-label": "وضع عرض الأرشيف",
                 children: [
@@ -449,7 +449,7 @@ export function ArchivePage() {
         className: "grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]",
         children: [
           filteredItems.length === 0 ? jsxs("div", {
-            className: "rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
+            className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
             children: [
               jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-500" }),
               jsx("h3", { className: "mt-4 text-lg font-bold text-white", children: showDeleted ? "سلة المحذوفات فارغة" : hasFilters ? "لا توجد نتائج مطابقة" : "الأرشيف فارغ" }),
@@ -466,7 +466,7 @@ export function ArchivePage() {
             className: "space-y-4",
             children: [
               jsxs("div", {
-                className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
+                className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
                 children: [
                   jsxs("div", {
                     className: "min-w-0",

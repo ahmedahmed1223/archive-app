@@ -213,8 +213,8 @@ export function DashboardSkeleton() {
 export function SplashScreen({ steps = STARTUP_STEPS, currentStepId, progress = 1, warnings = [], fatalError, onOpenDiagnostics }) {
   const currentStep = steps.find((step) => step.id === currentStepId) || steps[0];
   return (
-    <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
-      <section className="w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0b1626]/95 p-7 shadow-2xl shadow-black/30">
+    <main dir="rtl" className="va-onboarding-shell flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
+      <section className="va-onboarding-panel w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0b1626]/95 p-7 shadow-2xl shadow-black/30">
         <div className="flex items-center gap-4">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-200">
             <Sparkles className="h-7 w-7" />
@@ -341,8 +341,8 @@ export function LoginScreen() {
   };
 
   return (
-    <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
-      <section className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] shadow-2xl shadow-black/30 md:grid-cols-[0.9fr_1.1fr]">
+    <main dir="rtl" className="va-onboarding-shell flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
+      <section className="va-onboarding-panel grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] shadow-2xl shadow-black/30 md:grid-cols-[0.9fr_1.1fr]">
         <aside className="bg-emerald-500/10 p-7">
           <Sparkles className="h-11 w-11 text-emerald-200" />
           <h1 className="mt-5 text-3xl font-bold">أرشيف الفيديو</h1>

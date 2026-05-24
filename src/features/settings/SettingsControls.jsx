@@ -64,7 +64,7 @@ export function cx(...classes) {
 
 export function SettingsCard({ title, description, icon, children, aside }) {
   return jsxs("section", {
-    className: "rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right shadow-xl shadow-black/5 backdrop-blur-sm",
+    className: "va-card rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right shadow-xl shadow-black/5 backdrop-blur-sm",
     dir: "rtl",
     children: [
       jsxs("div", {
@@ -106,7 +106,7 @@ export function SegmentedChoices({ label, value, options, onChange, columns = "s
             type: "button",
             onClick: () => onChange(option.value),
             className: cx(
-              "min-h-16 rounded-xl border px-3 py-2 text-right transition-colors",
+              "va-tool-button min-h-16 rounded-xl border px-3 py-2 text-right transition-colors",
               selected
                 ? "border-emerald-500/45 bg-emerald-500/15 text-emerald-100"
                 : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"
@@ -127,7 +127,7 @@ export function ToggleRow({ label, description, checked, onChange }) {
   return jsxs("button", {
     type: "button",
     onClick: () => onChange(!checked),
-    className: "flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-gray-950/30 p-3 text-right transition-colors hover:bg-white/[0.04]",
+    className: "va-card-subtle flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-gray-950/30 p-3 text-right transition-colors hover:bg-white/[0.04]",
     "aria-pressed": checked,
     children: [
       jsxs("span", {
@@ -155,7 +155,7 @@ export function ToggleRow({ label, description, checked, onChange }) {
 
 export function SelectRow({ label, value, options, onChange, description }) {
   return jsxs("label", {
-    className: "block rounded-xl border border-white/10 bg-gray-950/30 p-3",
+    className: "va-card-subtle block rounded-xl border border-white/10 bg-gray-950/30 p-3",
     children: [
       jsx("span", { className: "block text-sm font-semibold text-white", children: label }),
       description && jsx("span", { className: "mt-1 block text-xs leading-relaxed text-gray-500", children: description }),
@@ -171,7 +171,7 @@ export function SelectRow({ label, value, options, onChange, description }) {
 
 export function TextInputRow({ label, value, onChange, description, dir = "rtl", placeholder = "", type = "text" }) {
   return jsxs("label", {
-    className: "block rounded-xl border border-white/10 bg-gray-950/30 p-3",
+    className: "va-card-subtle block rounded-xl border border-white/10 bg-gray-950/30 p-3",
     children: [
       jsx("span", { className: "block text-sm font-semibold text-white", children: label }),
       description && jsx("span", { className: "mt-1 block text-xs leading-relaxed text-gray-500", children: description }),
@@ -200,7 +200,7 @@ export function ColorChoices({ value, onChange }) {
             type: "button",
             onClick: () => onChange(option.value),
             className: cx(
-              "min-h-16 rounded-xl border p-3 text-right transition-colors",
+              "va-tool-button min-h-16 rounded-xl border p-3 text-right transition-colors",
               selected ? "border-emerald-500/45 bg-emerald-500/15" : "border-white/10 bg-gray-950/35 hover:bg-white/5"
             ),
             children: [
@@ -216,7 +216,7 @@ export function ColorChoices({ value, onChange }) {
 
 export function SettingsTabs({ activeTab, onTabChange }) {
   return jsx("nav", {
-    className: "sticky top-4 h-fit rounded-2xl border border-white/10 bg-gray-900/50 p-2",
+    className: "va-tab-surface sticky top-4 h-fit rounded-2xl border border-white/10 bg-gray-900/50 p-2",
     dir: "rtl",
     children: SETTINGS_TABS.map((tab) => {
       const Icon = TAB_ICONS[tab.id] || CircleQuestionFallback;
@@ -280,7 +280,7 @@ export function ShortcutManager({ settings, onSave, showToast }) {
           const conflict = conflicts[action.id];
           return jsxs("label", {
             className: cx(
-              "block rounded-xl border p-3",
+              "va-card-subtle block rounded-xl border p-3",
               conflict ? "border-amber-500/30 bg-amber-500/10" : "border-white/10 bg-gray-950/30"
             ),
             children: [
@@ -314,7 +314,7 @@ export function ShortcutManager({ settings, onSave, showToast }) {
       jsxs("div", {
         className: "flex flex-wrap gap-2",
         children: [
-          jsx("button", { type: "button", onClick: save, disabled: hasConflicts, className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50", children: "حفظ الاختصارات" }),
+          jsx("button", { type: "button", onClick: save, disabled: hasConflicts, className: "va-primary-button rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50", children: "حفظ الاختصارات" }),
           jsx("button", { type: "button", onClick: restoreDefaults, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "استعادة الافتراضيات" }),
           jsx("button", { type: "button", onClick: disableAll, className: "rounded-xl border border-red-500/20 px-4 py-2 text-sm text-red-100 hover:bg-red-500/10", children: "تعطيل الكل" })
         ]

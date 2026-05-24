@@ -544,7 +544,7 @@ export function App() {
 
   return jsxs("div", {
     dir: "rtl",
-    className: `flex min-h-screen text-right ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"}`,
+    className: `va-app-shell flex min-h-screen text-right ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"}`,
     children: [
       jsx("a", {
         href: "#main-content",

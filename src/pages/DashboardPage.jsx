@@ -35,7 +35,7 @@ const toneClasses = {
 
 function DashboardCard({ children, className = "" }) {
   return jsx("section", {
-    className: `rounded-xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children
   });
@@ -43,7 +43,7 @@ function DashboardCard({ children, className = "" }) {
 
 function KpiCard({ label, value, hint, icon, tone = "slate" }) {
   return jsxs(DashboardCard, {
-    className: "min-h-[132px]",
+    className: "va-metric-card min-h-[132px]",
     children: [
       jsxs("div", {
         className: "flex items-start justify-between gap-3",
@@ -70,10 +70,10 @@ function ActionButton({ label, detail, icon, onClick, tone = "emerald" }) {
   return jsxs("button", {
     type: "button",
     onClick,
-    className: "group flex min-h-[92px] w-full items-center gap-3 rounded-xl border border-white/10 bg-gray-800/30 p-4 text-right transition-colors hover:border-emerald-500/25 hover:bg-white/5",
+    className: "va-action-card group flex min-h-[92px] w-full items-center gap-3 rounded-xl border border-white/10 bg-gray-800/30 p-4 text-right transition-colors hover:border-emerald-500/25 hover:bg-white/5",
     children: [
       jsx("span", {
-        className: `flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${toneClasses[tone] || toneClasses.emerald}`,
+        className: `va-icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${toneClasses[tone] || toneClasses.emerald}`,
         children: icon
       }),
       jsxs("span", {
@@ -92,7 +92,7 @@ function ReadinessRow({ label, value, status = "neutral" }) {
     : status === "warning" ? "bg-amber-500/10 text-amber-200 border-amber-500/20"
       : "bg-white/5 text-gray-300 border-white/10";
   return jsxs("div", {
-    className: "flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-gray-800/20 px-3 py-2",
+    className: "va-card-subtle flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-gray-800/20 px-3 py-2",
     children: [
       jsx("span", { className: "text-sm text-gray-400", children: label }),
       jsx("span", { className: `rounded-full border px-2 py-0.5 text-xs ${statusClass}`, children: value })
@@ -102,7 +102,7 @@ function ReadinessRow({ label, value, status = "neutral" }) {
 
 function MiniStat({ label, value, hint, icon }) {
   return jsxs("div", {
-    className: "min-h-[96px] rounded-xl border border-white/5 bg-gray-800/20 p-3",
+    className: "va-card-subtle min-h-[96px] rounded-xl border border-white/5 bg-gray-800/20 p-3",
     children: [
       jsxs("div", {
         className: "flex items-center justify-between gap-2",
@@ -121,7 +121,7 @@ function RecentItem({ item, onOpen }) {
   return jsxs("button", {
     type: "button",
     onClick: onOpen,
-    className: "flex w-full items-center gap-3 rounded-lg border border-white/5 bg-gray-800/20 p-3 text-right transition-colors hover:border-emerald-500/25 hover:bg-white/5",
+    className: "va-action-card flex w-full items-center gap-3 rounded-lg border border-white/5 bg-gray-800/20 p-3 text-right transition-colors hover:border-emerald-500/25 hover:bg-white/5",
     children: [
       jsx("span", {
         className: "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-gray-300",
@@ -196,11 +196,11 @@ export function DashboardPage() {
   };
 
   return jsxs("div", {
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -209,7 +209,7 @@ export function DashboardPage() {
                 className: "min-w-0",
                 children: [
                   jsxs("h2", {
-                    className: "flex items-center gap-2 text-2xl font-bold text-white",
+                    className: "va-title flex items-center gap-2 text-2xl font-bold text-white",
                     children: [jsx(LayoutGrid, { className: "h-6 w-6 text-emerald-400" }), "لوحة التحكم"]
                   }),
                   jsx("p", {
@@ -221,7 +221,7 @@ export function DashboardPage() {
               jsxs("button", {
                 type: "button",
                 onClick: () => goTo("add"),
-                className: "inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+                className: "va-primary-button inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
                 children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
               })
             ]

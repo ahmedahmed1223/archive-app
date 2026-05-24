@@ -7,3 +7,10 @@ Base_old/
 IMPLEMENTATION_STATUS.md
 DESIGN.md
 requirements_and_worklog.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

@@ -24,7 +24,7 @@ const sourceTypeLabels = {
 
 export function PageCard({ children, className = "" }) {
   return jsx("section", {
-    className: `rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children
   });
@@ -32,7 +32,7 @@ export function PageCard({ children, className = "" }) {
 
 export function DataMetric({ label, value, hint, icon }) {
   return jsxs(PageCard, {
-    className: "min-h-[116px]",
+    className: "va-metric-card min-h-[116px]",
     children: [
       jsxs("div", {
         className: "flex items-start justify-between gap-3",
@@ -62,7 +62,7 @@ export function TabButton({ tab, active, onClick }) {
     role: "tab",
     "aria-selected": active,
     onClick,
-    className: `flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-right text-sm transition-colors ${
+    className: `va-tool-button flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-right text-sm transition-colors ${
       active
         ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
         : "border-white/5 bg-gray-900/40 text-gray-400 hover:border-white/10 hover:bg-white/5 hover:text-white"
@@ -78,7 +78,7 @@ export function SegmentedButton({ active, children, onClick, danger = false }) {
   return jsx("button", {
     type: "button",
     onClick,
-    className: `min-h-10 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+    className: `va-tool-button min-h-10 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
       active
         ? danger
           ? "border-red-500/40 bg-red-500/15 text-red-100"
@@ -99,7 +99,7 @@ export function ActionButton({ children, icon, onClick, disabled = false, tone =
     type: "button",
     onClick,
     disabled,
-    className: `inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toneClass}`,
+    className: `va-action-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toneClass}`,
     children: [
       icon,
       children
@@ -111,7 +111,7 @@ export function SummaryGrid({ rows }) {
   return jsx("div", {
     className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-3",
     children: rows.map((item) => jsxs("div", {
-      className: "rounded-xl border border-white/5 bg-gray-950/35 p-3",
+      className: "va-card-subtle rounded-xl border border-white/5 bg-gray-950/35 p-3",
       children: [
         jsx("p", { className: "text-xs text-gray-500", children: item.label }),
         jsx("p", { className: "mt-1 text-sm font-semibold text-gray-100", children: String(item.value) })

@@ -639,11 +639,11 @@ export function DataCenterPage() {
         : renderExportPanel();
 
   return jsxs("div", {
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -651,7 +651,7 @@ export function DataCenterPage() {
               jsxs("div", {
                 className: "min-w-0",
                 children: [
-                  jsxs("h2", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Database, { className: "h-6 w-6 text-emerald-400" }), "مركز البيانات"] }),
+                  jsxs("h2", { className: "va-title flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Database, { className: "h-6 w-6 text-emerald-400" }), "مركز البيانات"] }),
                   jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "تدفق واحد للتصدير والاستيراد والنقل والنسخ الاحتياطي، بدون تمرير طويل أو خيارات مبعثرة." })
                 ]
               }),
@@ -676,7 +676,7 @@ export function DataCenterPage() {
         className: "grid gap-4 xl:grid-cols-[260px_1fr]",
         children: [
           jsxs("aside", {
-            className: "h-fit rounded-2xl border border-white/10 bg-gray-950/55 p-3 backdrop-blur-sm xl:sticky xl:top-4",
+            className: "va-tab-surface h-fit rounded-2xl border border-white/10 bg-gray-950/55 p-3 backdrop-blur-sm xl:sticky xl:top-4",
             children: [
               jsx("div", {
                 className: "grid gap-2 sm:grid-cols-2 xl:grid-cols-1",

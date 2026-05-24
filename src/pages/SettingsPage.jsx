@@ -490,11 +490,11 @@ export function SettingsPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -502,7 +502,7 @@ export function SettingsPage() {
               jsxs("div", {
                 className: "min-w-0",
                 children: [
-                  jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Lightbulb, { className: "h-6 w-6 text-emerald-400" }), "الإعدادات"] }),
+                  jsxs("h1", { className: "va-title flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Lightbulb, { className: "h-6 w-6 text-emerald-400" }), "الإعدادات"] }),
                   jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "تبويبات واضحة بدون تحذيرات غير محفوظة عند التنقل فقط. التغييرات الصغيرة تحفظ مباشرة، وكلمة المرور لها إجراء حفظ مستقل." })
                 ]
               }),

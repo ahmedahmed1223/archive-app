@@ -66,7 +66,7 @@ function SidebarButton({ page, active, onClick, badge, collapsed }) {
     onClick,
     "aria-current": active ? "page" : undefined,
     title: collapsed ? page.meta?.title : undefined,
-    className: `group relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-right text-sm transition-colors ${
+    className: `va-sidebar-item ${active ? "va-sidebar-item-active" : ""} group relative flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-right text-sm transition-colors ${
       active
         ? "bg-emerald-500/10 text-emerald-100"
         : "text-gray-400 hover:bg-white/5 hover:text-white"
@@ -126,7 +126,7 @@ export function Sidebar() {
   const sidebarContent = jsxs(Fragment, {
     children: [
       jsxs("div", {
-        className: `flex items-center gap-3 border-b p-5 ${isDark ? "border-white/10" : "border-gray-200"}`,
+        className: `va-sidebar-brand flex items-center gap-3 border-b p-5 ${isDark ? "border-white/10" : "border-gray-200"}`,
         children: [
           jsx("div", {
             className: "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20",
@@ -239,13 +239,13 @@ export function Sidebar() {
       isMobile ? sidebarOpen && jsx("aside", {
         role: "navigation",
         "aria-label": "القائمة الجانبية",
-        className: "fixed top-0 right-0 z-40 flex h-full w-[280px] flex-col border-l border-white/10 bg-gray-950",
+        className: "va-sidebar fixed top-0 right-0 z-40 flex h-full w-[280px] flex-col border-l border-white/10 bg-gray-950",
         dir: "rtl",
         children: sidebarContent
       }) : jsx("aside", {
         role: "navigation",
         "aria-label": "القائمة الجانبية",
-        className: `${collapsed ? "w-[72px]" : "w-[clamp(240px,18vw,280px)]"} flex h-screen shrink-0 flex-col border-l border-white/10 bg-gray-950 transition-[width] duration-200`,
+        className: `va-sidebar ${collapsed ? "w-[72px]" : "w-[clamp(240px,18vw,280px)]"} flex h-screen shrink-0 flex-col border-l border-white/10 bg-gray-950 transition-[width] duration-200`,
         dir: "rtl",
         children: sidebarContent
       })

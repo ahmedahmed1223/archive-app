@@ -21,8 +21,8 @@ import { getPageContextBarModel } from "./viewModel.js";
 
 function ContextButton({ children, onClick, variant = "secondary" }) {
   const classes = variant === "primary"
-    ? "border-emerald-500/30 bg-emerald-700 text-white hover:bg-emerald-600"
-    : "border-white/10 text-gray-300 hover:bg-white/5 hover:text-white";
+    ? "va-primary-button border-emerald-500/30 bg-emerald-700 text-white hover:bg-emerald-600"
+    : "va-secondary-button border-white/10 text-gray-300 hover:bg-white/5 hover:text-white";
 
   return jsx("button", {
     type: "button",

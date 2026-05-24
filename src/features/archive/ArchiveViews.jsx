@@ -119,7 +119,7 @@ export function ToolbarButton({ children, onClick, active = false, danger = fals
   return jsxs("button", {
     type: "button",
     onClick,
-    className: `inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+    className: `va-tool-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
       active
         ? danger
           ? "border-red-500/35 bg-red-500/15 text-red-100"
@@ -135,7 +135,7 @@ export function ToolbarButton({ children, onClick, active = false, danger = fals
 
 export function ArchiveMetric({ label, value, hint }) {
   return jsxs("div", {
-    className: "rounded-xl border border-white/5 bg-gray-950/35 p-3",
+    className: "va-metric-card rounded-xl border border-white/5 bg-gray-950/35 p-3",
     children: [
       jsx("p", { className: "text-xs text-gray-500", children: label }),
       jsx("p", { className: "mt-1 text-lg font-bold text-white", children: value }),
@@ -151,7 +151,7 @@ export function ArchivePagination({ currentPage, totalPages, onPageChange }) {
   const buttonBase = "inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors";
 
   return jsxs("nav", {
-    className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
     dir: "rtl",
     "aria-label": "صفحات الأرشيف",
     children: [
@@ -213,7 +213,7 @@ export function SegmentedControl({ label, value, options, onChange }) {
     children: [
       label && jsx("span", { className: "text-xs text-gray-500", children: label }),
       jsx("div", {
-        className: "inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+        className: "va-control-surface inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
         role: "group",
         "aria-label": label,
         children: options.map((option) => jsx("button", {
@@ -230,7 +230,7 @@ export function SegmentedControl({ label, value, options, onChange }) {
 export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable" }) {
   const size = ARCHIVE_CARD_SIZE[itemSize] || ARCHIVE_CARD_SIZE.comfortable;
   return jsxs("article", {
-    className: `group overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
+    className: `va-video-card ${selected ? "va-video-card-selected" : ""} group overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
       selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
     }`,
     dir: "rtl",
@@ -260,7 +260,7 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
               item.tags?.length > 0 && jsxs("div", {
                 className: "flex flex-wrap gap-1.5",
                 children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
-                  className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+                  className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
                   children: tag
                 }, tag))
               }),
@@ -275,7 +275,7 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
           jsx("button", {
             type: "button",
             onClick: onOpen,
-            className: `${size.button} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
+            className: `va-primary-button ${size.button} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
             children: "فتح التفاصيل"
           }),
           !showDeleted && jsx("button", {
@@ -316,7 +316,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
   const size = ARCHIVE_LIST_SIZE[itemSize] || ARCHIVE_LIST_SIZE.comfortable;
 
   return jsxs("article", {
-    className: `group grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
+    className: `va-video-list-item ${selected ? "va-video-list-item-selected" : ""} group grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
       selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
     }`,
     dir: "rtl",
@@ -344,7 +344,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
           item.tags?.length > 0 && jsx("div", {
             className: "mt-3 flex flex-wrap gap-1.5",
             children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
-              className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+              className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
               children: tag
             }, tag))
           }),
@@ -357,7 +357,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
           jsx("button", {
             type: "button",
             onClick: onOpen,
-            className: `${size.actionButton} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
+            className: `va-primary-button ${size.actionButton} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
             children: "التفاصيل"
           }),
           !showDeleted && jsx("button", {
@@ -387,7 +387,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
   const size = ARCHIVE_TABLE_SIZE[itemSize] || ARCHIVE_TABLE_SIZE.comfortable;
 
   return jsx("div", {
-    className: "overflow-hidden rounded-2xl border border-white/10 bg-gray-900/45",
+    className: "va-card overflow-hidden rounded-2xl border border-white/10 bg-gray-900/45",
     dir: "rtl",
     children: jsx("div", {
       className: "overflow-x-auto",
@@ -432,7 +432,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   children: item.tags?.length ? jsx("div", {
                     className: "flex flex-wrap gap-1.5",
                     children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
-                      className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+                      className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
                       children: tag
                     }, tag))
                   }) : jsx("span", { className: "text-gray-600", children: "—" })
@@ -443,7 +443,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   children: jsxs("div", {
                     className: "flex flex-wrap gap-2",
                     children: [
-                      jsx("button", { type: "button", onClick: () => onOpen(item), className: `rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600 ${size.actionButton}`, children: "فتح" }),
+                      jsx("button", { type: "button", onClick: () => onOpen(item), className: `va-primary-button rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600 ${size.actionButton}`, children: "فتح" }),
                       !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: `rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 ${size.actionButton}`, children: item.isFavorite ? "إزالة" : "مفضلة" }),
                       showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: `rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10 ${size.actionButton}`, children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: `rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10 ${size.actionButton}`, children: "حذف" })
                     ]
@@ -461,7 +461,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
 export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
   if (!item) {
     return jsxs("aside", {
-      className: "rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-5 text-center text-gray-500 xl:sticky xl:top-4",
+      className: "va-preview-panel rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-5 text-center text-gray-500 xl:sticky xl:top-4",
       children: [
         jsx(Video, { className: "mx-auto h-10 w-10" }),
         jsx("p", { className: "mt-3 text-sm font-medium text-gray-300", children: "اختر بطاقة للمعاينة" }),
@@ -472,7 +472,7 @@ export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
 
   const source = getHtml5VideoPreviewSource(item.path || item.filePath || item.url || "");
   return jsxs("aside", {
-    className: "h-fit rounded-2xl border border-white/10 bg-gray-900/55 p-4 text-right backdrop-blur-sm xl:sticky xl:top-4",
+    className: "va-preview-panel h-fit rounded-2xl border border-white/10 bg-gray-900/55 p-4 text-right backdrop-blur-sm xl:sticky xl:top-4",
     dir: "rtl",
     children: [
       jsx("div", {
@@ -493,14 +493,14 @@ export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
       item.tags?.length > 0 && jsxs("div", {
         className: "mt-4 flex flex-wrap gap-1.5",
         children: item.tags.map((tag) => jsx("span", {
-          className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+          className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
           children: tag
         }, tag))
       }),
       jsx("button", {
         type: "button",
         onClick: onOpen,
-        className: "mt-4 w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+        className: "va-primary-button mt-4 w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
         children: "فتح صفحة التفاصيل"
       })
     ]
