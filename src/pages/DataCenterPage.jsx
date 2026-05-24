@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-import { XLSX as legacyXlsx } from "../vendor/xlsx.js";
+import { XLSX } from "../vendor/xlsx.js";
 import {
   dbGetAll,
   STORES
@@ -24,7 +24,7 @@ import {
 import {
   importNormalizedPayload,
   normalizeBackupData
-} from "../services/data-portability/legacyOperations.js";
+} from "../services/data-portability/normalizedImport.js";
 import {
   runOperationPreflight
 } from "../services/health/index.js";
@@ -360,11 +360,11 @@ export function DataCenterPage() {
         downloadArchiveBlob(new Blob([json], { type: "application/json;charset=utf-8" }), makeFileName("video-archive-export", "json"));
         setOperationMessage("تم تنزيل ملف JSON بنجاح.");
       } else if (kind === "excel") {
-        const { workbook, checksum } = createArchiveExcelWorkbook(legacyXlsx, {
+        const { workbook, checksum } = createArchiveExcelWorkbook(XLSX, {
           ...useAppStore.getState(),
           ...exportPayload
         });
-        legacyXlsx.writeFile(workbook, makeFileName("video-archive-report", "xlsx"));
+        XLSX.writeFile(workbook, makeFileName("video-archive-report", "xlsx"));
         setOperationMessage(`تم إنشاء ملف Excel متعدد الأوراق. checksum ${checksum}`);
       } else if (kind === "csv") {
         const csvFiles = createArchiveCsvExportFiles(exportPayload);
@@ -402,7 +402,7 @@ export function DataCenterPage() {
     setOperationMessage("");
     try {
       const parsed = await readArchiveImportFile(file, {
-        loadXlsx: async () => legacyXlsx,
+        loadXlsx: async () => XLSX,
         normalizePayload: normalizeBackupData
       });
       if (!parsed.valid) {

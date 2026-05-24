@@ -67,8 +67,8 @@ export function readTransferPackage(text, options = {}) {
     package: parsed.packageType === TRANSFER_PACKAGE_TYPE
       ? { ...parsed, payload }
       : createTransferPackage(
-        typeof options.createLegacyPackageState === "function"
-          ? options.createLegacyPackageState(payload, rawPayload)
+        typeof options.createFallbackPackageState === "function"
+          ? options.createFallbackPackageState(payload, rawPayload)
           : payload,
         "ملف قديم"
       ),

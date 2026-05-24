@@ -36,7 +36,7 @@ export async function runOperationPreflight(kind = "operation", payloadSummary =
   checks.push(createOperationSizeCheck(payloadSummary, { formatFileSize }));
   checks.push(createSqliteReadinessCheck({
     sqliteReady: false,
-    sqliteError: "SQLite يعمل عبر طبقة التطبيق عند توفره، وسيتم الاعتماد على IndexedDB لهذه العملية."
+    sqliteError: "SQLite غير مفعّل في هذه النسخة، التخزين المحلي يعمل عبر IndexedDB لهذه العملية."
   }));
 
   const errors = checks.filter((check) => check.status === "error");

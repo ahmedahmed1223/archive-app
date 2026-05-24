@@ -10,7 +10,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import {
   APP_ICON_REGISTRY,
   ICON_PICKER_EMOJIS,
-  getLegacyIconFromSpec,
+  getFallbackIconFromSpec,
   normalizeIconSpec,
   renderArchiveIcon
 } from "../icons/index.js";
@@ -31,7 +31,7 @@ export function IconPicker({
   fallbackIcon = "📁",
   color = "#10b981",
   onChange,
-  onLegacyIconChange,
+  onFallbackIconChange,
   inputId = "archive-icon-picker",
   title = "الأيقونة"
 }) {
@@ -53,10 +53,10 @@ export function IconPicker({
     updateSettings?.({ ui: { ...(settings.ui || {}), iconPickerLastTab: tab } });
   };
 
-  const applySpec = (spec, legacyFallback = fallbackIcon) => {
-    const nextSpec = normalizeIconSpec(spec, legacyFallback);
+  const applySpec = (spec, nextFallbackIcon = fallbackIcon) => {
+    const nextSpec = normalizeIconSpec(spec, nextFallbackIcon);
     onChange?.(nextSpec);
-    onLegacyIconChange?.(getLegacyIconFromSpec(nextSpec, legacyFallback));
+    onFallbackIconChange?.(getFallbackIconFromSpec(nextSpec, nextFallbackIcon));
   };
 
   const visibleBuiltinIcons = APP_ICON_REGISTRY.filter((item) => {

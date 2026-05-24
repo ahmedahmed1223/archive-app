@@ -534,12 +534,12 @@ run("navigation view model", () => {
   assert.equal(getPrimaryPageAction("backup").dataTab, "import");
 });
 
-run("page migration wrappers", () => {
+run("page migration native status", () => {
   const status = getPageMigrationStatus();
   const summary = getPageMigrationSummary(status);
   assert.equal(summary.total, 15);
   assert.equal(summary.native, 15);
-  assert.equal(summary.legacyWrapped, 0);
+  assert.equal(summary.wrappedPages, 0);
   assert.equal(status.find((page) => page.id === "archive")?.status, "native");
   assert.equal(status.find((page) => page.id === "dashboard")?.status, "native");
   assert.equal(status.find((page) => page.id === "backup")?.status, "native");
@@ -821,4 +821,152 @@ run("theme accent tokens", () => {
   });
   assert.equal(tokens.accent, "#f43f5e");
   assert.deepEqual(writes[0], ["--app-accent", "#f43f5e"]);
+});
+
+function createRequest(result) {
+  const request = { result, error: null, onsuccess: null, onerror: null };
+  queueMicrotask(() => request.onsuccess?.());
+  return request;
+}
+
+function createFakeIndexedDB() {
+  const stores = new Map();
+  const keyPaths = new Map();
+
+  const db = {
+    objectStoreNames: {
+      contains: (name) => stores.has(name)
+    },
+    createObjectStore: (name, options = {}) => {
+      if (!stores.has(name)) stores.set(name, new Map());
+      keyPaths.set(name, options.keyPath || "id");
+      return stores.get(name);
+    },
+    transaction: (storeNames) => {
+      const tx = {
+        error: null,
+        oncomplete: null,
+        onerror: null,
+        onabort: null,
+        objectStore: (storeName) => {
+          if (!stores.has(storeName)) {
+            stores.set(storeName, new Map());
+            keyPaths.set(storeName, "id");
+          }
+          const store = stores.get(storeName);
+          const keyPath = keyPaths.get(storeName) || "id";
+          const complete = () => queueMicrotask(() => tx.oncomplete?.());
+          return {
+            get: (key) => createRequest(store.get(key)),
+            getAll: () => createRequest([...store.values()]),
+            put: (record) => {
+              store.set(record?.[keyPath], record);
+              complete();
+              return createRequest(record);
+            },
+            add: (record) => {
+              store.set(record?.[keyPath], record);
+              complete();
+              return createRequest(record);
+            },
+            delete: (key) => {
+              store.delete(key);
+              complete();
+              return createRequest(undefined);
+            },
+            clear: () => {
+              store.clear();
+              complete();
+              return createRequest(undefined);
+            }
+          };
+        }
+      };
+      queueMicrotask(() => tx.oncomplete?.());
+      for (const storeName of Array.isArray(storeNames) ? storeNames : [storeNames]) {
+        if (!stores.has(storeName)) {
+          stores.set(storeName, new Map());
+          keyPaths.set(storeName, storeName === "settings" ? "key" : "id");
+        }
+      }
+      return tx;
+    }
+  };
+
+  return {
+    open: () => {
+      const request = { result: db, error: null, onupgradeneeded: null, onsuccess: null, onerror: null, onblocked: null };
+      queueMicrotask(() => {
+        request.onupgradeneeded?.();
+        request.onsuccess?.();
+      });
+      return request;
+    }
+  };
+}
+
+function installStoreSmokeGlobals() {
+  const storage = new Map();
+  const localStorage = {
+    getItem: (key) => storage.get(key) || null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: (key) => storage.delete(key)
+  };
+  globalThis.indexedDB = createFakeIndexedDB();
+  globalThis.localStorage = localStorage;
+  globalThis.window = {
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+    localStorage,
+    dispatchEvent: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {}
+  };
+}
+
+await runAsync("store action smoke tests", async () => {
+  installStoreSmokeGlobals();
+  const { useAppStore, useAuthStore } = await import("../src/stores/appStore.js");
+  const { importNormalizedPayload } = await import("../src/services/data-portability/normalizedImport.js");
+
+  const store = useAppStore.getState();
+  await store.loadAllData();
+  await store.setMasterPassword("StrongPass123!");
+  assert.equal(useAppStore.getState().isPasswordSet, true);
+  assert.equal(await useAuthStore.getState().login("admin", "StrongPass123!"), true);
+
+  const type = await useAppStore.getState().addContentType({ id: "smoke-type", name: "نوع smoke", fields: [], subtypes: [] });
+  const video = await useAppStore.getState().addVideoItem({ id: "smoke-video", title: "فيديو smoke", type: type.id });
+  const updated = await useAppStore.getState().updateVideoItem({ ...video, title: "فيديو معدل" });
+  assert.equal(updated.title, "فيديو معدل");
+
+  assert.equal(await useAppStore.getState().deleteVideoItem(video.id), true);
+  assert.equal(useAppStore.getState().videoItems.find((item) => item.id === video.id)?.isDeleted, true);
+  assert.equal(await useAppStore.getState().restoreVideoItem(video.id), true);
+  assert.equal(useAppStore.getState().videoItems.find((item) => item.id === video.id)?.isDeleted, false);
+
+  const settings = await useAppStore.getState().updateSettings({ theme: "light", ui: { lastSettingsTab: "security" } });
+  assert.equal(settings.theme, "light");
+  assert.equal(settings.ui.lastSettingsTab, "security");
+
+  const backup = await useAppStore.getState().createBackup("Smoke backup");
+  assert.equal(backup.itemCount, 1);
+
+  const mergeResult = await importNormalizedPayload({
+    contentTypes: [{ id: "smoke-type", name: "نوع smoke", fields: [], subtypes: [] }],
+    videoItems: [{ id: "merge-video", title: "مادة مدمجة", type: "smoke-type" }],
+    settings: { theme: "dark" }
+  }, "merge");
+  assert.equal(mergeResult.success, true);
+  await useAppStore.getState().loadAllData();
+  assert.equal(useAppStore.getState().videoItems.some((item) => item.id === "merge-video"), true);
+
+  const replaceResult = await importNormalizedPayload({
+    contentTypes: [{ id: "replace-type", name: "نوع بديل", fields: [], subtypes: [] }],
+    videoItems: [{ id: "replace-video", title: "مادة بديلة", type: "replace-type" }],
+    settings: { theme: "light" }
+  }, "replace");
+  assert.equal(replaceResult.success, true);
+  await useAppStore.getState().loadAllData();
+  assert.deepEqual(useAppStore.getState().videoItems.map((item) => item.id), ["replace-video"]);
 });

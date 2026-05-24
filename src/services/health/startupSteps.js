@@ -1,7 +1,7 @@
 export const STARTUP_SEQUENCE_STEP_DEFINITIONS = [
   { id: "environment", label: "فحص البيئة المحلية", hint: "نتأكد أن المتصفح يدعم التخزين والعمل المحلي.", icon: "cpu" },
   { id: "indexeddb", label: "تجهيز IndexedDB", hint: "فتح التخزين الأساسي الذي يحتفظ بالأرشيف.", icon: "database" },
-  { id: "data", label: "تحميل بيانات الأرشيف", hint: "تشغيل الترحيلات وتهيئة SQLite وقراءة العناصر.", icon: "drive" },
+  { id: "data", label: "تحميل بيانات الأرشيف", hint: "تشغيل الترحيلات وقراءة العناصر من IndexedDB.", icon: "drive" },
   { id: "admin", label: "تجهيز المدير الأول", hint: "تحديد هل نفتح معالج أول تشغيل أم جلسة يومية.", icon: "user" },
   { id: "filesystem", label: "تهيئة نظام الملفات", hint: "تجهيز حفظ أذونات المجلدات والفهارس المحلية.", icon: "folder" },
   { id: "session", label: "استعادة الجلسة والصلاحيات", hint: "قراءة جلسة المستخدم وتحميل الأدوار.", icon: "key" },

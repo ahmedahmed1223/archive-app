@@ -200,9 +200,9 @@ export async function writeStorageManifest(reason, data = {}) {
   return manifest;
 }
 
-export async function persistEntityAcrossStores(storeName, record, sqliteOperation, options = {}) {
+export async function persistEntityAcrossStores(storeName, record, beforePersist, options = {}) {
   try {
-    await sqliteOperation?.();
+    await beforePersist?.();
   } catch (error) {
     if (!options.allowIndexedDbFallback) throw error;
   }
@@ -217,23 +217,3 @@ export async function persistEntityAcrossStores(storeName, record, sqliteOperati
 export async function withStoreOperation(_context, operation) {
   return operation();
 }
-
-export async function rebuildSQLiteFromNormalizedData() {
-  return false;
-}
-
-export const sqliteDb = {
-  initialized: false,
-  async initialize() {
-    return false;
-  },
-  async save() {
-    return false;
-  },
-  async exportDatabase() {
-    return null;
-  },
-  async importDatabase() {
-    return false;
-  }
-};
