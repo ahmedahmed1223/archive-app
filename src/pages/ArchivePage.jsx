@@ -8,7 +8,6 @@ import {
   Trash2,
   Upload,
   Video,
-  appConfirm,
   legacyJsxRuntime,
   legacyMotion,
   legacyReact,
@@ -17,6 +16,7 @@ import {
   useAppStore,
   writeAppRoute
 } from "../runtime/legacyAdapter.js";
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   createArchiveRouteParams,
   getArchiveActiveFilterCount,

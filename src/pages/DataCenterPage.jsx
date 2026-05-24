@@ -10,7 +10,6 @@ import {
   Trash2,
   TriangleAlert,
   Upload,
-  appConfirm,
   dbGetAll,
   importNormalizedPayload,
   legacyJsxRuntime,
@@ -21,6 +20,7 @@ import {
   STORES,
   useAppStore
 } from "../runtime/legacyAdapter.js";
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   DATA_CENTER_TABS
 } from "../features/data-center/tabs.js";

@@ -1,7 +1,10 @@
 export {
   appAlert,
   appConfirm,
-  appPrompt,
+  appPrompt
+} from "../components/common/ConfirmDialog.js";
+
+export {
   handleAppError,
   normalizeAppError
 } from "../runtime/legacyAdapter.js";

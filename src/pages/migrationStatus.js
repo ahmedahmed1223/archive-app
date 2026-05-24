@@ -1,7 +1,7 @@
 import { PAGE_MANIFEST } from "../app/pageManifest.js";
 
 export const LEGACY_PAGE_MIGRATION = {
-  dashboard: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/DashboardPage.jsx; it still uses legacy React bridge until shared UI primitives are native." },
+  dashboard: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/DashboardPage.jsx; shared UI wrappers have been removed and only runtime bridge primitives remain." },
   archive: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/ArchivePage.jsx with native grid/list/table modes; file import wizard is exposed through a feature adapter while scanner internals remain legacy." },
   add: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/AddVideoPage.jsx with a native multi-step form and localFile metadata support." },
   detail: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/DetailPage.jsx with native preview, editing, custom fields, and history summary." },
@@ -15,7 +15,7 @@ export const LEGACY_PAGE_MIGRATION = {
   htags: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/HierarchicalTagsPage.jsx; tree helpers and # autocomplete paths are now driven by src/features/hierarchical-tags." },
   reports: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/ReportsPage.jsx; export helpers still use legacy SheetJS bridge." },
   users: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/UsersPage.jsx with native role filtering, account status controls, and protected admin handling." },
-  help: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/HelpPage.jsx; it still uses legacy React bridge until shared UI primitives are native." }
+  help: { legacyComponentName: "", status: "native", notes: "Page JSX lives in src/pages/HelpPage.jsx; shared UI wrappers have been removed and only runtime bridge primitives remain." }
 };
 
 export function getPageMigrationStatus() {

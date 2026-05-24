@@ -2,12 +2,9 @@ import { PAGE_COMPONENTS } from "./pageRegistry.js";
 import { getPageContextMeta } from "./pageMeta.js";
 import {
   AppErrorBoundary,
-  AppPageContextBar,
-  AppSidebar,
   CommandPalette,
   DashboardSkeleton,
   ForceChangePasswordDialog,
-  KeyboardShortcutsDialog,
   LockScreen,
   LoginScreen,
   SplashScreen,
@@ -16,7 +13,6 @@ import {
   ToastNotification,
   UndoRedoBar,
   V1ProductTour,
-  appConfirm,
   createStartupProgressState,
   handleAppError,
   legacyJsxRuntime,
@@ -32,6 +28,12 @@ import {
   useSessionStore,
   useTheme
 } from "../runtime/legacyAdapter.js";
+import { KeyboardShortcutsDialog } from "../components/common/KeyboardShortcutsDialog.jsx";
+import { appConfirm } from "../components/common/ConfirmDialog.js";
+import {
+  PageContextBar as AppPageContextBar,
+  Sidebar as AppSidebar
+} from "../components/navigation/index.js";
 import { getGlobalShortcutAction } from "../stores/globalShortcuts.js";
 import { applyAccentColor } from "../theme/accentColor.js";
 import {
