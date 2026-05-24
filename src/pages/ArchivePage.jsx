@@ -1,21 +1,26 @@
 import {
+  parseAppRoute,
+  writeAppRoute
+} from "../services/router/index.js";
+import {
+  useAppStore
+} from "../stores/index.js";
+import {
   Archive,
   FolderOpen,
+  LayoutGrid,
   RefreshCw,
   RotateCcw,
   Search,
   Tags,
   Trash2,
   Upload,
-  Video,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  LayoutGrid,
-  parseAppRoute,
-  useAppStore,
-  writeAppRoute
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   createArchiveRouteParams,
@@ -39,8 +44,6 @@ import {
   formatNumber
 } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 const ARCHIVE_ITEM_SIZE_OPTIONS = [
   { value: "compact", label: "صغير" },
@@ -557,29 +560,29 @@ export function ArchivePage() {
     showToast
   } = useAppStore();
 
-  const initialRouteState = legacyReact.useMemo(() => parseArchiveRouteParams(parseAppRoute().params), []);
-  const [localSearch, setLocalSearch] = legacyReact.useState(initialRouteState.searchQuery || searchQuery || "");
-  const [sortField, setSortField] = legacyReact.useState(initialRouteState.sortField || "updatedAt");
-  const [sortDirection, setSortDirection] = legacyReact.useState(initialRouteState.sortDirection || "desc");
-  const [showDeleted, setShowDeleted] = legacyReact.useState(initialRouteState.showDeleted || false);
-  const [showFavoritesOnly, setShowFavoritesOnly] = legacyReact.useState(initialRouteState.showFavoritesOnly || false);
-  const [page, setPage] = legacyReact.useState(initialRouteState.page || 1);
-  const [pageSize, setPageSize] = legacyReact.useState(initialRouteState.pageSize || 24);
-  const [itemSize, setItemSize] = legacyReact.useState(initialRouteState.itemSize || "comfortable");
-  const [previewId, setPreviewId] = legacyReact.useState(null);
-  const [showFileImportWizard, setShowFileImportWizard] = legacyReact.useState(initialRouteState.openImport || false);
+  const initialRouteState = React.useMemo(() => parseArchiveRouteParams(parseAppRoute().params), []);
+  const [localSearch, setLocalSearch] = React.useState(initialRouteState.searchQuery || searchQuery || "");
+  const [sortField, setSortField] = React.useState(initialRouteState.sortField || "updatedAt");
+  const [sortDirection, setSortDirection] = React.useState(initialRouteState.sortDirection || "desc");
+  const [showDeleted, setShowDeleted] = React.useState(initialRouteState.showDeleted || false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(initialRouteState.showFavoritesOnly || false);
+  const [page, setPage] = React.useState(initialRouteState.page || 1);
+  const [pageSize, setPageSize] = React.useState(initialRouteState.pageSize || 24);
+  const [itemSize, setItemSize] = React.useState(initialRouteState.itemSize || "comfortable");
+  const [previewId, setPreviewId] = React.useState(null);
+  const [showFileImportWizard, setShowFileImportWizard] = React.useState(initialRouteState.openImport || false);
   const activeViewMode = normalizeArchiveViewMode(viewMode || initialRouteState.viewMode || settings.defaultView || "grid");
   const activePageSize = normalizeArchivePageSize(pageSize);
   const activeItemSize = normalizeArchiveItemSize(itemSize);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (initialRouteState.searchQuery) setSearchQuery?.(initialRouteState.searchQuery);
     if (initialRouteState.filterType && initialRouteState.filterType !== filterType) setFilterType?.(initialRouteState.filterType);
     if (initialRouteState.filterSubtype && initialRouteState.filterSubtype !== filterSubtype) setFilterSubtype?.(initialRouteState.filterSubtype);
     if (initialRouteState.viewMode && initialRouteState.viewMode !== viewMode) setViewMode?.(initialRouteState.viewMode);
   }, []);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const applyRouteFlags = () => {
       const nextRouteState = parseArchiveRouteParams(parseAppRoute().params);
       if (nextRouteState.openImport) setShowFileImportWizard(true);
@@ -596,7 +599,7 @@ export function ArchivePage() {
     };
   }, [activeItemSize, activePageSize, page, setViewMode, viewMode]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const handle = window.setTimeout(() => {
       setSearchQuery?.(localSearch);
       if (localSearch.trim()) addRecentSearch?.(localSearch.trim());
@@ -604,7 +607,7 @@ export function ArchivePage() {
     return () => window.clearTimeout(handle);
   }, [addRecentSearch, localSearch, setSearchQuery]);
 
-  const filteredItems = legacyReact.useMemo(() => getFilteredArchiveItems({
+  const filteredItems = React.useMemo(() => getFilteredArchiveItems({
     videoItems,
     filterType,
     filterSubtype,
@@ -619,7 +622,7 @@ export function ArchivePage() {
   const currentPage = Math.min(normalizeArchivePage(page), totalPages);
   const visibleItems = filteredItems.slice((currentPage - 1) * activePageSize, currentPage * activePageSize);
   const rangeText = getArchiveResultRangeText({ total: filteredItems.length, page: currentPage, itemsPerPage: activePageSize });
-  const initialFilterHydrationSkips = legacyReact.useRef(
+  const initialFilterHydrationSkips = React.useRef(
     initialRouteState.page > 1
     || initialRouteState.searchQuery
     || initialRouteState.filterType !== "all"
@@ -631,9 +634,9 @@ export function ArchivePage() {
       ? 2
       : 1
   );
-  const resetPageAfterFilterChange = legacyReact.useRef(0);
+  const resetPageAfterFilterChange = React.useRef(0);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     resetPageAfterFilterChange.current += 1;
     if (resetPageAfterFilterChange.current <= initialFilterHydrationSkips.current) {
       return;
@@ -641,11 +644,11 @@ export function ArchivePage() {
     setPage(1);
   }, [activePageSize, filterType, filterSubtype, localSearch, showDeleted, showFavoritesOnly, sortDirection, sortField]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (page !== currentPage) setPage(currentPage);
   }, [currentPage, page]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const params = createArchiveRouteParams({
       searchQuery: localSearch,
       filterType,
@@ -663,7 +666,7 @@ export function ArchivePage() {
     writeAppRoute("archive", { params }, settings, true);
   }, [activeItemSize, activePageSize, activeViewMode, currentPage, filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
 
-  const typeById = legacyReact.useMemo(() => new Map(contentTypes.map((type) => [type.id, type])), [contentTypes]);
+  const typeById = React.useMemo(() => new Map(contentTypes.map((type) => [type.id, type])), [contentTypes]);
   const activeType = typeById.get(filterType);
   const subtypes = activeType?.subtypes || [];
   const previewItem = filteredItems.find((item) => item.id === previewId) || visibleItems[0] || null;

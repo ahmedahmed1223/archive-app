@@ -1,16 +1,19 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   FolderOpen,
   PenLine,
   Plus,
   Search,
   Sparkles,
   Trash2,
-  Video,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   COLLECTION_COLORS,
   createVirtualCollectionValue,
@@ -21,14 +24,12 @@ import {
 } from "../features/collections/viewModel.js";
 import { formatDateTime, formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 function CollectionForm({ collection, onCancel, onSave }) {
-  const [name, setName] = legacyReact.useState(collection?.name || "");
-  const [description, setDescription] = legacyReact.useState(collection?.description || "");
-  const [icon, setIcon] = legacyReact.useState(collection?.icon || "📁");
-  const [color, setColor] = legacyReact.useState(collection?.color || "#10b981");
+  const [name, setName] = React.useState(collection?.name || "");
+  const [description, setDescription] = React.useState(collection?.description || "");
+  const [icon, setIcon] = React.useState(collection?.icon || "📁");
+  const [color, setColor] = React.useState(collection?.color || "#10b981");
 
   const save = () => {
     if (!name.trim()) return;
@@ -109,9 +110,9 @@ function CollectionCard({ collection, itemCount, active, index, onOpen, onEdit, 
 }
 
 function CollectionDetails({ collection, items, availableItems, onAddItems, onRemoveItem, onOpenItem }) {
-  const [selectedIds, setSelectedIds] = legacyReact.useState([]);
+  const [selectedIds, setSelectedIds] = React.useState([]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     setSelectedIds([]);
   }, [collection?.id]);
 
@@ -192,18 +193,18 @@ export function CollectionsPage() {
     showToast
   } = useAppStore();
 
-  const [query, setQuery] = legacyReact.useState("");
-  const [selectedCollectionId, setSelectedCollectionId] = legacyReact.useState(virtualCollections[0]?.id || null);
-  const [editingCollection, setEditingCollection] = legacyReact.useState(null);
-  const [showForm, setShowForm] = legacyReact.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [selectedCollectionId, setSelectedCollectionId] = React.useState(virtualCollections[0]?.id || null);
+  const [editingCollection, setEditingCollection] = React.useState(null);
+  const [showForm, setShowForm] = React.useState(false);
 
-  const filteredCollections = legacyReact.useMemo(() => getFilteredCollections(virtualCollections, query), [query, virtualCollections]);
+  const filteredCollections = React.useMemo(() => getFilteredCollections(virtualCollections, query), [query, virtualCollections]);
   const selectedCollection = virtualCollections.find((collection) => collection.id === selectedCollectionId) || filteredCollections[0] || null;
-  const selectedItems = legacyReact.useMemo(() => resolveCollectionItems(selectedCollection, videoItems), [selectedCollection, videoItems]);
-  const availableItems = legacyReact.useMemo(() => getAvailableCollectionItems(selectedCollection, videoItems), [selectedCollection, videoItems]);
-  const summary = legacyReact.useMemo(() => getCollectionSummary(virtualCollections, videoItems), [videoItems, virtualCollections]);
+  const selectedItems = React.useMemo(() => resolveCollectionItems(selectedCollection, videoItems), [selectedCollection, videoItems]);
+  const availableItems = React.useMemo(() => getAvailableCollectionItems(selectedCollection, videoItems), [selectedCollection, videoItems]);
+  const summary = React.useMemo(() => getCollectionSummary(virtualCollections, videoItems), [videoItems, virtualCollections]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (selectedCollectionId && virtualCollections.some((collection) => collection.id === selectedCollectionId)) return;
     setSelectedCollectionId(filteredCollections[0]?.id || null);
   }, [filteredCollections, selectedCollectionId, virtualCollections]);

@@ -1,4 +1,15 @@
 import {
+  useTheme
+} from "../theme/useTheme.js";
+import {
+  formatDateTime,
+  formatNumber
+} from "../utils/formatting.js";
+import {
+  useAppStore,
+  useAuthStore
+} from "../stores/index.js";
+import {
   Archive,
   Bell,
   CircleQuestionMark,
@@ -14,16 +25,12 @@ import {
   Tags,
   TriangleAlert,
   Users,
-  Video,
-  formatDateTime,
-  formatNumber,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore,
-  useAuthStore,
-  useTheme
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   SETTINGS_TABS
 } from "../features/settings/settingsTabs.js";
@@ -44,9 +51,6 @@ import {
   getDefaultSettings,
   mergeAppSettings
 } from "../utils/settings.js";
-
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 const THEME_OPTIONS = [
   { value: "dark", label: "ليلي حبري", detail: "Ink Slate للعمل الطويل" },
@@ -272,9 +276,9 @@ function SettingsTabs({ activeTab, onTabChange }) {
 }
 
 function ShortcutManager({ settings, onSave, showToast }) {
-  const effectiveShortcuts = legacyReact.useMemo(() => getEffectiveKeyboardShortcuts(settings), [settings]);
-  const shortcutConflicts = legacyReact.useMemo(() => getShortcutConflictDetails(effectiveShortcuts), [effectiveShortcuts]);
-  const categories = legacyReact.useMemo(() => [...new Set(SHORTCUT_ACTIONS.map((action) => action.category))], []);
+  const effectiveShortcuts = React.useMemo(() => getEffectiveKeyboardShortcuts(settings), [settings]);
+  const shortcutConflicts = React.useMemo(() => getShortcutConflictDetails(effectiveShortcuts), [effectiveShortcuts]);
+  const categories = React.useMemo(() => [...new Set(SHORTCUT_ACTIONS.map((action) => action.category))], []);
 
   const updateShortcut = (action, value) => {
     const conflict = findShortcutConflict(effectiveShortcuts, action.id, value);
@@ -374,17 +378,17 @@ export function SettingsPage() {
   } = useAppStore();
   const authStore = useAuthStore();
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const settings = legacyReact.useMemo(() => mergeAppSettings(getDefaultSettings(), rawSettings), [rawSettings]);
-  const [activeTab, setActiveTabState] = legacyReact.useState(normalizeSettingsTab(settings.ui?.lastSettingsTab || "general"));
-  const [oldPassword, setOldPassword] = legacyReact.useState("");
-  const [newPassword, setNewPassword] = legacyReact.useState("");
-  const [confirmPassword, setConfirmPassword] = legacyReact.useState("");
-  const [passwordError, setPasswordError] = legacyReact.useState("");
-  const [healthRunning, setHealthRunning] = legacyReact.useState(false);
+  const settings = React.useMemo(() => mergeAppSettings(getDefaultSettings(), rawSettings), [rawSettings]);
+  const [activeTab, setActiveTabState] = React.useState(normalizeSettingsTab(settings.ui?.lastSettingsTab || "general"));
+  const [oldPassword, setOldPassword] = React.useState("");
+  const [newPassword, setNewPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [passwordError, setPasswordError] = React.useState("");
+  const [healthRunning, setHealthRunning] = React.useState(false);
   const tabState = getSettingsTabState(activeTab);
   const isDark = resolvedTheme === "dark";
 
-  const saveSettings = legacyReact.useCallback(async (patch, successMessage) => {
+  const saveSettings = React.useCallback(async (patch, successMessage) => {
     const ok = await updateSettings?.(patch);
     if (ok !== false && successMessage) showToast?.(successMessage, "success");
     return ok;

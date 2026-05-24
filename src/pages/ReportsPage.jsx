@@ -1,4 +1,7 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   ChartColumn,
   Database,
   Download,
@@ -6,12 +9,12 @@ import {
   FolderOpen,
   HardDrive,
   History,
-  Users,
-  legacyJsxRuntime,
-  legacyReact,
-  legacyXlsx,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Users
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { XLSX as legacyXlsx } from "../vendor/xlsx.js";
+
 import {
   downloadArchiveBlob
 } from "../services/data-portability/index.js";
@@ -20,8 +23,6 @@ import {
   formatFileSize,
   formatNumber
 } from "../utils/formatting.js";
-
-const { jsx, jsxs } = legacyJsxRuntime;
 
 function ReportPanel({ children, className = "" }) {
   return jsx("section", {
@@ -121,13 +122,13 @@ export function ReportsPage() {
       deleted: videoItems.filter((item) => item.isDeleted).length
     };
 
-  const typeDistribution = legacyReact.useMemo(() => contentTypes.map((type) => ({
+  const typeDistribution = React.useMemo(() => contentTypes.map((type) => ({
     id: type.id,
     label: type.name || type.id,
     value: activeItems.filter((item) => item.type === type.id).length
   })).filter((item) => item.value > 0).sort((a, b) => b.value - a.value), [activeItems, contentTypes]);
 
-  const monthlyDistribution = legacyReact.useMemo(() => {
+  const monthlyDistribution = React.useMemo(() => {
     const counts = new Map();
     activeItems.forEach((item) => {
       const date = new Date(item.createdAt || item.updatedAt || Date.now());
@@ -137,7 +138,7 @@ export function ReportsPage() {
     return Array.from(counts.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-12).map(([label, value]) => ({ id: label, label, value }));
   }, [activeItems]);
 
-  const recentLogs = legacyReact.useMemo(() => auditLogs
+  const recentLogs = React.useMemo(() => auditLogs
     .slice()
     .sort((a, b) => new Date(b.timestamp || b.createdAt || 0).getTime() - new Date(a.timestamp || a.createdAt || 0).getTime())
     .slice(0, 8), [auditLogs]);

@@ -6,4 +6,4 @@ export {
 
 export {
   cn
-} from "../runtime/legacyAdapter.js";
+} from "./classNames.js";

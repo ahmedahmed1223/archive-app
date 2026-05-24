@@ -1,13 +1,15 @@
 import {
-  BookOpen,
-  Hash,
-  legacyJsxRuntime,
-  legacyReact,
   useAppStore
-} from "../../runtime/legacyAdapter.js";
+} from "../../stores/index.js";
+import {
+  BookOpen,
+  Hash
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+
 import { normalizeArabicSearchText } from "../../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
 
 const categoryLabels = {
   people: "أشخاص",
@@ -129,15 +131,15 @@ export function TagAutocomplete({
   ...props
 }) {
   const { vocabulary, hierarchicalTags, videoItems, settings } = useAppStore();
-  const [match, setMatch] = legacyReact.useState(null);
-  const [highlightedIndex, setHighlightedIndex] = legacyReact.useState(0);
-  const inputRef = legacyReact.useRef(null);
-  const triggers = legacyReact.useMemo(() => ({
+  const [match, setMatch] = React.useState(null);
+  const [highlightedIndex, setHighlightedIndex] = React.useState(0);
+  const inputRef = React.useRef(null);
+  const triggers = React.useMemo(() => ({
     vocabulary: getAutocompleteTrigger(settings, "vocabulary", "@"),
     tags: getAutocompleteTrigger(settings, "tags", "#")
   }), [settings]);
 
-  const suggestions = legacyReact.useMemo(() => createSuggestions({
+  const suggestions = React.useMemo(() => createSuggestions({
     match,
     allowed,
     vocabulary,
@@ -145,7 +147,7 @@ export function TagAutocomplete({
     videoItems
   }), [match, allowed, vocabulary, hierarchicalTags, videoItems]);
 
-  const groupedSuggestions = legacyReact.useMemo(() => {
+  const groupedSuggestions = React.useMemo(() => {
     const groups = [];
     suggestions.forEach((suggestion) => {
       let group = groups.find((entry) => entry.label === suggestion.group);
@@ -158,7 +160,7 @@ export function TagAutocomplete({
     return groups;
   }, [suggestions]);
 
-  const updateMatch = legacyReact.useCallback((text, caret) => {
+  const updateMatch = React.useCallback((text, caret) => {
     setMatch(getAutocompleteMatch(text, caret, triggers));
     setHighlightedIndex(0);
   }, [triggers]);

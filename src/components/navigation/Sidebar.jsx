@@ -1,4 +1,11 @@
 import {
+  useTheme
+} from "../../theme/useTheme.js";
+import {
+  useAppStore,
+  useAuthStore
+} from "../../stores/index.js";
+import {
   Archive,
   Bell,
   BookOpen,
@@ -15,16 +22,13 @@ import {
   Shield,
   Tag,
   Users,
-  Video,
-  legacyJsxRuntime,
-  legacyReact,
-  useAppStore,
-  useAuthStore,
-  useTheme
-} from "../../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+
 import { getSidebarNavigationGroups } from "./viewModel.js";
 
-const { Fragment, jsx, jsxs } = legacyJsxRuntime;
 
 const iconMap = {
   dashboard: LayoutGrid,
@@ -44,8 +48,8 @@ const iconMap = {
 };
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = legacyReact.useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
-  legacyReact.useEffect(() => {
+  const [isMobile, setIsMobile] = React.useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
+  React.useEffect(() => {
     if (typeof window === "undefined") return undefined;
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -105,7 +109,7 @@ export function Sidebar() {
   } = useAppStore();
   const { currentUser, logout } = useAuthStore();
   const { resolvedTheme } = useTheme();
-  const [collapsed, setCollapsed] = legacyReact.useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
   const isMobile = useIsMobile();
   const isDark = resolvedTheme === "dark";
   const activeCount = videoItems.filter((item) => !item.isDeleted).length;

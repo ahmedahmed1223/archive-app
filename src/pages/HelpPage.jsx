@@ -1,4 +1,11 @@
 import {
+  parseAppRoute,
+  writeAppRoute
+} from "../services/router/index.js";
+import {
+  useAppStore
+} from "../stores/index.js";
+import {
   ArrowUp,
   Bell,
   BookOpen,
@@ -20,13 +27,11 @@ import {
   Tags,
   Upload,
   Users,
-  Video,
-  legacyJsxRuntime,
-  legacyReact,
-  parseAppRoute,
-  useAppStore,
-  writeAppRoute
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+
 import {
   HELP_FAQ_ITEMS,
   HELP_QUICK_SECTION_LINKS
@@ -42,8 +47,6 @@ import {
   SHORTCUT_DISABLED,
   getEffectiveKeyboardShortcuts
 } from "../features/settings/keyboardShortcuts.js";
-
-const { Fragment, jsx, jsxs } = legacyJsxRuntime;
 
 function HelpPanel({ title, children, icon = null, className = "" }) {
   return jsxs("section", {
@@ -366,16 +369,16 @@ function createHelpSections(keyboardShortcuts) {
 
 export function HelpPage() {
   const { settings, updateSettings } = useAppStore();
-  const [activeSection, setActiveSection] = legacyReact.useState(settings.ui?.lastHelpSection || "getting-started");
-  const [helpQuery, setHelpQuery] = legacyReact.useState("");
-  const contentRef = legacyReact.useRef(null);
+  const [activeSection, setActiveSection] = React.useState(settings.ui?.lastHelpSection || "getting-started");
+  const [helpQuery, setHelpQuery] = React.useState("");
+  const contentRef = React.useRef(null);
   const effectiveShortcuts = getEffectiveKeyboardShortcuts(settings);
   const keyboardShortcuts = createHelpShortcutList(SHORTCUT_ACTIONS, effectiveShortcuts, SHORTCUT_DISABLED);
-  const sections = legacyReact.useMemo(() => createHelpSections(keyboardShortcuts), [settings.keyboardShortcuts]);
-  const filteredSections = legacyReact.useMemo(() => filterHelpSections(sections, helpQuery), [sections, helpQuery]);
-  const filteredFaqItems = legacyReact.useMemo(() => filterHelpFaqItems(HELP_FAQ_ITEMS, helpQuery), [helpQuery]);
+  const sections = React.useMemo(() => createHelpSections(keyboardShortcuts), [settings.keyboardShortcuts]);
+  const filteredSections = React.useMemo(() => filterHelpSections(sections, helpQuery), [sections, helpQuery]);
+  const filteredFaqItems = React.useMemo(() => filterHelpFaqItems(HELP_FAQ_ITEMS, helpQuery), [helpQuery]);
 
-  const scrollToSection = legacyReact.useCallback((sectionId, options = {}) => {
+  const scrollToSection = React.useCallback((sectionId, options = {}) => {
     const normalizedSectionId = normalizeHelpSectionId(sectionId);
     setActiveSection(normalizedSectionId);
     updateSettings({ ui: { ...(settings.ui || {}), lastHelpSection: normalizedSectionId } });
@@ -388,7 +391,7 @@ export function HelpPage() {
     }
   }, [settings, updateSettings]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const applyHelpSectionFromRoute = () => {
       const route = parseAppRoute();
       if (route.page !== "help") return;

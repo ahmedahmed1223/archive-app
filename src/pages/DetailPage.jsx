@@ -1,15 +1,18 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   FileText,
   PenLine,
   RefreshCw,
   Tags,
   Trash2,
-  Video,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
@@ -25,8 +28,6 @@ import {
 } from "../features/videos/viewModel.js";
 import { formatDateTime, formatFileSize, formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 function fieldKey(field) {
   return field.storageKey || field.name || field.id;
@@ -80,10 +81,10 @@ export function DetailPage() {
   } = useAppStore();
 
   const item = videoItems.find((video) => video.id === selectedItemId) || null;
-  const [editing, setEditing] = legacyReact.useState(false);
-  const [draft, setDraft] = legacyReact.useState(null);
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(null);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     setDraft(item ? {
       ...item,
       tagsText: (item.tags || []).join("، "),
@@ -92,10 +93,10 @@ export function DetailPage() {
     setEditing(false);
   }, [item?.id]);
 
-  const fields = legacyReact.useMemo(() => item ? getFieldsForSelection(contentTypes, draft?.type || item.type, draft?.subtype || item.subtype) : [], [contentTypes, draft?.subtype, draft?.type, item]);
+  const fields = React.useMemo(() => item ? getFieldsForSelection(contentTypes, draft?.type || item.type, draft?.subtype || item.subtype) : [], [contentTypes, draft?.subtype, draft?.type, item]);
   const selectedType = contentTypes.find((type) => type.id === (draft?.type || item?.type));
   const subtypes = selectedType?.subtypes || [];
-  const history = legacyReact.useMemo(() => item ? changeHistory.filter((record) => record.itemId === item.id).sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()).slice(0, 10) : [], [changeHistory, item]);
+  const history = React.useMemo(() => item ? changeHistory.filter((record) => record.itemId === item.id).sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()).slice(0, 10) : [], [changeHistory, item]);
   const previewSource = item?.path && isHtml5PreviewableVideo(item.path) ? getHtml5VideoPreviewSource(item.path) : null;
 
   if (!item) {

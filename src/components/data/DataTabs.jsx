@@ -3,11 +3,11 @@ import {
   Download,
   HardDrive,
   RefreshCw,
-  Upload,
-  legacyJsxRuntime
-} from "../../runtime/legacyAdapter.js";
+  Upload
+} from "lucide-react";
+import { jsx, jsxs } from "react/jsx-runtime";
 
-const { jsx, jsxs } = legacyJsxRuntime;
+
 
 const iconMap = {
   export: Download,

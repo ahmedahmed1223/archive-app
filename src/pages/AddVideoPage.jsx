@@ -1,13 +1,16 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   Database,
   FileText,
   Tags,
-  Video,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import { getFieldsForSelection } from "../features/types/viewModel.js";
 import {
   createLocalFileValue,
@@ -15,8 +18,6 @@ import {
   parseVideoTags
 } from "../features/videos/viewModel.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 const STEPS = [
   { id: "basic", label: "الأساسيات", icon: Video },
@@ -69,23 +70,23 @@ export function AddVideoPage() {
   } = useAppStore();
 
   const firstType = contentTypes.find((type) => type.status !== "archived") || contentTypes[0];
-  const [stepIndex, setStepIndex] = legacyReact.useState(0);
-  const [title, setTitle] = legacyReact.useState("");
-  const [path, setPath] = legacyReact.useState("");
-  const [thumbnail, setThumbnail] = legacyReact.useState("");
-  const [notes, setNotes] = legacyReact.useState("");
-  const [tags, setTags] = legacyReact.useState("");
-  const [typeId, setTypeId] = legacyReact.useState(firstType?.id || "");
-  const [subtypeId, setSubtypeId] = legacyReact.useState("");
-  const [metadata, setMetadata] = legacyReact.useState({});
+  const [stepIndex, setStepIndex] = React.useState(0);
+  const [title, setTitle] = React.useState("");
+  const [path, setPath] = React.useState("");
+  const [thumbnail, setThumbnail] = React.useState("");
+  const [notes, setNotes] = React.useState("");
+  const [tags, setTags] = React.useState("");
+  const [typeId, setTypeId] = React.useState(firstType?.id || "");
+  const [subtypeId, setSubtypeId] = React.useState("");
+  const [metadata, setMetadata] = React.useState({});
 
   const selectedType = contentTypes.find((type) => type.id === typeId);
   const subtypes = selectedType?.subtypes || [];
-  const fields = legacyReact.useMemo(() => getFieldsForSelection(contentTypes, typeId, subtypeId), [contentTypes, subtypeId, typeId]);
+  const fields = React.useMemo(() => getFieldsForSelection(contentTypes, typeId, subtypeId), [contentTypes, subtypeId, typeId]);
   const currentStep = STEPS[stepIndex];
   const canSave = title.trim() && typeId;
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (subtypeId && !subtypes.some((subtype) => subtype.id === subtypeId)) setSubtypeId("");
   }, [subtypeId, subtypes]);
 

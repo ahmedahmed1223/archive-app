@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,6 +22,7 @@ function getFiles(dir, files = []) {
 }
 
 function countLines(path) {
+  if (!existsSync(path)) return 0;
   return readFileSync(path, "utf8").split(/\r?\n/).length;
 }
 

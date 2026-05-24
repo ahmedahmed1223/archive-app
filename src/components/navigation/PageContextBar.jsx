@@ -1,4 +1,10 @@
 import {
+  writeAppRoute
+} from "../../services/router/index.js";
+import {
+  useAppStore
+} from "../../stores/index.js";
+import {
   Archive,
   CirclePlus,
   CircleQuestionMark,
@@ -6,14 +12,12 @@ import {
   HardDrive,
   LayoutGrid,
   Search,
-  Upload,
-  legacyJsxRuntime,
-  useAppStore,
-  writeAppRoute
-} from "../../runtime/legacyAdapter.js";
+  Upload
+} from "lucide-react";
+import { jsx, jsxs } from "react/jsx-runtime";
+
 import { getPageContextBarModel } from "./viewModel.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
 
 function ContextButton({ children, onClick, variant = "secondary" }) {
   const classes = variant === "primary"

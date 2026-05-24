@@ -1,4 +1,7 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
@@ -8,12 +11,12 @@ import {
   PenLine,
   Plus,
   Search,
-  Trash2,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Trash2
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   HIERARCHICAL_TAG_COLORS,
   buildHierarchicalTagModel,
@@ -25,12 +28,10 @@ import {
 } from "../features/hierarchical-tags/viewModel.js";
 import { formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 function TagForm({ tag, parentTag, tags, onCancel, onSave }) {
-  const [name, setName] = legacyReact.useState(tag?.name || "");
-  const [color, setColor] = legacyReact.useState(tag?.color || "#10b981");
+  const [name, setName] = React.useState(tag?.name || "");
+  const [color, setColor] = React.useState(tag?.color || "#10b981");
 
   const save = () => {
     if (!name.trim()) return;
@@ -190,14 +191,14 @@ export function HierarchicalTagsPage() {
     showToast
   } = useAppStore();
 
-  const [query, setQuery] = legacyReact.useState("");
-  const [expandedIds, setExpandedIds] = legacyReact.useState(() => new Set());
-  const [editingTag, setEditingTag] = legacyReact.useState(null);
-  const [parentTag, setParentTag] = legacyReact.useState(null);
-  const [showForm, setShowForm] = legacyReact.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [expandedIds, setExpandedIds] = React.useState(() => new Set());
+  const [editingTag, setEditingTag] = React.useState(null);
+  const [parentTag, setParentTag] = React.useState(null);
+  const [showForm, setShowForm] = React.useState(false);
 
-  const model = legacyReact.useMemo(() => buildHierarchicalTagModel(hierarchicalTags), [hierarchicalTags]);
-  const filteredTags = legacyReact.useMemo(() => getFilteredHierarchicalTags(hierarchicalTags, query), [hierarchicalTags, query]);
+  const model = React.useMemo(() => buildHierarchicalTagModel(hierarchicalTags), [hierarchicalTags]);
+  const filteredTags = React.useMemo(() => getFilteredHierarchicalTags(hierarchicalTags, query), [hierarchicalTags, query]);
 
   const rootCount = model.roots.length;
   const childCount = Math.max(0, hierarchicalTags.length - rootCount);

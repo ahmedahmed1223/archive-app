@@ -5,13 +5,12 @@ import {
   Search,
   Star,
   Trash2,
-  Video,
-  legacyJsxRuntime,
-  legacyMotion
-} from "../../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
+
 
 function getDefaultIcon(type) {
   const iconClassName = "h-16 w-16";

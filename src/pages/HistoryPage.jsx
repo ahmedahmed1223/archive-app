@@ -1,4 +1,11 @@
 import {
+  parseAppRoute,
+  writeAppRoute
+} from "../services/router/index.js";
+import {
+  useAppStore
+} from "../stores/index.js";
+import {
   CirclePlus,
   Clock,
   FileText,
@@ -6,14 +13,12 @@ import {
   PenLine,
   RefreshCw,
   Search,
-  Trash2,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  parseAppRoute,
-  useAppStore,
-  writeAppRoute
-} from "../runtime/legacyAdapter.js";
+  Trash2
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   HISTORY_ACTIONS,
   createHistoryRouteParams,
@@ -27,8 +32,6 @@ import {
 } from "../features/history/viewModel.js";
 import { formatDateTime, formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 const ACTION_ICON = {
   create: CirclePlus,
@@ -161,16 +164,16 @@ export function HistoryPage() {
     showToast
   } = useAppStore();
 
-  const initialRouteState = legacyReact.useMemo(() => parseHistoryRouteParams(parseAppRoute().params), []);
-  const [query, setQuery] = legacyReact.useState(initialRouteState.query);
-  const [action, setAction] = legacyReact.useState(initialRouteState.action);
-  const [page, setPage] = legacyReact.useState(initialRouteState.page);
-  const [pageSize, setPageSize] = legacyReact.useState(initialRouteState.pageSize);
-  const skipPageReset = legacyReact.useRef(true);
+  const initialRouteState = React.useMemo(() => parseHistoryRouteParams(parseAppRoute().params), []);
+  const [query, setQuery] = React.useState(initialRouteState.query);
+  const [action, setAction] = React.useState(initialRouteState.action);
+  const [page, setPage] = React.useState(initialRouteState.page);
+  const [pageSize, setPageSize] = React.useState(initialRouteState.pageSize);
+  const skipPageReset = React.useRef(true);
 
-  const itemTitleById = legacyReact.useMemo(() => new Map(videoItems.map((item) => [item.id, item.title || item.id])), [videoItems]);
-  const counts = legacyReact.useMemo(() => getHistoryActionCounts(changeHistory), [changeHistory]);
-  const filteredRecords = legacyReact.useMemo(() => getFilteredHistoryRecords({
+  const itemTitleById = React.useMemo(() => new Map(videoItems.map((item) => [item.id, item.title || item.id])), [videoItems]);
+  const counts = React.useMemo(() => getHistoryActionCounts(changeHistory), [changeHistory]);
+  const filteredRecords = React.useMemo(() => getFilteredHistoryRecords({
     changeHistory,
     query,
     action,
@@ -181,7 +184,7 @@ export function HistoryPage() {
   const currentPage = Math.min(page, totalPages);
   const visibleRecords = filteredRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const applyRouteState = () => {
       const next = parseHistoryRouteParams(parseAppRoute().params);
       setQuery(next.query);
@@ -197,7 +200,7 @@ export function HistoryPage() {
     };
   }, []);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const handle = window.setTimeout(() => {
       writeAppRoute("history", {
         params: createHistoryRouteParams({ query, action, page: currentPage, pageSize })
@@ -206,7 +209,7 @@ export function HistoryPage() {
     return () => window.clearTimeout(handle);
   }, [action, currentPage, pageSize, query, settings]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (skipPageReset.current) {
       skipPageReset.current = false;
       return;
@@ -214,7 +217,7 @@ export function HistoryPage() {
     setPage(1);
   }, [action, pageSize, query]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (page !== currentPage) setPage(currentPage);
   }, [currentPage, page]);
 

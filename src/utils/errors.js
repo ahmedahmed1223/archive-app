@@ -7,4 +7,4 @@ export {
 export {
   handleAppError,
   normalizeAppError
-} from "../runtime/legacyAdapter.js";
+} from "./errorHandling.js";

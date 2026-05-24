@@ -1,17 +1,22 @@
 import {
+  parseAppRoute,
+  writeAppRoute
+} from "../services/router/index.js";
+import {
+  useAppStore
+} from "../stores/index.js";
+import {
   BookOpen,
   PenLine,
   Plus,
   Search,
   Tag,
-  Trash2,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  parseAppRoute,
-  useAppStore,
-  writeAppRoute
-} from "../runtime/legacyAdapter.js";
+  Trash2
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   VOCABULARY_CATEGORIES,
   createVocabularyEntryValue,
@@ -23,8 +28,6 @@ import {
 } from "../features/vocabulary/viewModel.js";
 import { formatDateTime, formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 function getCategoryInfo(categoryId) {
   return VOCABULARY_CATEGORIES.find((category) => category.id === categoryId) || VOCABULARY_CATEGORIES[VOCABULARY_CATEGORIES.length - 1];
@@ -45,10 +48,10 @@ function CategoryButton({ category, count, active, onClick }) {
 }
 
 function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
-  const [term, setTerm] = legacyReact.useState(entry?.term || "");
-  const [category, setCategory] = legacyReact.useState(entry?.category || (activeCategory === "all" ? "other" : activeCategory));
-  const [description, setDescription] = legacyReact.useState(entry?.description || "");
-  const [aliases, setAliases] = legacyReact.useState((entry?.aliases || []).join("، "));
+  const [term, setTerm] = React.useState(entry?.term || "");
+  const [category, setCategory] = React.useState(entry?.category || (activeCategory === "all" ? "other" : activeCategory));
+  const [description, setDescription] = React.useState(entry?.description || "");
+  const [aliases, setAliases] = React.useState((entry?.aliases || []).join("، "));
 
   const save = () => {
     if (!term.trim()) return;
@@ -175,22 +178,22 @@ export function VocabularyPage() {
     showToast
   } = useAppStore();
 
-  const initialRouteState = legacyReact.useMemo(() => parseVocabularyRouteParams(parseAppRoute().params), []);
-  const [query, setQuery] = legacyReact.useState(initialRouteState.query);
-  const [category, setCategory] = legacyReact.useState(initialRouteState.category);
-  const [page, setPage] = legacyReact.useState(initialRouteState.page);
-  const [pageSize, setPageSize] = legacyReact.useState(initialRouteState.pageSize);
-  const [editingEntry, setEditingEntry] = legacyReact.useState(null);
-  const [showForm, setShowForm] = legacyReact.useState(false);
-  const skipPageReset = legacyReact.useRef(true);
+  const initialRouteState = React.useMemo(() => parseVocabularyRouteParams(parseAppRoute().params), []);
+  const [query, setQuery] = React.useState(initialRouteState.query);
+  const [category, setCategory] = React.useState(initialRouteState.category);
+  const [page, setPage] = React.useState(initialRouteState.page);
+  const [pageSize, setPageSize] = React.useState(initialRouteState.pageSize);
+  const [editingEntry, setEditingEntry] = React.useState(null);
+  const [showForm, setShowForm] = React.useState(false);
+  const skipPageReset = React.useRef(true);
 
-  const counts = legacyReact.useMemo(() => getVocabularyCategoryCounts(vocabulary), [vocabulary]);
-  const filteredEntries = legacyReact.useMemo(() => getFilteredVocabularyEntries({ vocabulary, query, category }), [category, query, vocabulary]);
+  const counts = React.useMemo(() => getVocabularyCategoryCounts(vocabulary), [vocabulary]);
+  const filteredEntries = React.useMemo(() => getFilteredVocabularyEntries({ vocabulary, query, category }), [category, query, vocabulary]);
   const totalPages = Math.max(1, Math.ceil(filteredEntries.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const visibleEntries = filteredEntries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const applyRouteState = () => {
       const next = parseVocabularyRouteParams(parseAppRoute().params);
       setQuery(next.query);
@@ -206,7 +209,7 @@ export function VocabularyPage() {
     };
   }, []);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const handle = window.setTimeout(() => {
       writeAppRoute("vocabulary", {
         params: createVocabularyRouteParams({ query, category, page: currentPage, pageSize })
@@ -215,7 +218,7 @@ export function VocabularyPage() {
     return () => window.clearTimeout(handle);
   }, [category, currentPage, pageSize, query, settings]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (skipPageReset.current) {
       skipPageReset.current = false;
       return;
@@ -223,7 +226,7 @@ export function VocabularyPage() {
     setPage(1);
   }, [category, pageSize, query]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (page !== currentPage) setPage(currentPage);
   }, [currentPage, page]);
 

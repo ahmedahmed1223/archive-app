@@ -1,10 +1,13 @@
 import {
-  Keyboard,
-  Search,
-  legacyJsxRuntime,
-  legacyReact,
   useAppStore
-} from "../../runtime/legacyAdapter.js";
+} from "../../stores/index.js";
+import {
+  Keyboard,
+  Search
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+
 import {
   SHORTCUT_ACTIONS,
   SHORTCUT_DISABLED,
@@ -18,18 +21,17 @@ import {
   getShortcutDialogItemsForCategory
 } from "./shortcutDialogViewModel.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
 const allShortcuts = createShortcutDialogItems(SHORTCUT_ACTIONS);
 
 export function KeyboardShortcutsDialog({ open, onOpenChange }) {
   const { settings, updateSettings } = useAppStore();
-  const [shortcutQuery, setShortcutQuery] = legacyReact.useState(settings.ui?.shortcutDialogQuery || "");
+  const [shortcutQuery, setShortcutQuery] = React.useState(settings.ui?.shortcutDialogQuery || "");
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (open) setShortcutQuery(settings.ui?.shortcutDialogQuery || "");
   }, [open, settings.ui?.shortcutDialogQuery]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (!open) return undefined;
     const handleKeyDown = (event) => {
       if (event.key === "Escape") onOpenChange?.(false);
@@ -38,11 +40,11 @@ export function KeyboardShortcutsDialog({ open, onOpenChange }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, onOpenChange]);
 
-  const effectiveShortcuts = legacyReact.useMemo(() => {
+  const effectiveShortcuts = React.useMemo(() => {
     return getEffectiveKeyboardShortcuts(settings);
   }, [settings]);
 
-  const visibleShortcuts = legacyReact.useMemo(() => {
+  const visibleShortcuts = React.useMemo(() => {
     return filterShortcutDialogItems(allShortcuts, shortcutQuery, effectiveShortcuts);
   }, [shortcutQuery, effectiveShortcuts]);
 

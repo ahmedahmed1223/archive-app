@@ -1,4 +1,24 @@
-import { PAGE_COMPONENTS } from "./pageRegistry.js";
+import {
+  handleAppError,
+  normalizeAppError
+} from "../utils/errorHandling.js";
+import {
+  useTheme
+} from "../theme/useTheme.js";
+import {
+  parseAppRoute
+} from "../services/router/index.js";
+import {
+  useAppStore,
+  useAuthStore,
+  useSessionStore
+} from "../stores/index.js";
+import * as React from "react";
+import { createRoot } from "react-dom/client";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+import {
+  PAGE_COMPONENTS } from "./pageRegistry.js";
 import { getPageContextMeta } from "./pageMeta.js";
 import {
   AppErrorBoundary,
@@ -14,20 +34,9 @@ import {
   UndoRedoBar,
   V1ProductTour,
   createStartupProgressState,
-  handleAppError,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  legacyReactDOM,
-  normalizeAppError,
-  parseAppRoute,
   runStartupSequence,
-  undoRedoManager,
-  useAppStore,
-  useAuthStore,
-  useSessionStore,
-  useTheme
-} from "../runtime/legacyAdapter.js";
+  undoRedoManager
+} from "./shell/ShellParts.jsx";
 import { KeyboardShortcutsDialog } from "../components/common/KeyboardShortcutsDialog.jsx";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
@@ -41,8 +50,6 @@ import {
   shouldShowStartupOnboarding
 } from "../features/onboarding/index.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 export function App() {
   const {
@@ -64,20 +71,20 @@ export function App() {
   const { isAuthenticated, currentUser, initAuth, logout } = useAuthStore();
   const { isIdleLocked } = useSessionStore();
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const [showShortcuts, setShowShortcuts] = legacyReact.useState(false);
-  const [showCommandPalette, setShowCommandPalette] = legacyReact.useState(false);
-  const [showV1Tour, setShowV1Tour] = legacyReact.useState(false);
-  const [showSplash, setShowSplash] = legacyReact.useState(true);
-  const [startupProgress, setStartupProgress] = legacyReact.useState(() => createStartupProgressState({ progress: 1 }));
-  const [startupRecovery, setStartupRecovery] = legacyReact.useState(null);
-  const [onboardingWizardMode, setOnboardingWizardMode] = legacyReact.useState(null);
-  const [authState, setAuthState] = legacyReact.useState("loading");
-  const loadInitRef = legacyReact.useRef(false);
-  const initialSyncRef = legacyReact.useRef(false);
-  const startupHealthRef = legacyReact.useRef(false);
-  const postLoginRouteRef = legacyReact.useRef(false);
+  const [showShortcuts, setShowShortcuts] = React.useState(false);
+  const [showCommandPalette, setShowCommandPalette] = React.useState(false);
+  const [showV1Tour, setShowV1Tour] = React.useState(false);
+  const [showSplash, setShowSplash] = React.useState(true);
+  const [startupProgress, setStartupProgress] = React.useState(() => createStartupProgressState({ progress: 1 }));
+  const [startupRecovery, setStartupRecovery] = React.useState(null);
+  const [onboardingWizardMode, setOnboardingWizardMode] = React.useState(null);
+  const [authState, setAuthState] = React.useState("loading");
+  const loadInitRef = React.useRef(false);
+  const initialSyncRef = React.useRef(false);
+  const startupHealthRef = React.useRef(false);
+  const postLoginRouteRef = React.useRef(false);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (!isLoading && !initialSyncRef.current) {
       initialSyncRef.current = true;
       if (settings.theme && settings.theme !== theme) {
@@ -86,17 +93,17 @@ export function App() {
     }
   }, [isLoading, settings.theme, theme, setTheme]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (initialSyncRef.current && settings.theme !== theme) {
       updateSettings({ theme });
     }
   }, [theme]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     applyAccentColor(settings.accentColor || "teal");
   }, [settings.accentColor]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (!loadInitRef.current) {
       loadInitRef.current = true;
       let splashTimer;
@@ -136,7 +143,7 @@ export function App() {
     }
   }, [loadAllData, initAuth]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (isLoading || authState !== "ready" || startupHealthRef.current) return;
     const lastCheckAt = settings.systemHealth?.lastCheckAt;
     const isFresh = lastCheckAt && Date.now() - new Date(lastCheckAt).getTime() < 24 * 60 * 60 * 1e3;
@@ -148,7 +155,7 @@ export function App() {
     return () => clearTimeout(timer);
   }, [isLoading, authState, settings.systemHealth?.lastCheckAt, runSystemHealthCheck]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (isLoading || authState !== "ready" || !settings.helpAutoOpenPending) return;
     const tourPending = !settings.ui?.v1TourCompleted && (settings.ui?.v1OnboardingCompleted || settings.ui?.onboardingCompleted);
     if (tourPending) {
@@ -176,7 +183,7 @@ export function App() {
     updateSettings
   ]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const applyPageFromLocation = () => {
       const route = parseAppRoute();
       const page = route.page || "dashboard";
@@ -195,7 +202,7 @@ export function App() {
     };
   }, [setCurrentPage, setSelectedItemId]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const handleExternalChange = (event) => {
       if (event.key !== "videoArchive:lastChange" || !event.newValue) return;
       loadAllData();
@@ -204,7 +211,7 @@ export function App() {
     return () => window.removeEventListener("storage", handleExternalChange);
   }, [loadAllData]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (isLoading) {
       setAuthState("loading");
       return;
@@ -249,7 +256,7 @@ export function App() {
     setAuthState("login");
   }, [isLoading, isAuthenticated, currentUser, isLocked, isPasswordSet, isIdleLocked]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const openOnboarding = (event) => {
       setOnboardingWizardMode(event.detail?.mode === "replay" ? "replay" : "startup");
     };
@@ -262,7 +269,7 @@ export function App() {
     };
   }, []);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (shouldShowStartupOnboarding({ authState, settings })) {
       setOnboardingWizardMode((mode) => mode || "startup");
     } else if (onboardingWizardMode === "startup" && authState !== "setup") {
@@ -270,7 +277,7 @@ export function App() {
     }
   }, [authState, onboardingWizardMode, settings]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (!currentUser) {
       postLoginRouteRef.current = false;
       return;
@@ -304,7 +311,7 @@ export function App() {
     });
   }, [authState, currentUser, setCurrentPage, setSelectedItemId, settings.ui, updateSettings]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (authState !== "ready" || !currentUser) return;
     if (currentPage !== "dashboard") return;
     if (settings.ui?.v1TourCompleted) return;
@@ -313,7 +320,7 @@ export function App() {
     return () => clearTimeout(timer);
   }, [authState, currentUser, currentPage, settings.ui?.v1TourCompleted, settings.ui?.v1OnboardingCompleted, settings.ui?.onboardingCompleted]);
 
-  const completeV1Tour = legacyReact.useCallback(async (skipped = false) => {
+  const completeV1Tour = React.useCallback(async (skipped = false) => {
     setShowV1Tour(false);
     await updateSettings({
       ui: {
@@ -326,7 +333,7 @@ export function App() {
     });
   }, [settings.ui, updateSettings]);
 
-  const openStartupDiagnostics = legacyReact.useCallback(async () => {
+  const openStartupDiagnostics = React.useCallback(async () => {
     setStartupRecovery(null);
     setShowSplash(false);
     setSelectedItemId(null);
@@ -339,11 +346,11 @@ export function App() {
     }
   }, [setCurrentPage, setSelectedItemId, updateSettings, runSystemHealthCheck, settings.ui]);
 
-  const retryStartup = legacyReact.useCallback(() => {
+  const retryStartup = React.useCallback(() => {
     if (typeof window !== "undefined") window.location.reload();
   }, []);
 
-  const handleKeyDown = legacyReact.useCallback((event) => {
+  const handleKeyDown = React.useCallback((event) => {
     const shortcutAction = getGlobalShortcutAction(event, settings);
     if (!shortcutAction) return;
 
@@ -462,7 +469,7 @@ export function App() {
     toggleNotificationCenter
   ]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
@@ -582,8 +589,8 @@ export function mountVideoArchive(rootElement = document.getElementById("root"))
     throw new Error("Video Archive root element was not found.");
   }
 
-  return legacyReactDOM.createRoot(rootElement).render(
-    jsx(legacyReact.StrictMode, { children: jsx(App, {}) })
+  return createRoot(rootElement).render(
+    jsx(React.StrictMode, { children: jsx(App, {}) })
   );
 }
 

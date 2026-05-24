@@ -1,4 +1,7 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   Database,
   Download,
   FileSpreadsheet,
@@ -9,17 +12,22 @@ import {
   Shield,
   Trash2,
   TriangleAlert,
-  Upload,
+  Upload
+} from "lucide-react";
+import * as React from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+import { XLSX as legacyXlsx } from "../vendor/xlsx.js";
+import {
   dbGetAll,
+  STORES
+} from "../services/storage/index.js";
+import {
   importNormalizedPayload,
-  legacyJsxRuntime,
-  legacyReact,
-  legacyXlsx,
-  normalizeBackupData,
-  runOperationPreflight,
-  STORES,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  normalizeBackupData
+} from "../services/data-portability/legacyOperations.js";
+import {
+  runOperationPreflight
+} from "../services/health/index.js";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   DATA_CENTER_TABS
@@ -45,7 +53,6 @@ import {
   formatNumber
 } from "../utils/formatting.js";
 
-const { Fragment, jsx, jsxs } = legacyJsxRuntime;
 
 const tabIconMap = {
   export: Download,
@@ -232,28 +239,28 @@ export function DataCenterPage() {
     showToast
   } = useAppStore();
 
-  const [activeTab, setActiveTabState] = legacyReact.useState(settings.ui?.lastDataCenterTab || "export");
-  const [typeFilter, setTypeFilter] = legacyReact.useState("all");
-  const [collectionFilter, setCollectionFilter] = legacyReact.useState("all");
-  const [favoritesOnly, setFavoritesOnly] = legacyReact.useState(false);
-  const [selectedFormat, setSelectedFormat] = legacyReact.useState("json");
-  const [importMode, setImportModeState] = legacyReact.useState(settings.ui?.lastImportMode || settings.ui?.transferLastMode || "merge");
-  const [sourceDeviceName, setSourceDeviceName] = legacyReact.useState(() => typeof navigator !== "undefined" ? navigator.platform || "هذا الجهاز" : "هذا الجهاز");
-  const [isWorking, setIsWorking] = legacyReact.useState(false);
-  const [operationMessage, setOperationMessage] = legacyReact.useState("");
-  const [importPreview, setImportPreview] = legacyReact.useState(null);
-  const [importErrors, setImportErrors] = legacyReact.useState([]);
-  const [backups, setBackups] = legacyReact.useState([]);
-  const [backupError, setBackupError] = legacyReact.useState("");
-  const importInputRef = legacyReact.useRef(null);
+  const [activeTab, setActiveTabState] = React.useState(settings.ui?.lastDataCenterTab || "export");
+  const [typeFilter, setTypeFilter] = React.useState("all");
+  const [collectionFilter, setCollectionFilter] = React.useState("all");
+  const [favoritesOnly, setFavoritesOnly] = React.useState(false);
+  const [selectedFormat, setSelectedFormat] = React.useState("json");
+  const [importMode, setImportModeState] = React.useState(settings.ui?.lastImportMode || settings.ui?.transferLastMode || "merge");
+  const [sourceDeviceName, setSourceDeviceName] = React.useState(() => typeof navigator !== "undefined" ? navigator.platform || "هذا الجهاز" : "هذا الجهاز");
+  const [isWorking, setIsWorking] = React.useState(false);
+  const [operationMessage, setOperationMessage] = React.useState("");
+  const [importPreview, setImportPreview] = React.useState(null);
+  const [importErrors, setImportErrors] = React.useState([]);
+  const [backups, setBackups] = React.useState([]);
+  const [backupError, setBackupError] = React.useState("");
+  const importInputRef = React.useRef(null);
 
-  const exportOptions = legacyReact.useMemo(() => createDataCenterExportFilters({
+  const exportOptions = React.useMemo(() => createDataCenterExportFilters({
     typeFilter,
     collectionFilter,
     favoritesOnly
   }), [typeFilter, collectionFilter, favoritesOnly]);
 
-  const exportPayload = legacyReact.useMemo(() => {
+  const exportPayload = React.useMemo(() => {
     if (typeof buildExportPayload === "function") return buildExportPayload(exportOptions);
     return {
       videoItems,
@@ -278,12 +285,12 @@ export function DataCenterPage() {
     vocabulary
   ]);
 
-  const estimatedSize = legacyReact.useMemo(() => {
+  const estimatedSize = React.useMemo(() => {
     if (typeof estimateExportSize === "function") return estimateExportSize(exportOptions);
     return new Blob([JSON.stringify(exportPayload)]).size;
   }, [estimateExportSize, exportOptions, exportPayload]);
 
-  const exportSummary = legacyReact.useMemo(() => createDataCenterExportSummary({
+  const exportSummary = React.useMemo(() => createDataCenterExportSummary({
     data: exportPayload,
     estimatedSize,
     filters: { typeFilter, collectionFilter, favoritesOnly },
@@ -303,7 +310,7 @@ export function DataCenterPage() {
     Promise.resolve(updateSettings?.({ ui: { ...(settings.ui || {}), lastImportMode: mode, transferLastMode: mode } })).catch(() => {});
   };
 
-  const loadBackups = legacyReact.useCallback(async () => {
+  const loadBackups = React.useCallback(async () => {
     try {
       setBackupError("");
       const rows = await dbGetAll(STORES.BACKUPS);
@@ -313,11 +320,11 @@ export function DataCenterPage() {
     }
   }, []);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     loadBackups();
   }, [loadBackups]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const handleDataTab = (event) => {
       const tab = event?.detail?.tab;
       if (DATA_CENTER_TABS.some((item) => item.id === tab)) setActiveTabState(tab);

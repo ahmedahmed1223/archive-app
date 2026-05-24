@@ -1,4 +1,7 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   Archive,
   Bell,
   Database,
@@ -10,18 +13,16 @@ import {
   Tags,
   Upload,
   Users,
-  Video,
-  legacyJsxRuntime,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+
 import {
   createDashboardStats,
   getDashboardDemoItemIds
 } from "../features/dashboard/viewModel.js";
 import { formatDateTime } from "../utils/formatting.js";
-
-const { jsx, jsxs } = legacyJsxRuntime;
 
 const toneClasses = {
   emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-200",
@@ -155,15 +156,15 @@ export function DashboardPage() {
     showToast
   } = useAppStore();
 
-  const stats = legacyReact.useMemo(() => createDashboardStats({
+  const stats = React.useMemo(() => createDashboardStats({
     videoItems,
     contentTypes,
     virtualCollections,
     hierarchicalTags
   }), [videoItems, contentTypes, virtualCollections, hierarchicalTags]);
 
-  const demoIds = legacyReact.useMemo(() => getDashboardDemoItemIds(videoItems), [videoItems]);
-  const recentItems = legacyReact.useMemo(() => videoItems
+  const demoIds = React.useMemo(() => getDashboardDemoItemIds(videoItems), [videoItems]);
+  const recentItems = React.useMemo(() => videoItems
     .filter((item) => !item.isDeleted)
     .slice()
     .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime())

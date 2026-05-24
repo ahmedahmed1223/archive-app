@@ -1,17 +1,19 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   PenLine,
   Plus,
   Search,
   Shield,
   ShieldCheck,
   Trash2,
-  Users,
-  hashPassword,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Users
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+import { hashPassword } from "../utils/passwordHash.js";
 import {
   USER_ROLES,
   canDeactivateUser,
@@ -22,18 +24,16 @@ import {
 } from "../features/users/viewModel.js";
 import { formatDateTime, formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 function getRole(roleId) {
   return USER_ROLES.find((role) => role.id === roleId) || USER_ROLES[USER_ROLES.length - 1];
 }
 
 function UserForm({ user, users, onCancel, onSave }) {
-  const [username, setUsername] = legacyReact.useState(user?.username || "");
-  const [displayName, setDisplayName] = legacyReact.useState(user?.displayName || "");
-  const [role, setRole] = legacyReact.useState(normalizeUserRole(user?.role || "viewer"));
-  const [password, setPassword] = legacyReact.useState("");
+  const [username, setUsername] = React.useState(user?.username || "");
+  const [displayName, setDisplayName] = React.useState(user?.displayName || "");
+  const [role, setRole] = React.useState(normalizeUserRole(user?.role || "viewer"));
+  const [password, setPassword] = React.useState("");
 
   const usernameExists = !user && users.some((item) => item.username.trim().toLowerCase() === username.trim().toLowerCase());
   const canSave = username.trim() && displayName.trim() && !usernameExists && (user || password.length >= 6);
@@ -154,13 +154,13 @@ export function UsersPage() {
     showToast
   } = useAppStore();
 
-  const [query, setQuery] = legacyReact.useState("");
-  const [roleFilter, setRoleFilter] = legacyReact.useState("all");
-  const [showForm, setShowForm] = legacyReact.useState(false);
-  const [editingUser, setEditingUser] = legacyReact.useState(null);
+  const [query, setQuery] = React.useState("");
+  const [roleFilter, setRoleFilter] = React.useState("all");
+  const [showForm, setShowForm] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState(null);
 
-  const summary = legacyReact.useMemo(() => getUserSummary(users), [users]);
-  const filteredUsers = legacyReact.useMemo(() => getFilteredUsers(users, query, roleFilter), [query, roleFilter, users]);
+  const summary = React.useMemo(() => getUserSummary(users), [users]);
+  const filteredUsers = React.useMemo(() => getFilteredUsers(users, query, roleFilter), [query, roleFilter, users]);
 
   const saveUser = async (draft) => {
     try {

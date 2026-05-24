@@ -1,19 +1,26 @@
 import {
+  formatDateTime,
+  formatNumber
+} from "../utils/formatting.js";
+import {
+  parseAppRoute,
+  writeAppRoute
+} from "../services/router/index.js";
+import {
+  useAppStore
+} from "../stores/index.js";
+import {
   Archive,
   FolderOpen,
   RefreshCw,
   Search,
   Tags,
-  Video,
-  formatDateTime,
-  formatNumber,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  parseAppRoute,
-  useAppStore,
-  writeAppRoute
-} from "../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   createArchiveRouteParams
 } from "../features/archive/viewModel.js";
@@ -23,9 +30,6 @@ import {
   getSearchResults,
   parseSearchRouteParams
 } from "../features/search/viewModel.js";
-
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 const PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
 
@@ -120,24 +124,24 @@ export function SearchPage() {
     addRecentSearch
   } = useAppStore();
 
-  const initialRouteState = legacyReact.useMemo(() => parseSearchRouteParams(parseAppRoute().params), []);
-  const [query, setQuery] = legacyReact.useState(initialRouteState.query || "");
-  const [type, setType] = legacyReact.useState(initialRouteState.type || "all");
-  const [subtype, setSubtype] = legacyReact.useState(initialRouteState.subtype || "all");
-  const [favoritesOnly, setFavoritesOnly] = legacyReact.useState(initialRouteState.favoritesOnly || false);
-  const [dateFrom, setDateFrom] = legacyReact.useState(initialRouteState.dateFrom || "");
-  const [dateTo, setDateTo] = legacyReact.useState(initialRouteState.dateTo || "");
-  const [page, setPage] = legacyReact.useState(initialRouteState.page || 1);
-  const [pageSize, setPageSize] = legacyReact.useState(initialRouteState.pageSize || 24);
-  const skipInitialPageReset = legacyReact.useRef(true);
-  const isApplyingRouteState = legacyReact.useRef(false);
+  const initialRouteState = React.useMemo(() => parseSearchRouteParams(parseAppRoute().params), []);
+  const [query, setQuery] = React.useState(initialRouteState.query || "");
+  const [type, setType] = React.useState(initialRouteState.type || "all");
+  const [subtype, setSubtype] = React.useState(initialRouteState.subtype || "all");
+  const [favoritesOnly, setFavoritesOnly] = React.useState(initialRouteState.favoritesOnly || false);
+  const [dateFrom, setDateFrom] = React.useState(initialRouteState.dateFrom || "");
+  const [dateTo, setDateTo] = React.useState(initialRouteState.dateTo || "");
+  const [page, setPage] = React.useState(initialRouteState.page || 1);
+  const [pageSize, setPageSize] = React.useState(initialRouteState.pageSize || 24);
+  const skipInitialPageReset = React.useRef(true);
+  const isApplyingRouteState = React.useRef(false);
 
-  const typeById = legacyReact.useMemo(() => new Map(contentTypes.map((item) => [item.id, item])), [contentTypes]);
+  const typeById = React.useMemo(() => new Map(contentTypes.map((item) => [item.id, item])), [contentTypes]);
   const activeType = typeById.get(type);
   const subtypes = activeType?.subtypes || [];
   const activeFilterCount = getSearchActiveFilterCount({ query, type, subtype, favoritesOnly, dateFrom, dateTo });
 
-  const results = legacyReact.useMemo(() => getSearchResults({
+  const results = React.useMemo(() => getSearchResults({
     videoItems,
     query,
     type,
@@ -151,7 +155,7 @@ export function SearchPage() {
   const currentPage = Math.min(page, totalPages);
   const visibleResults = results.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const applyRouteState = () => {
       const nextState = parseSearchRouteParams(parseAppRoute().params);
       isApplyingRouteState.current = true;
@@ -172,7 +176,7 @@ export function SearchPage() {
     };
   }, []);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const handle = window.setTimeout(() => {
       const params = createSearchRouteParams({ query, type, subtype, favoritesOnly, dateFrom, dateTo, page: currentPage, pageSize });
       writeAppRoute("search", { params }, settings, true);
@@ -182,7 +186,7 @@ export function SearchPage() {
     return () => window.clearTimeout(handle);
   }, [addRecentSearch, currentPage, dateFrom, dateTo, favoritesOnly, pageSize, query, settings, setSearchQuery, subtype, type]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (skipInitialPageReset.current) {
       skipInitialPageReset.current = false;
       return;
@@ -194,7 +198,7 @@ export function SearchPage() {
     setPage(1);
   }, [dateFrom, dateTo, favoritesOnly, pageSize, query, subtype, type]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (page !== currentPage) setPage(currentPage);
   }, [currentPage, page]);
 

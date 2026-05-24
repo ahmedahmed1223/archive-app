@@ -1,15 +1,18 @@
 import {
+  useAppStore
+} from "../stores/index.js";
+import {
   Database,
   FolderOpen,
   PenLine,
   Plus,
   Search,
-  Trash2,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore
-} from "../runtime/legacyAdapter.js";
+  Trash2
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   FIELD_TYPE_OPTIONS,
   TYPE_COLORS,
@@ -22,8 +25,6 @@ import {
 } from "../features/types/viewModel.js";
 import { formatNumber } from "../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 function TypeBasicsForm({ draft, setDraft }) {
   return jsxs("div", {
@@ -50,7 +51,7 @@ function TypeBasicsForm({ draft, setDraft }) {
 }
 
 function SubtypesEditor({ draft, setDraft }) {
-  const [name, setName] = legacyReact.useState("");
+  const [name, setName] = React.useState("");
   const addSubtype = () => {
     if (!name.trim()) return;
     setDraft({
@@ -79,7 +80,7 @@ function SubtypesEditor({ draft, setDraft }) {
 }
 
 function FieldsEditor({ draft, setDraft }) {
-  const [fieldDraft, setFieldDraft] = legacyReact.useState({ label: "", type: "text", options: "", required: false });
+  const [fieldDraft, setFieldDraft] = React.useState({ label: "", type: "text", options: "", required: false });
 
   const addField = () => {
     if (!fieldDraft.label.trim()) return;
@@ -129,7 +130,7 @@ function FieldsEditor({ draft, setDraft }) {
 }
 
 function TypeEditor({ type, onCancel, onSave }) {
-  const [draft, setDraft] = legacyReact.useState(() => createContentTypeValue(type || { name: "", icon: "📁", color: "#6366f1" }));
+  const [draft, setDraft] = React.useState(() => createContentTypeValue(type || { name: "", icon: "📁", color: "#6366f1" }));
 
   const save = () => {
     if (!draft.name.trim()) return;
@@ -189,17 +190,17 @@ export function TypesPage() {
     showToast
   } = useAppStore();
 
-  const [query, setQuery] = legacyReact.useState("");
-  const [includeArchived, setIncludeArchived] = legacyReact.useState(false);
-  const [selectedTypeId, setSelectedTypeId] = legacyReact.useState(contentTypes.find((type) => type.status !== "archived")?.id || contentTypes[0]?.id || null);
-  const [editingType, setEditingType] = legacyReact.useState(null);
-  const [showEditor, setShowEditor] = legacyReact.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [includeArchived, setIncludeArchived] = React.useState(false);
+  const [selectedTypeId, setSelectedTypeId] = React.useState(contentTypes.find((type) => type.status !== "archived")?.id || contentTypes[0]?.id || null);
+  const [editingType, setEditingType] = React.useState(null);
+  const [showEditor, setShowEditor] = React.useState(false);
 
-  const filteredTypes = legacyReact.useMemo(() => getFilteredContentTypes(contentTypes, query, includeArchived), [contentTypes, includeArchived, query]);
-  const usageCounts = legacyReact.useMemo(() => getTypeUsageCounts(contentTypes, videoItems), [contentTypes, videoItems]);
+  const filteredTypes = React.useMemo(() => getFilteredContentTypes(contentTypes, query, includeArchived), [contentTypes, includeArchived, query]);
+  const usageCounts = React.useMemo(() => getTypeUsageCounts(contentTypes, videoItems), [contentTypes, videoItems]);
   const selectedType = contentTypes.find((type) => type.id === selectedTypeId) || filteredTypes[0] || null;
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (selectedTypeId && contentTypes.some((type) => type.id === selectedTypeId)) return;
     setSelectedTypeId(filteredTypes[0]?.id || null);
   }, [contentTypes, filteredTypes, selectedTypeId]);

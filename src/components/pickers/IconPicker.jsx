@@ -1,9 +1,12 @@
 import {
-  Upload,
-  legacyJsxRuntime,
-  legacyReact,
   useAppStore
-} from "../../runtime/legacyAdapter.js";
+} from "../../stores/index.js";
+import {
+  Upload
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+
 import {
   APP_ICON_REGISTRY,
   ICON_PICKER_EMOJIS,
@@ -13,7 +16,6 @@ import {
 } from "../icons/index.js";
 import { normalizeArabicSearchText } from "../../utils/formatting.js";
 
-const { jsx, jsxs } = legacyJsxRuntime;
 
 function readImageAsDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -36,12 +38,12 @@ export function IconPicker({
   const { settings, updateSettings, showToast } = useAppStore();
   const activeTab = settings.ui?.iconPickerLastTab || "builtin";
   const normalized = normalizeIconSpec(value, fallbackIcon);
-  const [query, setQuery] = legacyReact.useState("");
-  const [textValue, setTextValue] = legacyReact.useState(["emoji", "text"].includes(normalized.type) ? normalized.value : fallbackIcon);
-  const [urlValue, setUrlValue] = legacyReact.useState(normalized.type === "url" ? normalized.value : "");
-  const [isUploading, setIsUploading] = legacyReact.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [textValue, setTextValue] = React.useState(["emoji", "text"].includes(normalized.type) ? normalized.value : fallbackIcon);
+  const [urlValue, setUrlValue] = React.useState(normalized.type === "url" ? normalized.value : "");
+  const [isUploading, setIsUploading] = React.useState(false);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     const next = normalizeIconSpec(value, fallbackIcon);
     if (["emoji", "text"].includes(next.type)) setTextValue(next.value);
     if (next.type === "url") setUrlValue(next.value);

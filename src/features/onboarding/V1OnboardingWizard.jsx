@@ -1,4 +1,14 @@
 import {
+  handleAppError
+} from "../../utils/errorHandling.js";
+import {
+  useTheme
+} from "../../theme/useTheme.js";
+import {
+  useAppStore,
+  useAuthStore
+} from "../../stores/index.js";
+import {
   Archive,
   Database,
   HardDrive,
@@ -7,15 +17,12 @@ import {
   ShieldCheck,
   Sparkles,
   TriangleAlert,
-  Video,
-  handleAppError,
-  legacyJsxRuntime,
-  legacyMotion,
-  legacyReact,
-  useAppStore,
-  useAuthStore,
-  useTheme
-} from "../../runtime/legacyAdapter.js";
+  Video
+} from "lucide-react";
+import * as React from "react";
+import { jsx, jsxs } from "react/jsx-runtime";
+import { motion } from "framer-motion";
+
 import {
   CORE_UI_TOUR_ITEMS,
   ONBOARDING_ACCENT_OPTIONS,
@@ -28,9 +35,6 @@ import {
   normalizeOnboardingSecurityMode,
   normalizeOnboardingThemeChoice
 } from "./viewModel.js";
-
-const { jsx, jsxs } = legacyJsxRuntime;
-const motion = legacyMotion;
 
 const FIRST_TASK_OPTIONS = [
   { id: "dashboard", label: "لوحة التحكم", detail: "ابدأ من جاهزية اليوم والإجراءات السريعة.", icon: LayoutGrid },
@@ -108,37 +112,37 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
   } = useAppStore();
   const authStore = useAuthStore();
   const { setTheme } = useTheme();
-  const [securityMode, setSecurityMode] = legacyReact.useState(() => normalizeOnboardingSecurityMode(settings.ui?.onboardingSecurityMode || "secure"));
-  const [themeChoice, setThemeChoice] = legacyReact.useState(() => normalizeOnboardingThemeChoice(settings.ui?.onboardingThemeChoice || settings.theme || "dark"));
-  const [accentColor, setAccentColor] = legacyReact.useState(() => normalizeOnboardingAccentChoice(settings.accentColor || "teal"));
-  const [visualDensity, setVisualDensity] = legacyReact.useState(settings.ui?.visualDensity === "compact" ? "compact" : "comfortable");
-  const [firstTaskChoice, setFirstTaskChoice] = legacyReact.useState(settings.ui?.firstTaskChoice || "dashboard");
-  const [password, setPassword] = legacyReact.useState("");
-  const [confirmPassword, setConfirmPassword] = legacyReact.useState("");
-  const [showPassword, setShowPassword] = legacyReact.useState(false);
-  const [error, setError] = legacyReact.useState("");
-  const [isSubmitting, setIsSubmitting] = legacyReact.useState(false);
+  const [securityMode, setSecurityMode] = React.useState(() => normalizeOnboardingSecurityMode(settings.ui?.onboardingSecurityMode || "secure"));
+  const [themeChoice, setThemeChoice] = React.useState(() => normalizeOnboardingThemeChoice(settings.ui?.onboardingThemeChoice || settings.theme || "dark"));
+  const [accentColor, setAccentColor] = React.useState(() => normalizeOnboardingAccentChoice(settings.accentColor || "teal"));
+  const [visualDensity, setVisualDensity] = React.useState(settings.ui?.visualDensity === "compact" ? "compact" : "comfortable");
+  const [firstTaskChoice, setFirstTaskChoice] = React.useState(settings.ui?.firstTaskChoice || "dashboard");
+  const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const steps = legacyReact.useMemo(() => {
+  const steps = React.useMemo(() => {
     if (replayMode) return EXTRA_STEPS;
     if (securityMode === "quick") return EXTRA_STEPS.filter((step) => step.id !== "admin");
     return EXTRA_STEPS;
   }, [replayMode, securityMode]);
-  const [stepId, setStepId] = legacyReact.useState(settings.ui?.lastOnboardingStep && EXTRA_STEPS.some((step) => step.id === settings.ui.lastOnboardingStep) ? settings.ui.lastOnboardingStep : "welcome");
+  const [stepId, setStepId] = React.useState(settings.ui?.lastOnboardingStep && EXTRA_STEPS.some((step) => step.id === settings.ui.lastOnboardingStep) ? settings.ui.lastOnboardingStep : "welcome");
   const activeStepIndex = Math.max(0, steps.findIndex((step) => step.id === stepId));
   const activeStep = steps[activeStepIndex] || steps[0];
   const passwordStrength = getPasswordStrength(password);
   const passwordMatches = password.length > 0 && password === confirmPassword;
   const canContinueAdmin = replayMode || securityMode === "quick" || (password.length >= 8 && passwordMatches && passwordStrength.score >= 2);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (!open) return;
     setError("");
     setIsSubmitting(false);
     setStepId("welcome");
   }, [open, mode]);
 
-  legacyReact.useEffect(() => {
+  React.useEffect(() => {
     if (securityMode === "quick" && stepId === "admin" && !replayMode) {
       setStepId("appearance");
     }

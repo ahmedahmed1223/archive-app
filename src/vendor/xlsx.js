@@ -1,7 +1,8 @@
-import { legacyXlsx } from "../runtime/legacyAdapter.js";
+import * as XLSX from "xlsx";
 
-export { legacyXlsx };
+export { XLSX };
+export const legacyXlsx = XLSX;
 
 export async function loadXlsx() {
-  return legacyXlsx;
+  return XLSX;
 }
