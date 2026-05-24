@@ -27,6 +27,7 @@ function countLines(path) {
 }
 
 const runtimeLines = countLines(runtimePath);
+const runtimeRemoved = !existsSync(runtimePath) && runtimeLines === 0;
 const pageFiles = readdirSync(pageDir)
   .filter((file) => /Page\.jsx$/.test(file))
   .map((file) => {
@@ -58,19 +59,30 @@ const legacyImports = sourceFiles
   .filter((item) => item.count > 0)
   .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
 
+const wrappedPages = pageFiles.filter((page) => page.wrapper).length;
+const wrappedComponents = componentWrapperFiles.filter((component) => component.wrapper).length;
+const directPageReExports = pageFiles.filter((page) => page.directReExport).length;
+const directComponentReExports = componentWrapperFiles.filter((component) => component.directReExport).length;
+
 const report = {
+  runtimeRemoved,
   runtimeLines,
+  wrappedPages,
+  legacyImportFiles: legacyImports.length,
   pages: {
     total: pageFiles.length,
-    wrapped: pageFiles.filter((page) => page.wrapper).length,
-    directReExports: pageFiles.filter((page) => page.directReExport).length
+    wrapped: wrappedPages,
+    directReExports: directPageReExports
   },
   components: {
-    wrapped: componentWrapperFiles.filter((component) => component.wrapper).length,
-    directReExports: componentWrapperFiles.filter((component) => component.directReExport).length
+    wrapped: wrappedComponents,
+    directReExports: directComponentReExports
   },
-  legacyImportFiles: legacyImports.length,
   topLegacyImportFiles: legacyImports.slice(0, 12)
 };
 
 console.log(JSON.stringify(report, null, 2));
+
+if (!runtimeRemoved || wrappedPages > 0 || wrappedComponents > 0 || legacyImports.length > 0 || directPageReExports > 0 || directComponentReExports > 0) {
+  process.exitCode = 1;
+}

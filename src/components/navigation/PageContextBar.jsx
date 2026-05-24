@@ -126,12 +126,12 @@ export function PageContextBar({ currentPage, currentPageTitle }) {
                 }),
                 sqliteError ? jsx("span", {
                   className: "rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-200",
-                  children: "SQLite محدود"
+                  children: "تحقق التخزين"
                 }) : jsx("span", {
                   className: `rounded-full border px-2 py-0.5 text-[11px] ${
                     sqliteReady ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-white/10 bg-white/5 text-gray-400"
                   }`,
-                  children: sqliteReady ? "جاهز محليًا" : "تخزين محلي"
+                  children: sqliteReady ? "SQLite جاهز" : "IndexedDB محلي"
                 })
               ]
             }),

@@ -58,11 +58,11 @@ export function normalizeIconSpec(iconSpec, fallbackIcon = "📁") {
     }
   }
 
-  const legacy = typeof fallbackIcon === "string" && fallbackIcon.trim() ? fallbackIcon.trim() : "📁";
-  return { type: "emoji", value: legacy };
+  const fallback = typeof fallbackIcon === "string" && fallbackIcon.trim() ? fallbackIcon.trim() : "📁";
+  return { type: "emoji", value: fallback };
 }
 
-export function getLegacyIconFromSpec(iconSpec, fallbackIcon = "📁") {
+export function getFallbackIconFromSpec(iconSpec, fallbackIcon = "📁") {
   const normalized = normalizeIconSpec(iconSpec, fallbackIcon);
   return ["emoji", "text"].includes(normalized.type) ? normalized.value : fallbackIcon;
 }

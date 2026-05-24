@@ -272,7 +272,7 @@ function createHelpSections(keyboardShortcuts) {
       searchText: "خطأ تحذير فشل تخزين IndexedDB SQLite",
       content: jsx(InfoGrid, { items: [
         ["IndexedDB غير متاح", "تأكد أن المتصفح لا يمنع التخزين المحلي ثم أعد تشغيل التطبيق."],
-        ["SQLite محدود", "يمكن متابعة العمل مع IndexedDB وفتح فحص النظام لمعرفة السبب."],
+        ["SQLite", "غير مفعّل في هذه النسخة. التخزين المحلي يعمل عبر IndexedDB ويمكن متابعة العمل طبيعيًا."],
         ["فشل الاستيراد", "راجع checksum ونوع الملف. الملفات الخارجية العادية لا تُستورد كبيانات v1."],
         ["رسائل الخطأ", "تعرض ماذا حدث، هل تم التراجع، وما الإجراء التالي."]
       ] })
@@ -574,6 +574,5 @@ export function HelpPage() {
 HelpPage.pageId = "help";
 HelpPage.pageTitle = "المساعدة";
 HelpPage.migrationStatus = "native";
-HelpPage.legacyComponentName = "";
 
 export default HelpPage;

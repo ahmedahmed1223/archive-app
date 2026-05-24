@@ -19,7 +19,7 @@ export function createSqliteReadinessCheck({ sqliteReady, sqliteError } = {}) {
     id: "sqlite",
     label: "SQLite",
     status: sqliteReady ? "ok" : "warning",
-    message: sqliteReady ? "جاهز" : sqliteError || "سيتم الاعتماد على IndexedDB عند الحاجة"
+    message: sqliteReady ? "جاهز" : sqliteError || "SQLite غير مفعّل في هذه النسخة، التخزين المحلي يعمل عبر IndexedDB."
   };
 }
 

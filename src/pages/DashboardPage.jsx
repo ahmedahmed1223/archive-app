@@ -261,7 +261,7 @@ export function DashboardPage() {
                   jsx(ActionButton, { label: "استيراد بيانات", detail: "JSON أو Excel صادر من التطبيق", icon: jsx(Upload, { className: "h-5 w-5" }), onClick: () => openDataTab("import"), tone: "amber" }),
                   jsx(ActionButton, { label: "نقل لجهاز آخر", detail: "ملف نقل مع checksum", icon: jsx(HardDrive, { className: "h-5 w-5" }), onClick: () => openDataTab("transfer"), tone: "violet" }),
                   jsx(ActionButton, { label: "البحث المتقدم", detail: "نتائج وفلاتر تفصيلية", icon: jsx(Search, { className: "h-5 w-5" }), onClick: () => goTo("search"), tone: "slate" }),
-                  jsx(ActionButton, { label: "فحص النظام", detail: "SQLite وIndexedDB والنسخ", icon: jsx(Shield, { className: "h-5 w-5" }), onClick: runHealth, tone: sqliteError ? "amber" : "emerald" })
+                  jsx(ActionButton, { label: "فحص النظام", detail: "IndexedDB والنسخ وحالة التخزين", icon: jsx(Shield, { className: "h-5 w-5" }), onClick: runHealth, tone: sqliteError ? "amber" : "emerald" })
                 ]
               })
             ]
@@ -272,7 +272,7 @@ export function DashboardPage() {
               jsxs("div", {
                 className: "space-y-2",
                 children: [
-                  jsx(ReadinessRow, { label: "SQLite", value: sqliteError ? "وضع محدود" : sqliteReady ? "جاهز" : "محلي", status: sqliteError ? "warning" : "ok" }),
+                  jsx(ReadinessRow, { label: "التخزين المحلي", value: sqliteReady ? "SQLite جاهز" : "IndexedDB أساسي", status: sqliteError ? "warning" : "ok" }),
                   jsx(ReadinessRow, { label: "آخر نسخة احتياطية", value: lastBackup, status: settings.lastBackupAt ? "ok" : "warning" }),
                   jsx(ReadinessRow, { label: "آخر فحص نظام", value: lastHealth, status: settings.systemHealth?.lastCheckAt ? "ok" : "neutral" }),
                   jsx(ReadinessRow, { label: "المفضلة", value: `${stats.favorites} عنصر`, status: "neutral" }),
@@ -328,6 +328,5 @@ export function DashboardPage() {
 DashboardPage.pageId = "dashboard";
 DashboardPage.pageTitle = "لوحة التحكم";
 DashboardPage.migrationStatus = "native";
-DashboardPage.legacyComponentName = "";
 
 export default DashboardPage;

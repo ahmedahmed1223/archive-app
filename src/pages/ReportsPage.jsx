@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
-import { XLSX as legacyXlsx } from "../vendor/xlsx.js";
+import { XLSX } from "../vendor/xlsx.js";
 
 import {
   downloadArchiveBlob
@@ -169,13 +169,13 @@ export function ReportsPage() {
   };
 
   const exportExcel = () => {
-    const workbook = legacyXlsx.utils.book_new();
+    const workbook = XLSX.utils.book_new();
     workbook.Workbook = { Views: [{ RTL: true }] };
     const appendSheet = (name, rows) => {
-      const worksheet = legacyXlsx.utils.json_to_sheet(rows.length ? rows : [{ "البيان": "لا توجد بيانات" }]);
+      const worksheet = XLSX.utils.json_to_sheet(rows.length ? rows : [{ "البيان": "لا توجد بيانات" }]);
       worksheet["!rtl"] = true;
       worksheet["!cols"] = Object.keys(rows[0] || { "البيان": "" }).map(() => ({ wch: 24 }));
-      legacyXlsx.utils.book_append_sheet(workbook, worksheet, name);
+      XLSX.utils.book_append_sheet(workbook, worksheet, name);
     };
     appendSheet("ملخص", [reportPayload.summary]);
     appendSheet("الأنواع", typeDistribution.map((item) => ({ "النوع": item.label, "العدد": item.value })));
@@ -186,7 +186,7 @@ export function ReportsPage() {
       "التفاصيل": log.details || "",
       "التاريخ": log.timestamp ? formatDateTime(log.timestamp, settings.numberSystem) : ""
     })));
-    legacyXlsx.writeFile(workbook, `archive-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(workbook, `archive-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   return jsxs("div", {
