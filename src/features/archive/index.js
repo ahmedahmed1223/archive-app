@@ -12,4 +12,5 @@ export {
   isHtml5PreviewableVideo
 } from "./mediaPreview.js";
 export { FileArchiveWizard } from "./FileArchiveWizard.jsx";
+export * from "./ArchiveViews.jsx";
 export * from "./viewModel.js";
