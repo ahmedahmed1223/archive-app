@@ -28,9 +28,11 @@ import {
   getArchiveResultRangeText,
   getFilteredArchiveItems,
   hasArchiveContentFilters,
+  normalizeArchiveGridRows,
   normalizeArchiveItemSize,
   normalizeArchivePage,
   normalizeArchivePageSize,
+  normalizeArchiveTopMode,
   normalizeArchiveViewMode,
   parseArchiveRouteParams
 } from "../features/archive/viewModel.js";
@@ -41,7 +43,6 @@ import {
   ARCHIVE_ITEM_SIZE_OPTIONS,
   ARCHIVE_PAGE_SIZE_OPTIONS,
   AnimatedItem,
-  ArchiveMetric,
   ArchivePagination,
   PreviewPanel,
   SegmentedControl,
@@ -56,6 +57,25 @@ import {
 import {
   formatNumber
 } from "../utils/formatting.js";
+
+const ARCHIVE_GRID_ROW_OPTIONS = [2, 3, 4, 6];
+
+function getGridColumnCount(width = 0, itemSize = "compact") {
+  if (itemSize === "large") return width >= 1536 ? 3 : width >= 1024 ? 2 : 1;
+  if (itemSize === "comfortable") return width >= 1536 ? 4 : width >= 1024 ? 3 : width >= 640 ? 2 : 1;
+  return width >= 1536 ? 5 : width >= 1280 ? 4 : width >= 768 ? 3 : width >= 640 ? 2 : 1;
+}
+
+function CompactStat({ label, value, hint }) {
+  return jsxs("span", {
+    className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-3 py-1.5 text-xs text-gray-400",
+    children: [
+      jsx("span", { className: "text-gray-500", children: label }),
+      jsx("strong", { className: "text-sm text-white", children: value }),
+      hint && jsx("span", { className: "hidden text-gray-600 sm:inline", children: hint })
+    ]
+  });
+}
 
 
 export function ArchivePage() {
@@ -73,6 +93,7 @@ export function ArchivePage() {
     setFilterType,
     setFilterSubtype,
     setViewMode,
+    updateSettings,
     toggleFavorite,
     deleteVideoItem,
     restoreVideoItem,
@@ -81,20 +102,28 @@ export function ArchivePage() {
     showToast
   } = useAppStore();
 
-  const initialRouteState = React.useMemo(() => parseArchiveRouteParams(parseAppRoute().params), []);
+  const initialRouteParams = React.useMemo(() => parseAppRoute().params, []);
+  const initialRouteState = React.useMemo(() => parseArchiveRouteParams(initialRouteParams), [initialRouteParams]);
   const [localSearch, setLocalSearch] = React.useState(initialRouteState.searchQuery || searchQuery || "");
   const [sortField, setSortField] = React.useState(initialRouteState.sortField || "updatedAt");
   const [sortDirection, setSortDirection] = React.useState(initialRouteState.sortDirection || "desc");
   const [showDeleted, setShowDeleted] = React.useState(initialRouteState.showDeleted || false);
   const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(initialRouteState.showFavoritesOnly || false);
   const [page, setPage] = React.useState(initialRouteState.page || 1);
-  const [pageSize, setPageSize] = React.useState(initialRouteState.pageSize || 24);
-  const [itemSize, setItemSize] = React.useState(initialRouteState.itemSize || "comfortable");
+  const [pageSize, setPageSize] = React.useState(initialRouteParams.has("per") ? initialRouteState.pageSize : 24);
+  const [itemSize, setItemSize] = React.useState(initialRouteParams.has("size") ? initialRouteState.itemSize : settings.ui?.archiveItemSize || "compact");
+  const [topMode, setTopMode] = React.useState(initialRouteParams.has("top") ? initialRouteState.topMode : settings.ui?.archiveTopMode || "quick");
+  const [gridRows, setGridRows] = React.useState(initialRouteParams.has("rows") ? initialRouteState.gridRows : settings.ui?.archiveGridRows || 3);
+  const [gridColumnCount, setGridColumnCount] = React.useState(3);
   const [previewId, setPreviewId] = React.useState(null);
   const [showFileImportWizard, setShowFileImportWizard] = React.useState(initialRouteState.openImport || false);
+  const gridContainerRef = React.useRef(null);
   const activeViewMode = normalizeArchiveViewMode(viewMode || initialRouteState.viewMode || settings.defaultView || "grid");
-  const activePageSize = normalizeArchivePageSize(pageSize);
+  const listPageSize = normalizeArchivePageSize(pageSize);
   const activeItemSize = normalizeArchiveItemSize(itemSize);
+  const activeTopMode = normalizeArchiveTopMode(topMode);
+  const activeGridRows = normalizeArchiveGridRows(gridRows);
+  const activePageSize = activeViewMode === "grid" ? Math.max(1, activeGridRows * gridColumnCount) : listPageSize;
 
   React.useEffect(() => {
     if (initialRouteState.searchQuery) setSearchQuery?.(initialRouteState.searchQuery);
@@ -109,8 +138,10 @@ export function ArchivePage() {
       setShowFileImportWizard(Boolean(nextRouteState.openImport));
       if (nextRouteState.viewMode && nextRouteState.viewMode !== viewMode) setViewMode?.(nextRouteState.viewMode);
       if (nextRouteState.page !== page) setPage(nextRouteState.page);
-      if (nextRouteState.pageSize !== activePageSize) setPageSize(nextRouteState.pageSize);
+      if (nextRouteState.pageSize !== listPageSize) setPageSize(nextRouteState.pageSize);
       if (nextRouteState.itemSize !== activeItemSize) setItemSize(nextRouteState.itemSize);
+      if (nextRouteState.topMode !== activeTopMode) setTopMode(nextRouteState.topMode);
+      if (nextRouteState.gridRows !== activeGridRows) setGridRows(nextRouteState.gridRows);
     };
     const applyImportEvent = () => setShowFileImportWizard(true);
     window.addEventListener("hashchange", applyRouteFlags);
@@ -121,7 +152,7 @@ export function ArchivePage() {
       window.removeEventListener("popstate", applyRouteFlags);
       window.removeEventListener("videoarchive:archive-import-open", applyImportEvent);
     };
-  }, [activeItemSize, activePageSize, page, setViewMode, viewMode]);
+  }, [activeGridRows, activeItemSize, activeTopMode, listPageSize, page, setViewMode, viewMode]);
 
   React.useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -130,6 +161,21 @@ export function ArchivePage() {
     }, 120);
     return () => window.clearTimeout(handle);
   }, [addRecentSearch, localSearch, setSearchQuery]);
+
+  React.useEffect(() => {
+    const element = gridContainerRef.current;
+    if (!element || typeof ResizeObserver === "undefined") {
+      setGridColumnCount(getGridColumnCount(typeof window !== "undefined" ? window.innerWidth : 1200, activeItemSize));
+      return;
+    }
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect?.width || element.clientWidth || 0;
+      setGridColumnCount(getGridColumnCount(width, activeItemSize));
+    });
+    observer.observe(element);
+    setGridColumnCount(getGridColumnCount(element.clientWidth || 0, activeItemSize));
+    return () => observer.disconnect();
+  }, [activeItemSize]);
 
   const filteredItems = React.useMemo(() => getFilteredArchiveItems({
     videoItems,
@@ -183,13 +229,15 @@ export function ArchivePage() {
       sortField,
       sortDirection,
       viewMode: activeViewMode,
+      topMode: activeTopMode,
       openImport: showFileImportWizard,
       page: currentPage,
-      pageSize: activePageSize,
-      itemSize: activeItemSize
+      pageSize: listPageSize,
+      itemSize: activeItemSize,
+      gridRows: activeGridRows
     });
     writeAppRoute("archive", { params }, settings, true);
-  }, [activeItemSize, activePageSize, activeViewMode, currentPage, filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
+  }, [activeGridRows, activeItemSize, activeTopMode, activeViewMode, currentPage, filterType, filterSubtype, listPageSize, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
 
   const typeById = React.useMemo(() => new Map(contentTypes.map((type) => [type.id, type])), [contentTypes]);
   const typeCounts = React.useMemo(() => new Map(contentTypes.map((type) => [
@@ -216,6 +264,30 @@ export function ArchivePage() {
   const changePageSize = (nextPageSize) => {
     setPageSize(normalizeArchivePageSize(nextPageSize));
     setPage(1);
+  };
+
+  const updateArchiveUiPreference = (patch) => {
+    updateSettings?.({ ui: { ...(settings.ui || {}), ...patch } });
+  };
+
+  const changeTopMode = (nextMode) => {
+    const normalized = normalizeArchiveTopMode(nextMode);
+    setTopMode(normalized);
+    updateArchiveUiPreference({ archiveTopMode: normalized });
+  };
+
+  const changeItemSize = (nextSize) => {
+    const normalized = normalizeArchiveItemSize(nextSize);
+    setItemSize(normalized);
+    setPage(1);
+    updateArchiveUiPreference({ archiveItemSize: normalized });
+  };
+
+  const changeGridRows = (nextRows) => {
+    const normalized = normalizeArchiveGridRows(nextRows);
+    setGridRows(normalized);
+    setPage(1);
+    updateArchiveUiPreference({ archiveGridRows: normalized });
   };
 
   const resetFilters = () => {
@@ -296,6 +368,7 @@ export function ArchivePage() {
       });
     }
     return jsx("div", {
+      ref: gridContainerRef,
       className: ARCHIVE_GRID_CLASSES[activeItemSize] || ARCHIVE_GRID_CLASSES.comfortable,
       children: visibleItems.map((item, index) => jsx(AnimatedItem, {
         index,
@@ -310,41 +383,43 @@ export function ArchivePage() {
       jsx(PageHero, {
         icon: jsx(Archive, { className: "h-6 w-6 text-emerald-400" }),
         title: "الأرشيف",
-        description: "شبكة سريعة للمعاينة والبحث اللحظي، مع فلاتر محفوظة في الرابط وزر إضافة واضح دائماً.",
+        description: "بحث سريع وفلاتر عند الطلب، مع تحكم مباشر بحجم البطاقات وعدد الصفوف.",
+        compact: true,
         actions: jsxs(React.Fragment, {
           children: [
+            jsxs("div", {
+              className: "va-control-surface inline-flex min-h-9 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+              role: "group",
+              "aria-label": "وضع القسم العلوي",
+              children: [
+                jsx("button", {
+                  type: "button",
+                  onClick: () => changeTopMode("quick"),
+                  "aria-pressed": activeTopMode === "quick",
+                  className: `rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${activeTopMode === "quick" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                  children: "سريع"
+                }),
+                jsx("button", {
+                  type: "button",
+                  onClick: () => changeTopMode("detailed"),
+                  "aria-pressed": activeTopMode === "detailed",
+                  className: `rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${activeTopMode === "detailed" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                  children: "تفصيلي"
+                })
+              ]
+            }),
             jsx(ToolbarButton, { onClick: openImport, icon: jsx(Upload, { className: "h-4 w-4" }), children: "استيراد ملفات" }),
             jsx("button", {
               type: "button",
               onClick: openAdd,
-              className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+              className: "va-primary-button inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600",
               children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
             })
           ]
-        })
-      }),
-      jsx(FileArchiveWizard, {
-        open: showFileImportWizard,
-        onOpenChange: setShowFileImportWizard,
-        contentTypes,
-        videoItems,
-        addVideoItem,
-        showToast
-      }),
-      jsx("section", {
-        className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
-        children: [
-          jsx(ArchiveMetric, { label: "النتائج الحالية", value: formatNumber(filteredItems.length), hint: rangeText }),
-          jsx(ArchiveMetric, { label: "كل العناصر", value: formatNumber(videoItems.length), hint: `${formatNumber(videoItems.filter((item) => !item.isDeleted).length)} نشط` }),
-          jsx(ArchiveMetric, { label: "الفلاتر", value: formatNumber(activeFilterCount), hint: activeFilterCount ? "فلاتر مطبقة" : "بدون فلاتر" }),
-          jsx(ArchiveMetric, { label: "قابل للمعاينة", value: formatNumber(filteredItems.filter((item) => isHtml5PreviewableVideo(item.path || item.filePath || item.url || "")).length), hint: "HTML5 داخل التطبيق" })
-        ]
-      }),
-      jsxs("section", {
-        className: "va-filter-surface z-20 rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm xl:sticky xl:top-3",
+        }),
         children: [
           jsxs("div", {
-            className: "grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_180px_180px]",
+            className: "mt-3 grid gap-2 xl:grid-cols-[minmax(260px,1fr)_auto]",
             children: [
               jsxs("label", {
                 className: "relative block",
@@ -354,17 +429,125 @@ export function ArchivePage() {
                     value: localSearch,
                     onChange: (event) => setLocalSearch(event.target.value),
                     placeholder: "بحث لحظي بالعنوان أو الوسوم أو الملاحظات",
-                    className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                    className: "min-h-10 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
                   })
                 ]
               }),
+              jsxs("div", {
+                className: "flex flex-wrap items-center gap-2",
+                children: [
+                  jsxs("div", {
+                    className: "va-control-surface inline-flex min-h-9 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+                    role: "group",
+                    "aria-label": "وضع عرض الأرشيف",
+                    children: [
+                      jsx("button", {
+                        type: "button",
+                        onClick: () => setViewMode?.("grid"),
+                        "aria-pressed": activeViewMode === "grid",
+                        className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${activeViewMode === "grid" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                        children: [jsx(LayoutGrid, { className: "h-3.5 w-3.5" }), "شبكة"]
+                      }),
+                      jsx("button", {
+                        type: "button",
+                        onClick: () => setViewMode?.("list"),
+                        "aria-pressed": activeViewMode === "list",
+                        className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${activeViewMode === "list" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                        children: [jsx(Archive, { className: "h-3.5 w-3.5" }), "قائمة"]
+                      }),
+                      jsx("button", {
+                        type: "button",
+                        onClick: () => setViewMode?.("table"),
+                        "aria-pressed": activeViewMode === "table",
+                        className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${activeViewMode === "table" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                        children: [jsx(FolderOpen, { className: "h-3.5 w-3.5" }), "جدول"]
+                      })
+                    ]
+                  }),
+                  jsx(SegmentedControl, {
+                    label: "الحجم",
+                    value: activeItemSize,
+                    options: ARCHIVE_ITEM_SIZE_OPTIONS,
+                    onChange: changeItemSize
+                  }),
+                  activeViewMode === "grid" ? jsx(SegmentedControl, {
+                    label: "الصفوف",
+                    value: activeGridRows,
+                    options: ARCHIVE_GRID_ROW_OPTIONS.map((value) => ({ value, label: `${formatNumber(value)} صفوف` })),
+                    onChange: changeGridRows
+                  }) : jsxs("label", {
+                    className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-2.5 py-1 text-xs text-gray-400",
+                    children: [
+                      jsx("span", { className: "text-gray-500", children: "في الصفحة" }),
+                      jsx("select", {
+                        value: listPageSize,
+                        onChange: (event) => changePageSize(event.target.value),
+                        className: "min-h-7 rounded-lg border-0 bg-transparent px-1 text-xs font-semibold text-white outline-none",
+                        children: ARCHIVE_PAGE_SIZE_OPTIONS.map((option) => jsx("option", { value: option, children: formatNumber(option) }, option))
+                      })
+                    ]
+                  })
+                ]
+              })
+            ]
+          }),
+          quickSearchMatches.length > 0 && jsxs("div", {
+            className: "mt-2 rounded-xl border border-white/10 bg-gray-950/30 p-2",
+            children: [
+              jsx("p", { className: "mb-1 text-xs font-semibold text-gray-500", children: "نتائج سريعة" }),
+              jsx("div", {
+                className: "grid gap-2 md:grid-cols-2 xl:grid-cols-5",
+                children: quickSearchMatches.map((item) => jsx("button", {
+                  type: "button",
+                  onClick: () => {
+                    setPage(1);
+                    setPreviewId(item.id);
+                  },
+                  className: "va-action-card min-w-0 rounded-xl border border-white/10 bg-gray-900/35 px-3 py-2 text-right hover:border-emerald-500/25",
+                  children: [
+                    jsx("span", { className: "block truncate text-xs font-semibold text-white", children: item.title || "بدون عنوان" }),
+                    jsx("span", { className: "mt-0.5 block truncate text-[11px] text-gray-500", children: item.updatedAt ? `آخر تحديث: ${item.updatedAt.slice(0, 10)}` : "بدون تاريخ" })
+                  ]
+                }, item.id))
+              })
+            ]
+          }),
+          jsxs("div", {
+            className: "mt-3 flex flex-wrap items-center gap-2",
+            children: [
+              jsx(CompactStat, { label: "النتائج", value: formatNumber(filteredItems.length), hint: rangeText }),
+              jsx(CompactStat, { label: "العناصر", value: formatNumber(videoItems.length), hint: `${formatNumber(videoItems.filter((item) => !item.isDeleted).length)} نشط` }),
+              jsx(CompactStat, { label: "الفلاتر", value: formatNumber(activeFilterCount), hint: activeFilterCount ? "مطبقة" : "بدون" }),
+              jsx(CompactStat, { label: "المعاينة", value: formatNumber(filteredItems.filter((item) => isHtml5PreviewableVideo(item.path || item.filePath || item.url || "")).length), hint: "HTML5" }),
+              jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة" }),
+              jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "المحذوفات" }),
+              (hasFilters || showDeleted) && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح" })
+            ]
+          })
+        ]
+      }),
+      jsx(FileArchiveWizard, {
+        open: showFileImportWizard,
+        onOpenChange: setShowFileImportWizard,
+        contentTypes,
+        videoItems,
+        addVideoItem,
+        showToast
+      }),
+      activeTopMode === "detailed" && jsxs("section", {
+        className: "va-filter-surface z-20 rounded-2xl border border-white/10 bg-gray-900/50 p-3 text-right backdrop-blur-sm xl:sticky xl:top-3",
+        children: [
+          jsxs("div", {
+            className: "grid gap-2 xl:grid-cols-[minmax(260px,1fr)_220px_180px_180px]",
+            children: [
+              jsx("div", { className: "hidden xl:block" }),
               jsxs("select", {
                 value: filterType,
                 onChange: (event) => {
                   setFilterType?.(event.target.value);
                   setFilterSubtype?.("all");
                 },
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                className: "min-h-10 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
                 children: [
                   jsx("option", { value: "all", children: "كل الأنواع" }),
                   ...contentTypes.map((type) => jsx("option", { value: type.id, children: type.name || type.id }, type.id))
@@ -374,7 +557,7 @@ export function ArchivePage() {
                 value: filterSubtype,
                 onChange: (event) => setFilterSubtype?.(event.target.value),
                 disabled: !subtypes.length,
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white disabled:opacity-50",
+                className: "min-h-10 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white disabled:opacity-50",
                 children: [
                   jsx("option", { value: "all", children: "كل الفروع" }),
                   ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name || subtype.id }, subtype.id))
@@ -387,7 +570,7 @@ export function ArchivePage() {
                   setSortField(field);
                   setSortDirection(direction);
                 },
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                className: "min-h-10 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
                 children: [
                   jsx("option", { value: "updatedAt:desc", children: "الأحدث تحديثاً" }),
                   jsx("option", { value: "createdAt:desc", children: "الأحدث إضافة" }),
@@ -397,29 +580,8 @@ export function ArchivePage() {
               })
             ]
           }),
-          quickSearchMatches.length > 0 && jsxs("div", {
-            className: "mt-3 rounded-2xl border border-white/10 bg-gray-950/30 p-3",
-            children: [
-              jsx("p", { className: "mb-2 text-xs font-semibold text-gray-500", children: "نتائج سريعة" }),
-              jsx("div", {
-                className: "grid gap-2 md:grid-cols-2 xl:grid-cols-5",
-                children: quickSearchMatches.map((item) => jsx("button", {
-                  type: "button",
-                  onClick: () => {
-                    setPage(1);
-                    setPreviewId(item.id);
-                  },
-                  className: "va-action-card min-w-0 rounded-xl border border-white/10 bg-gray-900/35 px-3 py-2 text-right hover:border-emerald-500/25",
-                  children: [
-                    jsx("span", { className: "block truncate text-sm font-semibold text-white", children: item.title || "بدون عنوان" }),
-                    jsx("span", { className: "mt-1 block truncate text-xs text-gray-500", children: item.updatedAt ? `آخر تحديث: ${item.updatedAt.slice(0, 10)}` : "بدون تاريخ" })
-                  ]
-                }, item.id))
-              })
-            ]
-          }),
           jsxs("div", {
-            className: "mt-3 flex gap-2 overflow-x-auto pb-1",
+            className: "mt-2 flex gap-2 overflow-x-auto pb-1",
             "aria-label": "فلاتر الأنواع السريعة",
             children: [
               jsx("button", {
@@ -428,7 +590,7 @@ export function ArchivePage() {
                   setFilterType?.("all");
                   setFilterSubtype?.("all");
                 },
-                className: `inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${filterType === "all" ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                className: `inline-flex min-h-9 shrink-0 items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${filterType === "all" ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"}`,
                 children: ["كل المواد", jsx("span", { className: "rounded-full bg-white/10 px-2 py-0.5 text-xs", children: formatNumber(videoItems.filter((item) => !item.isDeleted).length) }, "count")]
               }, "all"),
               ...contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("button", {
@@ -437,7 +599,7 @@ export function ArchivePage() {
                   setFilterType?.(type.id);
                   setFilterSubtype?.("all");
                 },
-                className: `inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${filterType === type.id ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                className: `inline-flex min-h-9 shrink-0 items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${filterType === type.id ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"}`,
                 style: filterType === type.id && type.color ? { boxShadow: `inset 0 0 0 1px ${type.color}44` } : undefined,
                 children: [
                   jsx("span", { className: "text-base", children: type.icon || "📁" }),
@@ -447,60 +609,7 @@ export function ArchivePage() {
               }, type.id))
             ]
           }),
-          jsxs("div", {
-            className: "mt-3 flex flex-wrap items-center gap-2",
-            children: [
-              jsxs("div", {
-                className: "va-control-surface inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
-                role: "group",
-                "aria-label": "وضع عرض الأرشيف",
-                children: [
-                  jsx("button", {
-                    type: "button",
-                    onClick: () => setViewMode?.("grid"),
-                    "aria-pressed": activeViewMode === "grid",
-                    className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "grid" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
-                    children: [jsx(LayoutGrid, { className: "h-4 w-4" }), "شبكة"]
-                  }),
-                  jsx("button", {
-                    type: "button",
-                    onClick: () => setViewMode?.("list"),
-                    "aria-pressed": activeViewMode === "list",
-                    className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "list" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
-                    children: [jsx(Archive, { className: "h-4 w-4" }), "قائمة"]
-                  }),
-                  jsx("button", {
-                    type: "button",
-                    onClick: () => setViewMode?.("table"),
-                    "aria-pressed": activeViewMode === "table",
-                    className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "table" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
-                    children: [jsx(FolderOpen, { className: "h-4 w-4" }), "جدول"]
-                  })
-                ]
-              }),
-              jsx(SegmentedControl, {
-                label: "حجم العناصر",
-                value: activeItemSize,
-                options: ARCHIVE_ITEM_SIZE_OPTIONS,
-                onChange: (value) => setItemSize(normalizeArchiveItemSize(value))
-              }),
-              jsxs("label", {
-                className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-3 py-1.5 text-sm text-gray-400",
-                children: [
-                  jsx("span", { className: "text-xs text-gray-500", children: "في الصفحة" }),
-                  jsx("select", {
-                    value: activePageSize,
-                    onChange: (event) => changePageSize(event.target.value),
-                    className: "min-h-7 rounded-lg border-0 bg-transparent px-1 text-sm font-semibold text-white outline-none",
-                    children: ARCHIVE_PAGE_SIZE_OPTIONS.map((option) => jsx("option", { value: option, children: formatNumber(option) }, option))
-                  })
-                ]
-              }),
-              jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة فقط" }),
-              jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "سلة المحذوفات" }),
-              (hasFilters || showDeleted) && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح الفلاتر" })
-            ]
-          })
+          jsx("p", { className: "mt-2 text-xs leading-5 text-gray-500", children: "الفلاتر التفصيلية تظهر هنا عند الحاجة. الوضع السريع يحافظ على مساحة أكبر للمواد." })
         ]
       }),
       jsxs("section", {
@@ -539,7 +648,7 @@ export function ArchivePage() {
                     children: [
                       jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: `العرض: ${activeViewMode === "grid" ? "شبكة" : activeViewMode === "list" ? "قائمة" : "جدول"}` }),
                       jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: `الحجم: ${ARCHIVE_ITEM_SIZE_LABELS[activeItemSize]}` }),
-                      jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: `${formatNumber(activePageSize)} عنصر/صفحة` })
+                      jsx("span", { className: "rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1", children: activeViewMode === "grid" ? `${formatNumber(activeGridRows)} صفوف × ${formatNumber(gridColumnCount)} أعمدة` : `${formatNumber(activePageSize)} عنصر/صفحة` })
                     ]
                   })
                 ]

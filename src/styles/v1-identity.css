@@ -19,6 +19,7 @@
   --va-shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.28);
   --va-shadow-card: 0 12px 36px rgba(0, 0, 0, 0.18);
   --va-page-gutter: clamp(1rem, 1.7vw, 1.5rem);
+  --va-control-height: 2.25rem;
 }
 
 html.dark {
@@ -307,6 +308,10 @@ html.light .va-tool-button {
   padding: clamp(1rem, 2vw, 1.4rem) !important;
 }
 
+.va-page-hero-compact {
+  padding: 0.85rem !important;
+}
+
 .va-page-hero::before,
 .va-card::before,
 .va-panel-premium::before {
@@ -413,6 +418,10 @@ html.light .va-tool-button {
   background: rgba(8, 19, 34, 0.55) !important;
   color: var(--va-text) !important;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.va-tool-button {
+  min-height: var(--va-control-height) !important;
 }
 
 .va-secondary-button:hover,

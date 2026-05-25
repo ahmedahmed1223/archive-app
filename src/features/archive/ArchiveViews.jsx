@@ -30,18 +30,18 @@ export const ARCHIVE_ITEM_SIZE_OPTIONS = [
 export const ARCHIVE_PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
 
 export const ARCHIVE_GRID_CLASSES = {
-  compact: "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
-  comfortable: "grid gap-4 sm:grid-cols-2 2xl:grid-cols-3",
-  large: "grid gap-5 lg:grid-cols-2"
+  compact: "grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5",
+  comfortable: "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
+  large: "grid gap-4 lg:grid-cols-2 2xl:grid-cols-3"
 };
 
 const ARCHIVE_CARD_SIZE = {
   compact: {
-    body: "space-y-2 p-3",
-    footer: "gap-1.5 p-2.5",
-    title: "line-clamp-2 text-sm",
+    body: "space-y-1.5 p-2.5",
+    footer: "gap-1.5 p-2",
+    title: "line-clamp-2 text-xs",
     meta: "text-[11px]",
-    button: "min-h-8 px-2.5 py-1 text-xs",
+    button: "min-h-7 px-2 py-0.5 text-[11px]",
     tags: 2
   },
   comfortable: {
@@ -126,7 +126,7 @@ export function ToolbarButton({ children, onClick, active = false, danger = fals
     type: "button",
     onClick,
     "aria-pressed": active,
-    className: `va-tool-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+    className: `va-tool-button inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-medium transition-colors ${
       active
         ? danger
           ? "border-red-500/35 bg-red-500/15 text-red-100"
@@ -142,10 +142,10 @@ export function ToolbarButton({ children, onClick, active = false, danger = fals
 
 export function ArchiveMetric({ label, value, hint }) {
   return jsxs("div", {
-    className: "va-metric-card rounded-xl border border-white/5 bg-gray-950/35 p-3",
+    className: "va-metric-card rounded-xl border border-white/5 bg-gray-950/35 p-2.5",
     children: [
       jsx("p", { className: "text-xs text-gray-500", children: label }),
-      jsx("p", { className: "mt-1 text-lg font-bold text-white", children: value }),
+      jsx("p", { className: "mt-1 text-base font-bold text-white", children: value }),
       hint && jsx("p", { className: "mt-1 text-xs text-gray-500", children: hint })
     ]
   });
@@ -255,14 +255,14 @@ export function SegmentedControl({ label, value, options, onChange }) {
     children: [
       label && jsx("span", { className: "text-xs text-gray-500", children: label }),
       jsx("div", {
-        className: "va-control-surface inline-flex min-h-10 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+        className: "va-control-surface inline-flex min-h-9 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
         role: "group",
         "aria-label": label,
         children: options.map((option) => jsx("button", {
           type: "button",
           onClick: () => onChange(option.value),
           "aria-pressed": value === option.value,
-          className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${value === option.value ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+          className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-colors ${value === option.value ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
           children: [option.icon, option.label]
         }, option.value))
       })

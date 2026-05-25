@@ -78,16 +78,16 @@ export function MotionPage({ children, className = "", ...props }) {
   );
 }
 
-export function PageHero({ icon, title, description, actions, children, className = "" }) {
+export function PageHero({ icon, title, description, actions, children, className = "", compact = false }) {
   return (
-    <section className={cx("va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", className)} dir="rtl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <section className={cx("va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 text-right shadow-2xl shadow-black/10", compact ? "va-page-hero-compact p-3" : "p-5", className)} dir="rtl">
+      <div className={cx("flex flex-wrap justify-between", compact ? "items-center gap-3" : "items-start gap-4")}>
         <div className="min-w-0">
-          <h2 className="va-title flex items-center gap-2 text-2xl font-bold text-white">
+          <h2 className={cx("va-title flex items-center gap-2 font-bold text-white", compact ? "text-lg" : "text-2xl")}>
             {icon}
             {title}
           </h2>
-          {description && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-400">{description}</p>}
+          {description && <p className={cx("max-w-3xl leading-relaxed text-gray-400", compact ? "mt-1 text-xs" : "mt-2 text-sm")}>{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </div>

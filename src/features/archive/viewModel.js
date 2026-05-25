@@ -4,13 +4,15 @@ const ARCHIVE_SORT_FIELDS = new Set(["title", "createdAt", "updatedAt"]);
 const ARCHIVE_VIEW_MODES = new Set(["grid", "list", "table"]);
 const ARCHIVE_ITEM_SIZES = new Set(["compact", "comfortable", "large"]);
 const ARCHIVE_PAGE_SIZES = new Set([12, 24, 48, 96]);
+const ARCHIVE_TOP_MODES = new Set(["quick", "detailed"]);
+const ARCHIVE_GRID_ROWS = new Set([2, 3, 4, 6]);
 
 export function normalizeArchiveViewMode(viewMode = "grid") {
   return ARCHIVE_VIEW_MODES.has(viewMode) ? viewMode : "grid";
 }
 
-export function normalizeArchiveItemSize(itemSize = "comfortable") {
-  return ARCHIVE_ITEM_SIZES.has(itemSize) ? itemSize : "comfortable";
+export function normalizeArchiveItemSize(itemSize = "compact") {
+  return ARCHIVE_ITEM_SIZES.has(itemSize) ? itemSize : "compact";
 }
 
 export function normalizeArchivePageSize(pageSize = 24) {
@@ -21,6 +23,15 @@ export function normalizeArchivePageSize(pageSize = 24) {
 export function normalizeArchivePage(page = 1) {
   const value = Number(page);
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
+}
+
+export function normalizeArchiveTopMode(topMode = "quick") {
+  return ARCHIVE_TOP_MODES.has(topMode) ? topMode : "quick";
+}
+
+export function normalizeArchiveGridRows(rows = 3) {
+  const value = Number(rows);
+  return ARCHIVE_GRID_ROWS.has(value) ? value : 3;
 }
 
 function flattenSearchValues(value, depth = 0) {
@@ -116,10 +127,12 @@ export function createArchiveRouteParams({
   sortField = "updatedAt",
   sortDirection = "desc",
   viewMode = "grid",
+  topMode = "quick",
   openImport = false,
   page = 1,
   pageSize = 24,
-  itemSize = "comfortable"
+  itemSize = "compact",
+  gridRows = 3
 } = {}) {
   const params = new URLSearchParams();
   if (searchQuery.trim()) params.set("q", searchQuery.trim());
@@ -131,12 +144,16 @@ export function createArchiveRouteParams({
   if (sortDirection !== "desc") params.set("dir", sortDirection);
   const normalizedViewMode = normalizeArchiveViewMode(viewMode);
   if (normalizedViewMode !== "grid") params.set("view", normalizedViewMode);
+  const normalizedTopMode = normalizeArchiveTopMode(topMode);
+  if (normalizedTopMode !== "quick") params.set("top", normalizedTopMode);
   const normalizedPage = normalizeArchivePage(page);
   if (normalizedPage > 1) params.set("page", String(normalizedPage));
   const normalizedPageSize = normalizeArchivePageSize(pageSize);
   if (normalizedPageSize !== 24) params.set("per", String(normalizedPageSize));
   const normalizedItemSize = normalizeArchiveItemSize(itemSize);
-  if (normalizedItemSize !== "comfortable") params.set("size", normalizedItemSize);
+  if (normalizedItemSize !== "compact") params.set("size", normalizedItemSize);
+  const normalizedGridRows = normalizeArchiveGridRows(gridRows);
+  if (normalizedGridRows !== 3) params.set("rows", String(normalizedGridRows));
   if (openImport) params.set("import", "1");
   return params;
 }
@@ -152,9 +169,11 @@ export function parseArchiveRouteParams(params = new URLSearchParams()) {
     sortField: ARCHIVE_SORT_FIELDS.has(sortField) ? sortField : "updatedAt",
     sortDirection: params.get("dir") === "asc" ? "asc" : "desc",
     viewMode: normalizeArchiveViewMode(params.get("view") || "grid"),
+    topMode: normalizeArchiveTopMode(params.get("top") || "quick"),
     openImport: params.get("import") === "1",
     page: normalizeArchivePage(params.get("page") || 1),
     pageSize: normalizeArchivePageSize(params.get("per") || 24),
-    itemSize: normalizeArchiveItemSize(params.get("size") || "comfortable")
+    itemSize: normalizeArchiveItemSize(params.get("size") || "compact"),
+    gridRows: normalizeArchiveGridRows(params.get("rows") || 3)
   };
 }
