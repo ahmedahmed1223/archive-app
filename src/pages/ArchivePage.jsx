@@ -59,6 +59,8 @@ import {
 } from "../utils/formatting.js";
 
 const ARCHIVE_GRID_ROW_OPTIONS = [2, 3, 4, 6];
+const ARCHIVE_GRID_ROW_MIN = 1;
+const ARCHIVE_GRID_ROW_MAX = 12;
 
 function getGridColumnCount(width = 0, itemSize = "compact") {
   if (itemSize === "large") return width >= 1536 ? 3 : width >= 1024 ? 2 : 1;
@@ -276,6 +278,13 @@ export function ArchivePage() {
     updateArchiveUiPreference({ archiveTopMode: normalized });
   };
 
+  const changeViewMode = (nextViewMode) => {
+    const normalized = normalizeArchiveViewMode(nextViewMode);
+    setViewMode?.(normalized);
+    setPage(1);
+    updateArchiveUiPreference({ archiveViewMode: normalized });
+  };
+
   const changeItemSize = (nextSize) => {
     const normalized = normalizeArchiveItemSize(nextSize);
     setItemSize(normalized);
@@ -443,21 +452,21 @@ export function ArchivePage() {
                     children: [
                       jsx("button", {
                         type: "button",
-                        onClick: () => setViewMode?.("grid"),
+                        onClick: () => changeViewMode("grid"),
                         "aria-pressed": activeViewMode === "grid",
                         className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${activeViewMode === "grid" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
                         children: [jsx(LayoutGrid, { className: "h-3.5 w-3.5" }), "شبكة"]
                       }),
                       jsx("button", {
                         type: "button",
-                        onClick: () => setViewMode?.("list"),
+                        onClick: () => changeViewMode("list"),
                         "aria-pressed": activeViewMode === "list",
                         className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${activeViewMode === "list" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
                         children: [jsx(Archive, { className: "h-3.5 w-3.5" }), "قائمة"]
                       }),
                       jsx("button", {
                         type: "button",
-                        onClick: () => setViewMode?.("table"),
+                        onClick: () => changeViewMode("table"),
                         "aria-pressed": activeViewMode === "table",
                         className: `inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${activeViewMode === "table" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
                         children: [jsx(FolderOpen, { className: "h-3.5 w-3.5" }), "جدول"]
@@ -470,11 +479,32 @@ export function ArchivePage() {
                     options: ARCHIVE_ITEM_SIZE_OPTIONS,
                     onChange: changeItemSize
                   }),
-                  activeViewMode === "grid" ? jsx(SegmentedControl, {
-                    label: "الصفوف",
-                    value: activeGridRows,
-                    options: ARCHIVE_GRID_ROW_OPTIONS.map((value) => ({ value, label: `${formatNumber(value)} صفوف` })),
-                    onChange: changeGridRows
+                  activeViewMode === "grid" ? jsxs("div", {
+                    className: "inline-flex flex-wrap items-center gap-2",
+                    children: [
+                      jsx(SegmentedControl, {
+                        label: "الصفوف",
+                        value: activeGridRows,
+                        options: ARCHIVE_GRID_ROW_OPTIONS.map((value) => ({ value, label: `${formatNumber(value)} صفوف` })),
+                        onChange: changeGridRows
+                      }),
+                      jsxs("label", {
+                        className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-2.5 py-1 text-xs text-gray-400",
+                        title: `اختر قيمة بين ${formatNumber(ARCHIVE_GRID_ROW_MIN)} و${formatNumber(ARCHIVE_GRID_ROW_MAX)} صفًا`,
+                        children: [
+                          jsx("span", { className: "text-gray-500", children: "مخصص" }),
+                          jsx("input", {
+                            type: "number",
+                            min: ARCHIVE_GRID_ROW_MIN,
+                            max: ARCHIVE_GRID_ROW_MAX,
+                            value: activeGridRows,
+                            onChange: (event) => changeGridRows(event.target.value),
+                            "aria-label": "عدد صفوف مخصص",
+                            className: "min-h-7 w-14 rounded-lg border border-white/10 bg-gray-950/55 px-2 text-center text-xs font-semibold text-white outline-none focus:border-emerald-500/50"
+                          })
+                        ]
+                      })
+                    ]
                   }) : jsxs("label", {
                     className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-2.5 py-1 text-xs text-gray-400",
                     children: [

@@ -5,7 +5,8 @@ const ARCHIVE_VIEW_MODES = new Set(["grid", "list", "table"]);
 const ARCHIVE_ITEM_SIZES = new Set(["compact", "comfortable", "large"]);
 const ARCHIVE_PAGE_SIZES = new Set([12, 24, 48, 96]);
 const ARCHIVE_TOP_MODES = new Set(["quick", "detailed"]);
-const ARCHIVE_GRID_ROWS = new Set([2, 3, 4, 6]);
+const ARCHIVE_GRID_ROW_MIN = 1;
+const ARCHIVE_GRID_ROW_MAX = 12;
 
 export function normalizeArchiveViewMode(viewMode = "grid") {
   return ARCHIVE_VIEW_MODES.has(viewMode) ? viewMode : "grid";
@@ -31,7 +32,9 @@ export function normalizeArchiveTopMode(topMode = "quick") {
 
 export function normalizeArchiveGridRows(rows = 3) {
   const value = Number(rows);
-  return ARCHIVE_GRID_ROWS.has(value) ? value : 3;
+  if (!Number.isFinite(value)) return 3;
+  const normalized = Math.floor(value);
+  return normalized >= ARCHIVE_GRID_ROW_MIN && normalized <= ARCHIVE_GRID_ROW_MAX ? normalized : 3;
 }
 
 function flattenSearchValues(value, depth = 0) {

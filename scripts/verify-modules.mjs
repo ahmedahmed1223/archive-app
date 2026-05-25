@@ -245,8 +245,12 @@ run("archive view model", () => {
   assert.equal(parsed.gridRows, 6);
   assert.equal(parseArchiveRouteParams(new URLSearchParams("view=missing")).viewMode, "grid");
   assert.equal(parseArchiveRouteParams(new URLSearchParams("top=wide&rows=9")).topMode, "quick");
+  assert.equal(parseArchiveRouteParams(new URLSearchParams("rows=5")).gridRows, 5);
   assert.equal(normalizeArchiveTopMode("detailed"), "detailed");
   assert.equal(normalizeArchiveGridRows("4"), 4);
+  assert.equal(normalizeArchiveGridRows("12"), 12);
+  assert.equal(normalizeArchiveGridRows("13"), 3);
+  assert.equal(normalizeArchiveGridRows("0"), 3);
   assert.equal(normalizeArchiveItemSize("huge"), "compact");
   assert.equal(normalizeArchivePageSize(999), 24);
   assert.equal(normalizeArchivePage("-1"), 1);
