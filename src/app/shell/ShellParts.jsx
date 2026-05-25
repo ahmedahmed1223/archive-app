@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   Bell,
   CheckCircle2,
+  Database,
   Command,
   Home,
   Info,
@@ -13,10 +14,12 @@ import {
   Sparkles,
   X
 } from "lucide-react";
+import { motion } from "framer-motion";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useAppStore, useAuthStore } from "../../stores/index.js";
 import { filterCommandPaletteCommands } from "../../components/common/commandPaletteViewModel.js";
+import { InsightPanel, SkeletonBlock, WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
 
 const STARTUP_STEPS = [
   { id: "environment", label: "فحص البيئة" },
@@ -211,9 +214,15 @@ export function DashboardSkeleton() {
 
 export function SplashScreen({ steps = STARTUP_STEPS, currentStepId, progress = 1, warnings = [], fatalError, onOpenDiagnostics }) {
   const currentStep = steps.find((step) => step.id === currentStepId) || steps[0];
+  const completedStepIds = steps.filter((step) => step.status === "done").map((step) => step.id);
   return (
     <main dir="rtl" className="va-onboarding-shell flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
-      <section className="va-onboarding-panel w-full max-w-2xl rounded-3xl border border-white/10 bg-[#0b1626]/95 p-7 shadow-2xl shadow-black/30">
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        className="va-onboarding-panel w-full max-w-3xl rounded-3xl border border-white/10 bg-[#0b1626]/95 p-7 shadow-2xl shadow-black/30"
+      >
         <div className="flex items-center gap-4">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-200">
             <Sparkles className="h-7 w-7" />
@@ -234,17 +243,24 @@ export function SplashScreen({ steps = STARTUP_STEPS, currentStepId, progress = 
           </div>
         </div>
 
-        <ol className="va-stepper-rtl mt-6 grid gap-3 sm:grid-cols-4">
-          {steps.map((step) => {
-            const active = step.id === currentStepId;
-            const done = step.status === "done";
-            return (
-              <li key={step.id} className={`rounded-xl border p-3 text-sm ${active || done ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-100" : "border-white/10 bg-white/[0.03] text-slate-400"}`}>
-                {step.label}
-              </li>
-            );
-          })}
-        </ol>
+        <WorkflowStepper steps={steps} activeStepId={currentStepId} completedStepIds={completedStepIds} className="mt-6 sm:grid-cols-4" compact />
+
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
+          <InsightPanel
+            icon={<Database className="h-5 w-5" />}
+            title="بياناتك محلية"
+            description="يتم تحميل IndexedDB على هذا الجهاز فقط، ويمكنك نقل الأرشيف لاحقًا من مركز البيانات."
+            className="p-4"
+          />
+          <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+            <p className="text-sm font-semibold text-slate-200">نجهّز الواجهة التالية</p>
+            <div className="mt-3 space-y-2">
+              <SkeletonBlock className="h-3 w-11/12" />
+              <SkeletonBlock className="h-3 w-8/12" />
+              <SkeletonBlock className="h-8 w-full" />
+            </div>
+          </div>
+        </div>
 
         {warnings.length > 0 && (
           <div className="mt-5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-100">
@@ -257,7 +273,7 @@ export function SplashScreen({ steps = STARTUP_STEPS, currentStepId, progress = 
             فتح فحص النظام
           </button>
         )}
-      </section>
+      </motion.section>
     </main>
   );
 }
@@ -399,7 +415,13 @@ export function ToastNotification() {
   return createPortal(
     <div dir="rtl" className="fixed bottom-4 left-4 z-[9990] flex w-[min(92vw,380px)] flex-col gap-2 text-right">
       {topItems.map((notification) => (
-        <div key={notification.id} className="rounded-2xl border border-white/10 bg-[#0b1626]/95 p-4 text-white shadow-2xl shadow-black/25 backdrop-blur">
+        <motion.div
+          key={notification.id}
+          initial={{ opacity: 0, x: -12, scale: 0.98 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.2 }}
+          className="rounded-2xl border border-white/10 bg-[#0b1626]/95 p-4 text-white shadow-2xl shadow-black/25 backdrop-blur"
+        >
           <div className="flex items-start gap-3">
             {notification.type === "success" ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" /> : notification.type === "error" ? <AlertTriangle className="mt-0.5 h-5 w-5 text-red-300" /> : <Info className="mt-0.5 h-5 w-5 text-sky-300" />}
             <div className="min-w-0 flex-1">
@@ -410,7 +432,7 @@ export function ToastNotification() {
               <X className="h-4 w-4" />
             </button>
           </div>
-        </div>
+        </motion.div>
       ))}
     </div>,
     document.body
@@ -444,7 +466,13 @@ export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
 
   return createPortal(
     <div dir="rtl" className="fixed inset-0 z-[9980] bg-black/60 p-4 text-right backdrop-blur-sm" onMouseDown={() => onOpenChange?.(false)}>
-      <section className="mx-auto mt-16 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] text-white shadow-2xl" onMouseDown={(event) => event.stopPropagation()}>
+      <motion.section
+        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.2 }}
+        className="mx-auto mt-16 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] text-white shadow-2xl"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
           <Search className="h-5 w-5 text-emerald-300" />
           <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="اكتب أمرًا أو صفحة..." className="min-h-11 flex-1 bg-transparent text-right outline-none placeholder:text-slate-500" />
@@ -467,7 +495,7 @@ export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
           })}
           {!filtered.length && <p className="p-6 text-center text-sm text-slate-400">لا توجد أوامر مطابقة.</p>}
         </div>
-      </section>
+      </motion.section>
     </div>,
     document.body
   );

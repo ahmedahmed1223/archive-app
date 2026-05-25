@@ -31,6 +31,7 @@ import {
 } from "../services/health/index.js";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
+  MotionPage,
   StatusBadge,
   Stepper
 } from "../components/ui/index.js";
@@ -671,9 +672,8 @@ export function DataCenterPage() {
         ? renderBackupPanel()
         : renderExportPanel();
 
-  return jsxs("div", {
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsxs("section", {
         className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",

@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
-import { motion } from "framer-motion";
+import { MotionPage } from "../components/ui/index.js";
 
 import {
   createSettingsTabUiPatch,
@@ -485,12 +485,8 @@ export function SettingsPage() {
     maintenance: renderMaintenance
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsxs("section", {
         className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",

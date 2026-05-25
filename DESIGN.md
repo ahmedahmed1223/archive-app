@@ -8,10 +8,10 @@ colors:
   secondary-surface: "#111827"
   elevated-surface: "#162033"
   border: "#263244"
-  accent: "#10B981"
-  accent-strong: "#047857"
-  accent-hover: "#34D399"
-  accent-soft: "#063B32"
+  accent: "#14B8A6"
+  accent-strong: "#0F766E"
+  accent-hover: "#2DD4BF"
+  accent-soft: "#0F3F3B"
   info: "#38BDF8"
   warning: "#F59E0B"
   danger: "#EF4444"
@@ -122,7 +122,7 @@ The visual system uses deep neutral surfaces with a single green action accent. 
 - **Primary (#030712):** application background and the deepest navigation layer.
 - **Primary Surface (#0B1220):** dashboard panels and high-priority operational surfaces.
 - **Secondary Surface (#111827):** forms, lists, and grouped controls.
-- **Accent (#10B981):** primary action, selected tab, healthy system state.
+- **Accent (#14B8A6):** primary action, selected tab, healthy system state. Switchable to indigo via the accent setting.
 - **Info (#38BDF8):** neutral progress, links, transfer guidance.
 - **Warning (#F59E0B):** preflight warnings, risky but recoverable states.
 - **Danger (#EF4444):** destructive actions only.

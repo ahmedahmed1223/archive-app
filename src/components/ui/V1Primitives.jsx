@@ -1,9 +1,32 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import * as React from "react";
 
 export function cx(...classes) {
   return classes.filter(Boolean).join(" ");
 }
+
+export const pageMotion = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
+  transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
+};
+
+export const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.045,
+      delayChildren: 0.02
+    }
+  }
+};
+
+export const staggerItem = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
+};
 
 const toneClasses = {
   accent: "va-tone-accent",
@@ -15,11 +38,43 @@ const toneClasses = {
   slate: "border-white/10 bg-white/5 text-gray-300"
 };
 
+function renderWorkflowIcon(icon) {
+  if (!icon) return null;
+  if (React.isValidElement(icon)) return icon;
+  if (typeof icon === "string") return <span aria-hidden="true">{icon}</span>;
+  return React.createElement(icon, { className: "h-4 w-4 shrink-0" });
+}
+
 export function StatusBadge({ tone = "slate", children, className = "" }) {
   return (
     <span className={cx("va-status-badge inline-flex min-h-7 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium", toneClasses[tone] || toneClasses.slate, className)}>
       {children}
     </span>
+  );
+}
+
+export function PageShell({ children, className = "", as: Component = "div", ...props }) {
+  return (
+    <Component className={cx("va-page-shell", className)} dir="rtl" {...props}>
+      {children}
+    </Component>
+  );
+}
+
+export function MotionPage({ children, className = "", ...props }) {
+  const reducedMotion = useReducedMotion();
+  return (
+    <motion.div
+      className={cx("va-page-shell va-motion-page", className)}
+      dir="rtl"
+      initial={reducedMotion ? false : pageMotion.initial}
+      animate={pageMotion.animate}
+      exit={reducedMotion ? undefined : pageMotion.exit}
+      transition={reducedMotion ? { duration: 0 } : pageMotion.transition}
+      {...props}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -63,6 +118,76 @@ export function Stepper({ steps, activeStepId, className = "" }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+export function WorkflowStepper({
+  steps,
+  activeStepId,
+  completedStepIds = [],
+  onStepClick,
+  className = "",
+  compact = false
+}) {
+  const reducedMotion = useReducedMotion();
+  const activeIndex = Math.max(0, steps.findIndex((step) => step.id === activeStepId));
+
+  return (
+    <motion.ol
+      className={cx("va-workflow-stepper va-stepper-rtl grid gap-3 text-right", compact ? "va-workflow-stepper-compact" : "", className)}
+      dir="rtl"
+      variants={reducedMotion ? undefined : staggerContainer}
+      initial={reducedMotion ? false : "initial"}
+      animate="animate"
+    >
+      {steps.map((step, index) => {
+        const active = step.id === activeStepId;
+        const done = completedStepIds.includes(step.id) || step.status === "done" || index < activeIndex;
+        const warning = step.status === "warning";
+        const error = step.status === "error";
+        const clickable = typeof onStepClick === "function";
+        const stepIcon = renderWorkflowIcon(step.icon);
+        const content = (
+          <>
+            <span className="va-workflow-step-index" aria-hidden="true">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-2 font-semibold">
+                {stepIcon}
+                <span>{step.label}</span>
+              </span>
+              {(step.detail || step.description) && (
+                <span className="mt-1 block text-xs leading-5 text-gray-500">{step.detail || step.description}</span>
+              )}
+            </span>
+          </>
+        );
+
+        return (
+          <motion.li
+            key={step.id}
+            variants={reducedMotion ? undefined : staggerItem}
+            className={cx(
+              "va-workflow-step rounded-2xl border",
+              active ? "va-workflow-step-active" : "",
+              done ? "va-workflow-step-done" : "",
+              warning ? "va-workflow-step-warning" : "",
+              error ? "va-workflow-step-error" : ""
+            )}
+            aria-current={active ? "step" : undefined}
+          >
+            {clickable ? (
+              <button type="button" onClick={() => onStepClick(step.id)} className="flex w-full items-start gap-3 rounded-2xl p-3 text-right">
+                {content}
+              </button>
+            ) : (
+              <div className="flex items-start gap-3 rounded-2xl p-3">{content}</div>
+            )}
+          </motion.li>
+        );
+      })}
+    </motion.ol>
   );
 }
 
@@ -125,6 +250,43 @@ export function FormSection({ title, description, icon, actions, children, class
 
 export function SkeletonBlock({ className = "" }) {
   return <div className={cx("va-skeleton rounded-xl", className)} aria-hidden="true" />;
+}
+
+export function FloatingActionBar({ children, className = "", label = "إجراءات سريعة" }) {
+  return (
+    <div className={cx("va-floating-action-bar", className)} dir="rtl" aria-label={label}>
+      {children}
+    </div>
+  );
+}
+
+export function InsightPanel({ icon, title, description, actions, children, tone = "accent", className = "" }) {
+  return (
+    <section className={cx("va-insight-panel rounded-2xl border p-4 text-right", `va-insight-panel-${tone}`, className)} dir="rtl">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          {icon && <span className={cx("va-icon-tile flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border", toneClasses[tone] || toneClasses.accent)}>{icon}</span>}
+          <div className="min-w-0">
+            {title && <h3 className="text-base font-bold text-white">{title}</h3>}
+            {description && <p className="mt-1 text-sm leading-7 text-gray-400">{description}</p>}
+          </div>
+        </div>
+        {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+      </div>
+      {children && <div className="mt-4">{children}</div>}
+    </section>
+  );
+}
+
+export function UXEmptyState({ icon, title, description, actions, className = "" }) {
+  return (
+    <section className={cx("va-ux-empty-state rounded-2xl border border-dashed p-8 text-center", className)} dir="rtl">
+      {icon && <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-gray-400">{icon}</div>}
+      {title && <h3 className="mt-4 text-lg font-bold text-white">{title}</h3>}
+      {description && <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-gray-500">{description}</p>}
+      {actions && <div className="mt-5 flex flex-wrap justify-center gap-2">{actions}</div>}
+    </section>
+  );
 }
 
 export function ResponsiveTabs({ tabs, activeTab, onChange, ariaLabel = "تبويبات", className = "" }) {

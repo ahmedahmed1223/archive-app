@@ -35,6 +35,7 @@ import {
   normalizeOnboardingSecurityMode,
   normalizeOnboardingThemeChoice
 } from "./viewModel.js";
+import { WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
 
 const FIRST_TASK_OPTIONS = [
   { id: "dashboard", label: "لوحة التحكم", detail: "ابدأ من جاهزية اليوم والإجراءات السريعة.", icon: LayoutGrid },
@@ -397,14 +398,13 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
           jsx("h2", { className: "mt-2 text-lg font-bold text-white", children: "أرشيف الفيديو" }),
           jsx("p", { className: "mt-2 text-xs leading-6 text-gray-500", children: "تجهيز آمن وواضح بعد شاشة التحميل، ثم دخول يومي مباشر." })
         ] }),
-        jsx("ol", { className: "va-stepper-rtl grid gap-2 rounded-3xl border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-3 lg:grid-cols-6", dir: "rtl", children: steps.map((step, index) => jsxs("li", {
-          className: `rounded-2xl border px-3 py-2 ${index === activeStepIndex ? "border-emerald-400/45 bg-emerald-500/15" : index < activeStepIndex ? "border-emerald-500/20 bg-emerald-500/5" : "border-white/5 bg-white/[0.02]"}`,
-          children: [
-            jsx("span", { className: "text-xs text-gray-500", children: String(index + 1).padStart(2, "0") }),
-            jsx("p", { className: "mt-1 text-sm font-semibold text-white", children: step.label }),
-            jsx("p", { className: "mt-1 line-clamp-2 text-[11px] leading-5 text-gray-500", children: step.detail })
-          ]
-        }, step.id)) })
+        jsx(WorkflowStepper, {
+          steps,
+          activeStepId: activeStep.id,
+          completedStepIds: steps.slice(0, activeStepIndex).map((step) => step.id),
+          className: "rounded-3xl border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-3 lg:grid-cols-6",
+          compact: true
+        })
       ] }),
       jsxs(motion.main, {
         key: activeStep.id,

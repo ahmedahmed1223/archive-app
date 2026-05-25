@@ -324,12 +324,12 @@
   }
   .va-v1-action {
     border-color: color-mix(in srgb, var(--va-v1-accent) 34%, transparent) !important;
-    background: linear-gradient(180deg, rgba(16,185,129,.16), rgba(6,59,50,.22)) !important;
-    color: #d1fae5 !important;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--va-v1-accent) 16%, transparent), color-mix(in srgb, var(--va-v1-accent-strong) 22%, transparent)) !important;
+    color: color-mix(in srgb, var(--va-v1-accent) 30%, #ffffff) !important;
   }
   .va-v1-action:hover {
     border-color: color-mix(in srgb, var(--va-v1-accent) 58%, transparent) !important;
-    background: linear-gradient(180deg, rgba(16,185,129,.22), rgba(4,120,87,.24)) !important;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--va-v1-accent) 22%, transparent), color-mix(in srgb, var(--va-v1-accent-strong) 24%, transparent)) !important;
     color: #fff !important;
   }
   .va-v1-metric {
@@ -399,9 +399,9 @@
   }
   .field-toggle-row:hover { background: rgba(255,255,255,.06); color: #fff; }
   .field-toggle-row-on {
-    border-color: rgba(16,185,129,.5);
-    background: rgba(16,185,129,.16);
-    color: #d1fae5;
+    border-color: color-mix(in srgb, var(--va-v1-accent) 50%, transparent);
+    background: color-mix(in srgb, var(--va-v1-accent) 16%, transparent);
+    color: color-mix(in srgb, var(--va-v1-accent) 30%, #ffffff);
   }
   .field-toggle-knob {
     position: relative;
@@ -423,8 +423,8 @@
     background: #fff;
     transition: transform .18s ease, background .18s ease;
   }
-  .field-toggle-row-on .field-toggle-knob { background: #10b981; }
-  .field-toggle-row-on .field-toggle-knob::after { transform: translateX(-1.12rem); background: #ecfdf5; }
+  .field-toggle-row-on .field-toggle-knob { background: var(--va-v1-accent); }
+  .field-toggle-row-on .field-toggle-knob::after { transform: translateX(-1.12rem); background: color-mix(in srgb, var(--va-v1-accent) 12%, #ffffff); }
   .va-settings-tabs {
     display: flex;
     flex-wrap: wrap;

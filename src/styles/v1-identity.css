@@ -117,6 +117,11 @@ html.light .va-app-shell {
   padding: var(--va-page-gutter);
 }
 
+.va-motion-page {
+  min-width: 0;
+  transform-origin: top center;
+}
+
 .va-page-hero,
 .va-panel-premium,
 .va-card,
@@ -223,6 +228,23 @@ html.light .va-preview-panel {
   color: #172033;
 }
 
+html.light .va-insight-panel,
+html.light .va-ux-empty-state,
+html.light .va-workflow-step,
+html.light .va-floating-action-bar {
+  border-color: rgba(120, 113, 108, 0.16) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(247, 244, 238, 0.88)),
+    #fffdf8 !important;
+  color: #172033;
+  box-shadow: 0 16px 42px rgba(88, 72, 48, 0.1);
+}
+
+html.light .va-mixed-token {
+  background: rgba(255, 253, 248, 0.96);
+  color: var(--va-action-strong);
+}
+
 html.light main input,
 html.light main select,
 html.light main textarea {
@@ -309,6 +331,28 @@ html.light .va-tool-button {
 .va-data-card {
   border-radius: var(--va-card-radius) !important;
   box-shadow: var(--va-shadow-card);
+}
+
+.va-insight-panel,
+.va-ux-empty-state {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--va-line-soft) !important;
+  background:
+    linear-gradient(180deg, rgba(20, 32, 51, 0.74), rgba(8, 19, 34, 0.56)),
+    rgba(7, 17, 31, 0.64) !important;
+  box-shadow: var(--va-shadow-card);
+}
+
+.va-insight-panel::before,
+.va-ux-empty-state::before {
+  content: "";
+  position: absolute;
+  inset-inline: 1rem;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--va-action) 56%, transparent), transparent);
+  pointer-events: none;
 }
 
 .va-card-subtle {
@@ -408,6 +452,108 @@ html.light .va-tool-button {
   background: rgba(8, 19, 34, 0.68) !important;
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.18);
   backdrop-filter: blur(14px);
+}
+
+.va-workflow-stepper {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: va-step;
+}
+
+.va-workflow-step {
+  min-height: 4.25rem;
+  border-color: rgba(148, 163, 184, 0.12) !important;
+  background: rgba(8, 19, 34, 0.58);
+  color: var(--va-text-soft);
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.va-workflow-step-active {
+  border-color: color-mix(in srgb, var(--va-action) 52%, transparent) !important;
+  background: color-mix(in srgb, var(--va-action) 14%, rgba(8, 19, 34, 0.72));
+  color: var(--va-text-strong);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--va-action) 12%, transparent);
+}
+
+.va-workflow-step-done {
+  border-color: color-mix(in srgb, var(--va-action) 26%, transparent) !important;
+  background: color-mix(in srgb, var(--va-action) 8%, rgba(8, 19, 34, 0.62));
+}
+
+.va-workflow-step-warning {
+  border-color: rgba(245, 158, 11, 0.34) !important;
+  background: rgba(245, 158, 11, 0.1);
+  color: #fde68a;
+}
+
+.va-workflow-step-error {
+  border-color: rgba(248, 113, 113, 0.34) !important;
+  background: rgba(248, 113, 113, 0.1);
+  color: #fecaca;
+}
+
+.va-workflow-step-index {
+  display: inline-flex;
+  min-width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--va-action) 28%, transparent);
+  background: color-mix(in srgb, var(--va-action) 12%, transparent);
+  color: color-mix(in srgb, var(--va-action) 72%, #ffffff);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.75rem;
+  direction: ltr;
+}
+
+.va-workflow-step button {
+  color: inherit;
+}
+
+.va-workflow-step button:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.va-floating-action-bar {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: calc(100vw - 2rem);
+  margin-inline-start: auto;
+  padding: 0.55rem;
+  border: 1px solid var(--va-line-soft);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--va-ink-900) 88%, transparent);
+  box-shadow: var(--va-shadow-panel);
+  backdrop-filter: blur(18px);
+}
+
+.va-floating-action-bar > * {
+  min-height: 2.5rem;
+}
+
+.va-mixed-token,
+[dir="ltr"].va-mixed-token {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 0.55rem;
+  background: rgba(7, 17, 31, 0.64);
+  padding: 0.05rem 0.38rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+  color: color-mix(in srgb, var(--va-action) 64%, #ffffff);
 }
 
 .va-form-field,
@@ -563,6 +709,9 @@ html.light .va-tool-button {
   .va-video-card,
   .va-video-list-item,
   .va-action-card,
+  .va-workflow-step,
+  .va-floating-action-bar,
+  .va-motion-page,
   .va-primary-button,
   .va-action-button {
     animation: none !important;
@@ -593,8 +742,19 @@ html.light .va-tool-button {
   .va-action-button:hover,
   .va-action-card:hover,
   .va-video-card:hover,
-  .va-video-list-item:hover {
+  .va-video-list-item:hover,
+  .va-workflow-step:hover {
     transform: none;
+  }
+
+  .va-floating-action-bar {
+    inset-inline: 0.75rem;
+    width: auto;
+    justify-content: stretch;
+  }
+
+  .va-floating-action-bar > * {
+    flex: 1 1 auto;
   }
 
   .va-context-bar-inner {

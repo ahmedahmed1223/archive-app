@@ -48,6 +48,7 @@ import {
   getEffectiveKeyboardShortcuts
 } from "../features/settings/keyboardShortcuts.js";
 import {
+  MotionPage,
   PageHero,
   StatusBadge
 } from "../components/ui/index.js";
@@ -421,9 +422,8 @@ export function HelpPage() {
     updateSettings({ ui: { ...(settings.ui || {}), v1TourCompleted: false, lastOnboardingStep: "tour-restart" } });
   };
 
-  return jsxs("div", {
-    className: "va-page-shell va-enter help-page flex h-[calc(100vh-4rem)] gap-6 p-4 text-right sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "va-enter help-page flex h-[calc(100vh-4rem)] gap-6 p-4 text-right sm:p-6",
     role: "main",
     "aria-label": "المساعدة والدليل",
     children: [

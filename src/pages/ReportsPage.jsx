@@ -18,6 +18,7 @@ import { XLSX } from "../vendor/xlsx.js";
 import {
   downloadArchiveBlob
 } from "../services/data-portability/index.js";
+import { MotionPage } from "../components/ui/index.js";
 import {
   formatDateTime,
   formatFileSize,
@@ -189,9 +190,8 @@ export function ReportsPage() {
     XLSX.writeFile(workbook, `archive-report-${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  return jsxs("div", {
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsxs("section", {
         className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",

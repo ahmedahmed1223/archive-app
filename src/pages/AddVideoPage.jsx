@@ -29,6 +29,7 @@ import {
   parseVideoTags
 } from "../features/videos/viewModel.js";
 import { formatFileSize } from "../utils/formatting.js";
+import { MotionPage, WorkflowStepper } from "../components/ui/V1Primitives.jsx";
 
 
 const STEPS = [
@@ -194,28 +195,20 @@ export function AddVideoPage() {
     }
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsxs("section", { className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
         jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Video, { className: "h-6 w-6 text-emerald-400" }), "إضافة فيديو"] }),
         jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "نموذج متعدد الخطوات لإضافة مادة أرشيفية بدون عرض كل الحقول دفعة واحدة." }),
-        jsx("div", { className: "mt-5 grid gap-2 sm:grid-cols-4", children: STEPS.map((step, index) => {
-          const Icon = step.icon;
-          const done = index < stepIndex;
-          return jsxs(motion.button, { type: "button", whileHover: { y: -2 }, whileTap: { scale: 0.98 }, onClick: () => setStepIndex(index), "aria-pressed": stepIndex === index, className: `va-tool-button rounded-xl border p-3 text-right transition-colors ${stepIndex === index ? "border-emerald-500/35 bg-emerald-500/10 text-white" : done ? "border-emerald-500/20 bg-emerald-500/5 text-gray-300" : "border-white/10 bg-gray-950/35 text-gray-500 hover:bg-white/5"}`, children: [
-            jsxs("span", { className: "mb-2 flex items-center justify-between gap-2", children: [
-              jsx(Icon, { className: "h-5 w-5 text-emerald-400" }),
-              done ? jsx(CheckCircle2, { className: "h-4 w-4 text-emerald-300" }) : jsx(Circle, { className: "h-4 w-4 text-gray-600" })
-            ] }),
-            jsx("span", { className: "block text-sm font-semibold", children: step.label }),
-            jsx("span", { className: "mt-1 block text-xs leading-5 text-gray-500", children: step.detail })
-          ] }, step.id);
-        }) })
+        jsx(WorkflowStepper, {
+          steps: STEPS,
+          activeStepId: currentStep.id,
+          completedStepIds: STEPS.slice(0, stepIndex).map((step) => step.id),
+          onStepClick: (stepId) => setStepIndex(Math.max(0, STEPS.findIndex((step) => step.id === stepId))),
+          className: "mt-5 sm:grid-cols-4",
+          compact: true
+        })
       ] }),
       jsxs("section", { className: "grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]", children: [
         jsxs("div", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [

@@ -19,6 +19,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { MotionPage, UXEmptyState } from "../components/ui/V1Primitives.jsx";
 import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
@@ -137,13 +138,13 @@ export function DetailPage() {
   ];
 
   if (!item) {
-    return jsxs("div", { className: "va-page-shell space-y-6 p-4 text-center sm:p-6", dir: "rtl", children: [
-      jsx("section", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10", children: [
-        jsx(Video, { className: "mx-auto h-12 w-12 text-gray-600" }),
-        jsx("h1", { className: "mt-3 text-xl font-bold text-white", children: "لم يتم اختيار فيديو" }),
-        jsx("p", { className: "mt-2 text-sm text-gray-500", children: "افتح عنصرًا من الأرشيف لعرض تفاصيله." }),
-        jsx("button", { type: "button", onClick: () => setCurrentPage?.("archive"), className: "mt-4 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "فتح الأرشيف" })
-      ] })
+    return jsxs(MotionPage, { className: "space-y-6 p-4 text-center sm:p-6", children: [
+      jsx(UXEmptyState, {
+        icon: jsx(Video, { className: "h-8 w-8" }),
+        title: "لم يتم اختيار فيديو",
+        description: "افتح عنصرًا من الأرشيف لعرض تفاصيله أو استخدم البحث للوصول إلى مادة محددة.",
+        actions: jsx("button", { type: "button", onClick: () => setCurrentPage?.("archive"), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "فتح الأرشيف" })
+      })
     ] });
   }
 
@@ -202,12 +203,8 @@ export function DetailPage() {
     }
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsxs("section", { className: "va-page-hero overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 text-right shadow-2xl shadow-black/10", children: [
         previewSource ? jsx("video", { src: previewSource, controls: true, className: "aspect-video w-full bg-black object-contain" }) : item.thumbnail ? jsx("img", { src: item.thumbnail, alt: item.title, className: "h-64 w-full object-cover" }) : jsx("div", { className: "flex h-48 items-center justify-center bg-gray-950/60", children: jsx(Video, { className: "h-16 w-16 text-gray-700" }) }),

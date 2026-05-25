@@ -22,7 +22,9 @@ import {
   ActionCard,
   FormSection,
   MetricCard,
-  PageHero
+  MotionPage,
+  PageHero,
+  UXEmptyState
 } from "../components/ui/V1Primitives.jsx";
 import {
   createDashboardStats,
@@ -138,9 +140,8 @@ export function DashboardPage() {
     if (report) showToast("اكتمل فحص النظام", report.status === "ok" ? "success" : "warning");
   };
 
-  return jsxs("div", {
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsxs(PageHero, {
         icon: jsx(LayoutGrid, { className: "h-6 w-6 text-emerald-400" }),
@@ -222,13 +223,11 @@ export function DashboardPage() {
             title: "آخر العناصر",
             icon: jsx(Bell, { className: "h-5 w-5 text-emerald-400" }),
             actions: jsx("button", { type: "button", onClick: () => goTo("archive"), className: "text-sm text-emerald-300 hover:text-emerald-200", children: "فتح الأرشيف" }),
-            children: recentItems.length === 0 ? jsxs("div", {
-              className: "rounded-xl border border-dashed border-white/10 p-6 text-center",
-              children: [
-                jsx(Video, { className: "mx-auto h-10 w-10 text-gray-600" }),
-                jsx("p", { className: "mt-3 text-sm font-medium text-gray-300", children: "لا توجد فيديوهات بعد" }),
-                jsx("p", { className: "mt-1 text-xs text-gray-500", children: "ابدأ بإضافة فيديو أو استيراد ملف نقل." })
-              ]
+            children: recentItems.length === 0 ? jsx(UXEmptyState, {
+              icon: jsx(Video, { className: "h-7 w-7" }),
+              title: "لا توجد فيديوهات بعد",
+              description: "ابدأ بإضافة فيديو أو استيراد ملف نقل، وستظهر أحدث العناصر هنا كطريق مختصر للاستخدام اليومي.",
+              actions: jsx("button", { type: "button", onClick: () => goTo("add"), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "إضافة أول فيديو" })
             }) : jsx("div", { className: "space-y-2", children: recentItems.map((item) => jsx(RecentItem, { item, onOpen: () => openItem(item) }, item.id)) })
           }),
           jsx(FormSection, {

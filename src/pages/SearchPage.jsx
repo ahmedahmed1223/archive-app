@@ -24,7 +24,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { EmptyState } from "../components/common/EmptyState.jsx";
-import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   createArchiveRouteParams
 } from "../features/archive/viewModel.js";
@@ -238,12 +238,8 @@ export function SearchPage() {
   const typeLabel = (item) => typeById.get(item.type)?.name || item.type || "";
   const subtypeLabel = (item) => typeById.get(item.type)?.subtypes?.find((sub) => sub.id === item.subtype)?.name || item.subtype || "";
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsx(PageHero, {
         icon: jsx(Search, { className: "h-6 w-6 text-emerald-400" }),
