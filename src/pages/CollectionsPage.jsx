@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
+import { PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   COLLECTION_COLORS,
   createVirtualCollectionValue,
@@ -261,17 +262,11 @@ export function CollectionsPage() {
     className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", {
-        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
-        children: [
-          jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
-            jsxs("div", { className: "min-w-0", children: [
-              jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(FolderOpen, { className: "h-6 w-6 text-emerald-400" }), "المجموعات"] }),
-              jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "تنظيم يدوي وذكي للعناصر مع معاينة مباشرة وإدارة سريعة للمحتوى داخل كل مجموعة." })
-            ] }),
-            jsx("button", { type: "button", onClick: startCreate, className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Plus, { className: "h-4 w-4" }), "مجموعة جديدة"] })
-          ] })
-        ]
+      jsx(PageHero, {
+        icon: jsx(FolderOpen, { className: "h-6 w-6 text-emerald-400" }),
+        title: "المجموعات",
+        description: "تنظيم يدوي وذكي للعناصر مع معاينة مباشرة وإدارة سريعة للمحتوى داخل كل مجموعة.",
+        actions: jsxs("button", { type: "button", onClick: startCreate, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white", children: [jsx(Plus, { className: "h-4 w-4" }), "مجموعة جديدة"] })
       }),
       showForm && jsx(CollectionForm, {
         collection: editingCollection,

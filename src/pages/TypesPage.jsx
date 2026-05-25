@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
-import { MotionPage } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   FIELD_TYPE_OPTIONS,
   TYPE_COLORS,
@@ -242,15 +242,12 @@ export function TypesPage() {
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
-      jsxs("section", { className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
-        jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
-          jsxs("div", { className: "min-w-0", children: [
-            jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Database, { className: "h-6 w-6 text-emerald-400" }), "إدارة الأنواع والحقول"] }),
-            jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "أنواع المحتوى والفروع والحقول المخصصة، مع دعم حقل ملف محلي يحفظ metadata فقط." })
-          ] }),
-          jsx("button", { type: "button", onClick: () => { setEditingType(null); setShowEditor(true); }, className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Plus, { className: "h-4 w-4" }), "نوع جديد"] })
-        ] }),
-        jsx("div", { className: "mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4", children: [
+      jsx(PageHero, {
+        icon: jsx(Database, { className: "h-6 w-6 text-emerald-400" }),
+        title: "إدارة الأنواع والحقول",
+        description: "أنواع المحتوى والفروع والحقول المخصصة، مع دعم حقل ملف محلي يحفظ metadata فقط.",
+        actions: jsxs("button", { type: "button", onClick: () => { setEditingType(null); setShowEditor(true); }, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white", children: [jsx(Plus, { className: "h-4 w-4" }), "نوع جديد"] }),
+        children: jsx("div", { className: "mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4", children: [
           { id: "types", label: "أنواع نشطة", value: formatNumber(activeTypes.length, settings.numberSystem), icon: Layers3 },
           { id: "subtypes", label: "فروع", value: formatNumber(totalSubtypes, settings.numberSystem), icon: Workflow },
           { id: "fields", label: "حقول مخصصة", value: formatNumber(totalFields, settings.numberSystem), icon: Database },
@@ -273,7 +270,7 @@ export function TypesPage() {
             ]
           }, stat.id);
         }) })
-      ] }),
+      }),
       jsxs("section", { className: "va-control-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
         jsxs("div", { className: "mb-3 flex items-center gap-2", children: [
           jsx(Palette, { className: "h-5 w-5 text-emerald-300" }),

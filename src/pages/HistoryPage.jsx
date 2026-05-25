@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
+import { PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   HISTORY_ACTIONS,
   createHistoryRouteParams,
@@ -248,28 +249,16 @@ export function HistoryPage() {
     className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", {
-        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
-        children: [
-          jsxs("div", {
-            className: "flex flex-wrap items-start justify-between gap-4",
-            children: [
-              jsxs("div", {
-                className: "min-w-0",
-                children: [
-                  jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(History, { className: "h-6 w-6 text-emerald-400" }), "سجل التغييرات"] }),
-                  jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "مراجعة عمليات الإنشاء والتحديث والحذف والاستعادة مع بحث مباشر وروابط تحفظ حالة الفلترة." })
-                ]
-              }),
-              changeHistory.length > 0 && jsx("button", {
-                type: "button",
-                onClick: handleClearHistory,
-                className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/15",
-                children: [jsx(Trash2, { className: "h-4 w-4" }), "مسح السجل"]
-              })
-            ]
-          })
-        ]
+      jsx(PageHero, {
+        icon: jsx(History, { className: "h-6 w-6 text-emerald-400" }),
+        title: "سجل التغييرات",
+        description: "مراجعة عمليات الإنشاء والتحديث والحذف والاستعادة مع بحث مباشر وروابط تحفظ حالة الفلترة.",
+        actions: changeHistory.length > 0 ? jsxs("button", {
+          type: "button",
+          onClick: handleClearHistory,
+          className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/15",
+          children: [jsx(Trash2, { className: "h-4 w-4" }), "مسح السجل"]
+        }) : null
       }),
       jsx("section", {
         className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-5",

@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
-import { MotionPage } from "../components/ui/index.js";
+import { MotionPage, PageHero } from "../components/ui/index.js";
 
 import {
   createSettingsTabUiPatch,
@@ -488,29 +488,17 @@ export function SettingsPage() {
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
-      jsxs("section", {
-        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
-        children: [
-          jsxs("div", {
-            className: "flex flex-wrap items-start justify-between gap-4",
-            children: [
-              jsxs("div", {
-                className: "min-w-0",
-                children: [
-                  jsxs("h1", { className: "va-title flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Lightbulb, { className: "h-6 w-6 text-emerald-400" }), "الإعدادات"] }),
-                  jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "تبويبات واضحة بدون تحذيرات غير محفوظة عند التنقل فقط. التغييرات الصغيرة تحفظ مباشرة، وكلمة المرور لها إجراء حفظ مستقل." })
-                ]
-              }),
-              jsxs("div", {
-                className: "flex flex-wrap gap-2",
-                children: [
-                  jsx("span", { className: "rounded-full border border-white/10 bg-gray-950/35 px-3 py-2 text-xs text-gray-400", children: `التبويب: ${tabState.activeLabel}` }),
-                  jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200", children: "حفظ مباشر" })
-                ]
-              })
-            ]
-          })
-        ]
+      jsx(PageHero, {
+        icon: jsx(Lightbulb, { className: "h-6 w-6 text-emerald-400" }),
+        title: "الإعدادات",
+        description: "تبويبات واضحة بدون تحذيرات غير محفوظة عند التنقل فقط. التغييرات الصغيرة تحفظ مباشرة، وكلمة المرور لها إجراء حفظ مستقل.",
+        actions: jsxs("div", {
+          className: "flex flex-wrap gap-2",
+          children: [
+            jsx("span", { className: "rounded-full border border-white/10 bg-gray-950/35 px-3 py-2 text-xs text-gray-400", children: `التبويب: ${tabState.activeLabel}` }),
+            jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200", children: "حفظ مباشر" })
+          ]
+        })
       }),
       jsxs("div", {
         className: "grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]",

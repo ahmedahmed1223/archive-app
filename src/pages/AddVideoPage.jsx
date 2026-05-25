@@ -29,7 +29,7 @@ import {
   parseVideoTags
 } from "../features/videos/viewModel.js";
 import { formatFileSize } from "../utils/formatting.js";
-import { MotionPage, WorkflowStepper } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero, WorkflowStepper } from "../components/ui/V1Primitives.jsx";
 
 
 const STEPS = [
@@ -198,10 +198,11 @@ export function AddVideoPage() {
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
-      jsxs("section", { className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
-        jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Video, { className: "h-6 w-6 text-emerald-400" }), "إضافة فيديو"] }),
-        jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "نموذج متعدد الخطوات لإضافة مادة أرشيفية بدون عرض كل الحقول دفعة واحدة." }),
-        jsx(WorkflowStepper, {
+      jsx(PageHero, {
+        icon: jsx(Video, { className: "h-6 w-6 text-emerald-400" }),
+        title: "إضافة فيديو",
+        description: "نموذج متعدد الخطوات لإضافة مادة أرشيفية بدون عرض كل الحقول دفعة واحدة.",
+        children: jsx(WorkflowStepper, {
           steps: STEPS,
           activeStepId: currentStep.id,
           completedStepIds: STEPS.slice(0, stepIndex).map((step) => step.id),
@@ -209,7 +210,7 @@ export function AddVideoPage() {
           className: "mt-5 sm:grid-cols-4",
           compact: true
         })
-      ] }),
+      }),
       jsxs("section", { className: "grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]", children: [
         jsxs("div", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
           jsxs("div", { className: "flex items-center justify-between gap-3", children: [
