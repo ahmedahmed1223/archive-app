@@ -2,17 +2,23 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Circle,
+  ClipboardCheck,
   Database,
+  Eye,
   FileText,
   HardDrive,
+  Sparkles,
   Tags,
+  UploadCloud,
   Video
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { getFieldsForSelection } from "../features/types/viewModel.js";
 import {
@@ -26,10 +32,10 @@ import { formatFileSize } from "../utils/formatting.js";
 
 
 const STEPS = [
-  { id: "basic", label: "الأساسيات", icon: Video },
-  { id: "classify", label: "التصنيف", icon: Database },
-  { id: "fields", label: "الحقول", icon: FileText },
-  { id: "review", label: "المراجعة", icon: Tags }
+  { id: "basic", label: "الأساسيات", detail: "العنوان والمسار أو الملف", icon: Video },
+  { id: "classify", label: "التصنيف", detail: "النوع والفرع والوسوم", icon: Database },
+  { id: "fields", label: "الحقول", detail: "حقول النوع المختار", icon: FileText },
+  { id: "review", label: "المراجعة", detail: "تأكيد سريع قبل الحفظ", icon: Tags }
 ];
 
 function fieldKey(field) {
@@ -39,14 +45,32 @@ function fieldKey(field) {
 function LocalFilePicker({ value, onFileSelect }) {
   const file = normalizeLocalFileValue(value);
   const inputRef = React.useRef(null);
-  return jsxs("div", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-3", children: [
+  const [dragActive, setDragActive] = React.useState(false);
+  const readFile = (nextFile) => {
+    if (nextFile) onFileSelect(nextFile);
+  };
+  return jsxs(motion.div, {
+    whileHover: { y: -1 },
+    className: `rounded-xl border border-dashed p-3 transition-colors ${dragActive ? "border-emerald-400/50 bg-emerald-500/10" : "border-white/10 bg-gray-950/35"}`,
+    onDragOver: (event) => {
+      event.preventDefault();
+      setDragActive(true);
+    },
+    onDragLeave: () => setDragActive(false),
+    onDrop: (event) => {
+      event.preventDefault();
+      setDragActive(false);
+      readFile(event.dataTransfer?.files?.[0]);
+    },
+    children: [
     jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3", children: [
       jsxs("div", { className: "flex min-w-0 items-center gap-2 text-sm text-gray-300", children: [
-        jsx(HardDrive, { className: "h-4 w-4 shrink-0 text-emerald-300" }),
+        jsx(file ? HardDrive : UploadCloud, { className: "h-4 w-4 shrink-0 text-emerald-300" }),
         jsx("span", { className: "truncate", children: file?.name || "لم يتم اختيار ملف" })
       ] }),
       jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "استعراض" })
     ] }),
+    !file && jsx("p", { className: "mt-2 text-xs leading-5 text-gray-500", children: "يمكنك سحب ملف فيديو هنا وسيتم ملء الاسم والمسار تلقائيًا قدر الإمكان." }),
     file && jsxs("div", { className: "mt-2 space-y-1 text-xs text-gray-600", children: [
       file.size > 0 && jsx("p", { children: formatFileSize(file.size) }),
       (file.relativePath || file.path) && jsx("p", { dir: "ltr", className: "truncate text-left", children: file.relativePath || file.path })
@@ -55,7 +79,7 @@ function LocalFilePicker({ value, onFileSelect }) {
       ref: inputRef,
       type: "file",
       onChange: (event) => {
-        onFileSelect(event.target.files?.[0]);
+        readFile(event.target.files?.[0]);
         event.target.value = "";
       },
       style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }
@@ -115,6 +139,15 @@ export function AddVideoPage() {
   const fields = React.useMemo(() => getFieldsForSelection(contentTypes, typeId, subtypeId), [contentTypes, subtypeId, typeId]);
   const currentStep = STEPS[stepIndex];
   const canSave = title.trim() && typeId;
+  const parsedTags = React.useMemo(() => parseVideoTags(tags), [tags]);
+  const readyChecks = React.useMemo(() => [
+    { id: "title", label: "عنوان واضح", ok: !!title.trim() },
+    { id: "type", label: "تصنيف محدد", ok: !!typeId },
+    { id: "source", label: "مصدر أو ملف", ok: !!(path.trim() || metadata.localFile) },
+    { id: "fields", label: "حقول جاهزة", ok: fields.every((field) => !field.required || metadata[fieldKey(field)] !== undefined && metadata[fieldKey(field)] !== "") }
+  ], [fields, metadata, path, title, typeId]);
+  const readyCount = readyChecks.filter((check) => check.ok).length;
+  const readyPercent = Math.round((readyCount / readyChecks.length) * 100);
 
   React.useEffect(() => {
     if (subtypeId && !subtypes.some((subtype) => subtype.id === subtypeId)) setSubtypeId("");
@@ -173,11 +206,56 @@ export function AddVideoPage() {
         jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "نموذج متعدد الخطوات لإضافة مادة أرشيفية بدون عرض كل الحقول دفعة واحدة." }),
         jsx("div", { className: "mt-5 grid gap-2 sm:grid-cols-4", children: STEPS.map((step, index) => {
           const Icon = step.icon;
-          return jsxs("button", { type: "button", onClick: () => setStepIndex(index), "aria-pressed": stepIndex === index, className: `va-tool-button rounded-xl border p-3 text-right transition-colors ${stepIndex === index ? "border-emerald-500/35 bg-emerald-500/10 text-white" : "border-white/10 bg-gray-950/35 text-gray-500 hover:bg-white/5"}`, children: [
-            jsx(Icon, { className: "mb-2 h-5 w-5 text-emerald-400" }),
-            jsx("span", { className: "text-sm font-semibold", children: step.label })
+          const done = index < stepIndex;
+          return jsxs(motion.button, { type: "button", whileHover: { y: -2 }, whileTap: { scale: 0.98 }, onClick: () => setStepIndex(index), "aria-pressed": stepIndex === index, className: `va-tool-button rounded-xl border p-3 text-right transition-colors ${stepIndex === index ? "border-emerald-500/35 bg-emerald-500/10 text-white" : done ? "border-emerald-500/20 bg-emerald-500/5 text-gray-300" : "border-white/10 bg-gray-950/35 text-gray-500 hover:bg-white/5"}`, children: [
+            jsxs("span", { className: "mb-2 flex items-center justify-between gap-2", children: [
+              jsx(Icon, { className: "h-5 w-5 text-emerald-400" }),
+              done ? jsx(CheckCircle2, { className: "h-4 w-4 text-emerald-300" }) : jsx(Circle, { className: "h-4 w-4 text-gray-600" })
+            ] }),
+            jsx("span", { className: "block text-sm font-semibold", children: step.label }),
+            jsx("span", { className: "mt-1 block text-xs leading-5 text-gray-500", children: step.detail })
           ] }, step.id);
         }) })
+      ] }),
+      jsxs("section", { className: "grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]", children: [
+        jsxs("div", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+          jsxs("div", { className: "flex items-center justify-between gap-3", children: [
+            jsxs("div", { className: "flex items-center gap-2", children: [
+              jsx(ClipboardCheck, { className: "h-5 w-5 text-emerald-300" }),
+              jsx("h2", { className: "text-sm font-bold text-white", children: "جاهزية الحفظ" })
+            ] }),
+            jsx("span", { dir: "ltr", className: "font-mono text-sm text-emerald-200", children: `${readyPercent}%` })
+          ] }),
+          jsx("div", { className: "mt-3 h-2 overflow-hidden rounded-full bg-white/10", dir: "rtl", children: jsx(motion.div, { className: "h-full rounded-full bg-emerald-400", initial: false, animate: { width: `${readyPercent}%` }, transition: { duration: 0.28 } }) }),
+          jsx("div", { className: "mt-3 grid gap-2 sm:grid-cols-2", children: readyChecks.map((check) => jsxs("span", { className: `inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${check.ok ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-500"}`, children: [
+            check.ok ? jsx(CheckCircle2, { className: "h-3.5 w-3.5" }) : jsx(Circle, { className: "h-3.5 w-3.5" }),
+            check.label
+          ] }, check.id)) })
+        ] }),
+        jsxs("div", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+          jsxs("div", { className: "flex items-center gap-2", children: [
+            jsx(Sparkles, { className: "h-5 w-5 text-amber-300" }),
+            jsx("h2", { className: "text-sm font-bold text-white", children: "ملخص مباشر" })
+          ] }),
+          jsx("div", { className: "mt-3 grid gap-2 text-sm text-gray-400", children: [
+            ["العنوان", title || "بانتظار الإدخال"],
+            ["التصنيف", selectedType?.name || "غير محدد"],
+            ["الوسوم", parsedTags.length ? `${parsedTags.length} وسم` : "لا توجد"],
+            ["المصدر", path || metadata.localFile?.name || "غير محدد"]
+          ].map(([label, value]) => jsxs("div", { className: "flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-gray-950/30 px-3 py-2", children: [
+            jsx("span", { className: "text-gray-500", children: label }),
+            jsx("span", { className: "min-w-0 truncate text-gray-200", children: value })
+          ] }, label)) })
+        ] }),
+        jsxs("div", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+          jsxs("div", { className: "flex items-center gap-2", children: [
+            jsx(Eye, { className: "h-5 w-5 text-cyan-300" }),
+            jsx("h2", { className: "text-sm font-bold text-white", children: "الخطوة الحالية" })
+          ] }),
+          jsx("p", { className: "mt-3 text-lg font-bold text-white", children: currentStep.label }),
+          jsx("p", { className: "mt-1 text-sm leading-7 text-gray-500", children: currentStep.detail }),
+          jsx("p", { className: "mt-3 rounded-xl border border-white/5 bg-gray-950/30 p-3 text-xs leading-6 text-gray-500", children: stepIndex === STEPS.length - 1 ? "راجع الملخص ثم احفظ، أو استخدم حفظ وإضافة آخر للعمل المتكرر." : "يمكنك الانتقال بين الخطوات بحرية؛ لن يتم الحفظ إلا من خطوة المراجعة." })
+        ] })
       ] }),
       jsxs("section", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
         jsx("h2", { className: "mb-4 text-lg font-bold text-white", children: currentStep.label }),
@@ -204,7 +282,7 @@ export function AddVideoPage() {
         currentStep.id === "review" && jsxs("div", { className: "grid gap-3 lg:grid-cols-2", children: [
           jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300", children: `العنوان: ${title || "غير محدد"}` }),
           jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300", children: `النوع: ${selectedType?.name || "غير محدد"}` }),
-          jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300", children: `عدد الوسوم: ${parseVideoTags(tags).length}` }),
+              jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300", children: `عدد الوسوم: ${parsedTags.length}` }),
           jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300", children: `حقول مخصصة: ${Object.keys(metadata).length}` })
         ] })
       ] }),

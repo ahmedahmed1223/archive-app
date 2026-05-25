@@ -2,12 +2,17 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  CheckCircle2,
   Database,
+  Eye,
   FolderOpen,
+  Layers3,
+  Palette,
   PenLine,
   Plus,
   Search,
   Trash2,
+  Workflow,
   X
 } from "lucide-react";
 import * as React from "react";
@@ -201,6 +206,9 @@ export function TypesPage() {
   const filteredTypes = React.useMemo(() => getFilteredContentTypes(contentTypes, query, includeArchived), [contentTypes, includeArchived, query]);
   const usageCounts = React.useMemo(() => getTypeUsageCounts(contentTypes, videoItems), [contentTypes, videoItems]);
   const selectedType = contentTypes.find((type) => type.id === selectedTypeId) || filteredTypes[0] || null;
+  const activeTypes = contentTypes.filter((type) => type.status !== "archived");
+  const totalSubtypes = contentTypes.reduce((sum, type) => sum + (type.subtypes?.length || 0), 0);
+  const totalFields = contentTypes.reduce((sum, type) => sum + (type.fields?.length || 0), 0);
 
   React.useEffect(() => {
     if (selectedTypeId && contentTypes.some((type) => type.id === selectedTypeId)) return;
@@ -243,7 +251,48 @@ export function TypesPage() {
             jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "أنواع المحتوى والفروع والحقول المخصصة، مع دعم حقل ملف محلي يحفظ metadata فقط." })
           ] }),
           jsx("button", { type: "button", onClick: () => { setEditingType(null); setShowEditor(true); }, className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Plus, { className: "h-4 w-4" }), "نوع جديد"] })
-        ] })
+        ] }),
+        jsx("div", { className: "mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4", children: [
+          { id: "types", label: "أنواع نشطة", value: formatNumber(activeTypes.length, settings.numberSystem), icon: Layers3 },
+          { id: "subtypes", label: "فروع", value: formatNumber(totalSubtypes, settings.numberSystem), icon: Workflow },
+          { id: "fields", label: "حقول مخصصة", value: formatNumber(totalFields, settings.numberSystem), icon: Database },
+          { id: "items", label: "عناصر مرتبطة", value: formatNumber(videoItems.length, settings.numberSystem), icon: Eye }
+        ].map((stat, index) => {
+          const Icon = stat.icon;
+          return jsxs(motion.div, {
+            initial: { opacity: 0, y: 8 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.18, delay: index * 0.03 },
+            className: "rounded-2xl border border-white/10 bg-gray-950/30 p-4",
+            children: [
+              jsxs("div", { className: "flex items-start justify-between gap-3", children: [
+                jsxs("div", { className: "min-w-0", children: [
+                  jsx("p", { className: "text-xs text-gray-500", children: stat.label }),
+                  jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: stat.value })
+                ] }),
+                jsx("span", { className: "va-icon-tile flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", children: jsx(Icon, { className: "h-5 w-5" }) })
+              ] })
+            ]
+          }, stat.id);
+        }) })
+      ] }),
+      jsxs("section", { className: "va-control-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+        jsxs("div", { className: "mb-3 flex items-center gap-2", children: [
+          jsx(Palette, { className: "h-5 w-5 text-emerald-300" }),
+          jsx("h2", { className: "text-sm font-bold text-white", children: "رحلة بناء نوع محتوى" })
+        ] }),
+        jsx("div", { className: "grid gap-2 md:grid-cols-4", children: [
+          ["الهوية", "اسم وأيقونة ولون"],
+          ["الفروع", "تقسيم داخلي واضح"],
+          ["الحقول", "بيانات مخصصة لكل نوع"],
+          ["الاستخدام", "ظهور منظم في الإضافة والأرشيف"]
+        ].map(([label, detail], index) => jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/30 p-3", children: [
+          jsxs("div", { className: "flex items-center gap-2", children: [
+            jsx(CheckCircle2, { className: "h-4 w-4 text-emerald-300" }),
+            jsx("p", { className: "text-sm font-semibold text-white", children: label })
+          ] }),
+          jsx("p", { className: "mt-1 text-xs leading-5 text-gray-500", children: detail })
+        ] }, label)) })
       ] }),
       showEditor && jsx(TypeEditor, { type: editingType, onCancel: () => { setShowEditor(false); setEditingType(null); }, onSave: saveType }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]", children: [
