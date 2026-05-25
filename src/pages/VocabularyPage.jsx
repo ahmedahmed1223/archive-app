@@ -18,6 +18,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   VOCABULARY_CATEGORIES,
   createVocabularyEntryValue,
@@ -349,14 +350,17 @@ export function VocabularyPage() {
           },
           onDelete: () => deleteEntry(entry)
         }, entry.id))
-      }) : jsxs("section", {
-        className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
-        children: [
-          jsx(BookOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
-          jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: vocabulary.length ? "لا توجد مصطلحات مطابقة" : "ابدأ قاموس المصطلحات" }),
-          jsx("p", { className: "mt-2 text-sm text-gray-500", children: vocabulary.length ? "غيّر الفئة أو امسح البحث لعرض المصطلحات." : "أضف مصطلحات موحدة ليستخدمها الفريق من خلال الاستدعاء الذكي @." }),
-          jsx("button", { type: "button", onClick: vocabulary.length ? () => { setQuery(""); setCategory("all"); } : startCreate, className: "mt-4 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: vocabulary.length ? "مسح الفلاتر" : "إضافة أول مصطلح" })
-        ]
+      }) : jsx("section", {
+        className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35",
+        children: jsx(EmptyState, {
+          icon: jsx(BookOpen, { className: "h-16 w-16" }),
+          title: vocabulary.length ? "لا توجد مصطلحات مطابقة" : "ابدأ قاموس المصطلحات",
+          description: vocabulary.length
+            ? "غيّر الفئة أو امسح البحث لعرض المصطلحات."
+            : "أضف مصطلحات موحدة ليستخدمها الفريق من خلال الاستدعاء الذكي @.",
+          actionLabel: vocabulary.length ? "مسح الفلاتر" : "إضافة أول مصطلح",
+          onAction: vocabulary.length ? () => { setQuery(""); setCategory("all"); } : startCreate
+        })
       }),
       jsx("div", {
         className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
