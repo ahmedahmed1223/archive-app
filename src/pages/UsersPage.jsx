@@ -14,6 +14,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import { hashPassword } from "../utils/passwordHash.js";
 import {
   USER_ROLES,
@@ -265,11 +266,11 @@ export function UsersPage() {
         onEdit: () => { setEditingUser(user); setShowForm(true); },
         onToggle: () => toggleUser(user),
         onDelete: () => disableUser(user)
-      }, user.id)) }) : jsxs("section", { className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
-        jsx(Users, { className: "mx-auto h-12 w-12 text-gray-600" }),
-        jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: users.length ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون بعد" }),
-        jsx("p", { className: "mt-2 text-sm text-gray-500", children: users.length ? "خفف البحث أو اختر كل الأدوار." : "أنشئ مستخدمًا جديدًا وحدد دوره الأولي." })
-      ] })
+      }, user.id)) }) : jsx("section", { className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35", children: jsx(EmptyState, {
+        icon: jsx(Users, { className: "h-16 w-16" }),
+        title: users.length ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون بعد",
+        description: users.length ? "خفف البحث أو اختر كل الأدوار." : "أنشئ مستخدمًا جديدًا وحدد دوره الأولي."
+      }) })
     ]
   });
 }

@@ -23,6 +23,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   createArchiveRouteParams
 } from "../features/archive/viewModel.js";
@@ -357,14 +358,17 @@ export function SearchPage() {
           })
         ]
       }),
-      results.length === 0 ? jsxs("section", {
-        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
-        children: [
-          jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-500" }),
-          jsx("h2", { className: "mt-4 text-lg font-bold text-white", children: activeFilterCount ? "لا توجد نتائج مطابقة" : "ابدأ بكتابة كلمة بحث" }),
-          jsx("p", { className: "mx-auto mt-2 max-w-xl text-sm leading-relaxed text-gray-500", children: activeFilterCount ? "جرّب كلمة أقصر، أو امسح بعض الفلاتر، أو افتح الأرشيف لاستعراض كل العناصر." : "اكتب جزءاً من العنوان أو الوسم أو الملاحظة لتظهر النتائج هنا مباشرة." }),
-          activeFilterCount > 0 && jsx("button", { type: "button", onClick: resetSearch, className: "mt-5 inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(RefreshCw, { className: "h-4 w-4" }), "مسح البحث"] })
-        ]
+      results.length === 0 ? jsx("section", {
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35",
+        children: jsx(EmptyState, {
+          type: "search",
+          title: activeFilterCount ? "لا توجد نتائج مطابقة" : "ابدأ بكتابة كلمة بحث",
+          description: activeFilterCount
+            ? "جرّب كلمة أقصر، أو امسح بعض الفلاتر، أو افتح الأرشيف لاستعراض كل العناصر."
+            : "اكتب جزءاً من العنوان أو الوسم أو الملاحظة لتظهر النتائج هنا مباشرة.",
+          actionLabel: activeFilterCount > 0 ? "مسح البحث" : undefined,
+          onAction: activeFilterCount > 0 ? resetSearch : undefined
+        })
       }) : jsxs("section", {
         className: "space-y-4",
         children: [

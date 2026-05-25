@@ -20,6 +20,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   createArchiveRouteParams,
   getArchiveActiveFilterCount,
@@ -518,20 +519,21 @@ export function ArchivePage() {
       jsxs("section", {
         className: "grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]",
         children: [
-          filteredItems.length === 0 ? jsxs("div", {
-            className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
-            children: [
-              jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-500" }),
-              jsx("h3", { className: "mt-4 text-lg font-bold text-white", children: showDeleted ? "سلة المحذوفات فارغة" : hasFilters ? "لا توجد نتائج مطابقة" : "الأرشيف فارغ" }),
-              jsx("p", { className: "mx-auto mt-2 max-w-xl text-sm leading-relaxed text-gray-500", children: showDeleted ? "لا توجد عناصر محذوفة حالياً." : hasFilters ? "جرّب مسح الفلاتر أو كلمة بحث أقصر." : "ابدأ بإضافة فيديو أو استيراد بيانات من جهازك." }),
-              jsxs("div", {
-                className: "mt-5 flex flex-wrap justify-center gap-2",
-                children: [
-                  hasFilters && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح الفلاتر" }),
-                  !showDeleted && jsx(ToolbarButton, { onClick: openAdd, active: true, icon: jsx(Video, { className: "h-4 w-4" }), children: "إضافة فيديو" })
-                ]
-              })
-            ]
+          filteredItems.length === 0 ? jsx("div", {
+            className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35",
+            children: jsx(EmptyState, {
+              type: showDeleted ? "trash" : "archive",
+              title: showDeleted ? "سلة المحذوفات فارغة" : hasFilters ? "لا توجد نتائج مطابقة" : "الأرشيف فارغ",
+              description: showDeleted
+                ? "لا توجد عناصر محذوفة حالياً."
+                : hasFilters
+                  ? "جرّب مسح الفلاتر أو كلمة بحث أقصر."
+                  : "ابدأ بإضافة فيديو أو استيراد بيانات من جهازك.",
+              actionLabel: !showDeleted ? "إضافة فيديو" : undefined,
+              onAction: !showDeleted ? openAdd : undefined,
+              secondaryActionLabel: hasFilters ? "مسح الفلاتر" : undefined,
+              onSecondaryAction: hasFilters ? resetFilters : undefined
+            })
           }) : jsxs("div", {
             className: "space-y-4",
             children: [

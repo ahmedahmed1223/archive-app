@@ -20,6 +20,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   FIELD_TYPE_OPTIONS,
   TYPE_COLORS,
@@ -307,11 +308,11 @@ export function TypesPage() {
               "إظهار المؤرشف"
             ] })
           ] }),
-          filteredTypes.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: filteredTypes.map((type, index) => jsx(TypeCard, { type, index, count: usageCounts[type.id] || 0, active: selectedType?.id === type.id, onOpen: () => setSelectedTypeId(type.id), onEdit: () => { setEditingType(type); setShowEditor(true); }, onArchive: () => archiveType(type) }, type.id)) }) : jsxs("div", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
-            jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
-            jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "لا توجد أنواع مطابقة" }),
-            jsx("p", { className: "mt-2 text-sm text-gray-500", children: "امسح البحث أو أنشئ نوعًا جديدًا." })
-          ] })
+          filteredTypes.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: filteredTypes.map((type, index) => jsx(TypeCard, { type, index, count: usageCounts[type.id] || 0, active: selectedType?.id === type.id, onOpen: () => setSelectedTypeId(type.id), onEdit: () => { setEditingType(type); setShowEditor(true); }, onArchive: () => archiveType(type) }, type.id)) }) : jsx("div", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35", children: jsx(EmptyState, {
+            type: "types",
+            title: "لا توجد أنواع مطابقة",
+            description: "امسح البحث أو أنشئ نوعًا جديدًا."
+          }) })
         ] }),
         jsxs("aside", { className: "va-preview-panel rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: selectedType ? [
           jsxs("div", { className: "flex items-start gap-3", children: [

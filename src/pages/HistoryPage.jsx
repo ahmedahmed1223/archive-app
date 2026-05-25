@@ -22,6 +22,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   HISTORY_ACTIONS,
   createHistoryRouteParams,
@@ -329,13 +330,15 @@ export function HistoryPage() {
           index,
           settings
         }, record.id || `${record.itemId}-${record.timestamp}-${index}`))
-      }) : jsxs("section", {
-        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
-        children: [
-          jsx(FileText, { className: "mx-auto h-12 w-12 text-gray-600" }),
-          jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: changeHistory.length ? "لا توجد نتائج مطابقة" : "لا توجد تغييرات مسجلة" }),
-          jsx("p", { className: "mt-2 text-sm text-gray-500", children: changeHistory.length ? "خفف البحث أو اختر كل الإجراءات لعرض السجل." : "ستظهر هنا عمليات الإنشاء والتعديل والحذف بعد استخدام الأرشيف." })
-        ]
+      }) : jsx("section", {
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35",
+        children: jsx(EmptyState, {
+          icon: jsx(FileText, { className: "h-16 w-16" }),
+          title: changeHistory.length ? "لا توجد نتائج مطابقة" : "لا توجد تغييرات مسجلة",
+          description: changeHistory.length
+            ? "خفف البحث أو اختر كل الإجراءات لعرض السجل."
+            : "ستظهر هنا عمليات الإنشاء والتعديل والحذف بعد استخدام الأرشيف."
+        })
       }),
       jsx(Pagination, { page: currentPage, totalPages, onChange: setPage }),
       jsxs("p", { className: "flex items-center gap-2 text-xs text-gray-600", children: [jsx(Clock, { className: "h-3.5 w-3.5" }), "السجل يعرض بيانات محلية محفوظة داخل هذا الجهاز."] })

@@ -15,6 +15,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   COLLECTION_COLORS,
   createVirtualCollectionValue,
@@ -312,12 +313,13 @@ export function CollectionsPage() {
               setShowForm(true);
             },
             onDelete: () => deleteCollection(collection)
-          }, collection.id)) }) : jsxs("div", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
-            jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
-            jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: virtualCollections.length ? "لا توجد مجموعات مطابقة" : "ابدأ تنظيم الأرشيف" }),
-            jsx("p", { className: "mt-2 text-sm text-gray-500", children: virtualCollections.length ? "امسح البحث أو استخدم كلمة أبسط." : "أنشئ مجموعة يدوية لتجميع الفيديوهات المهمة." }),
-            jsx("button", { type: "button", onClick: virtualCollections.length ? () => setQuery("") : startCreate, className: "mt-4 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: virtualCollections.length ? "مسح البحث" : "إنشاء مجموعة" })
-          ] })
+          }, collection.id)) }) : jsx("div", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35", children: jsx(EmptyState, {
+            icon: jsx(FolderOpen, { className: "h-16 w-16" }),
+            title: virtualCollections.length ? "لا توجد مجموعات مطابقة" : "ابدأ تنظيم الأرشيف",
+            description: virtualCollections.length ? "امسح البحث أو استخدم كلمة أبسط." : "أنشئ مجموعة يدوية لتجميع الفيديوهات المهمة.",
+            actionLabel: virtualCollections.length ? "مسح البحث" : "إنشاء مجموعة",
+            onAction: virtualCollections.length ? () => setQuery("") : startCreate
+          }) })
         ] }),
         jsx(CollectionDetails, {
           collection: selectedCollection,
