@@ -18,6 +18,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { EmptyState } from "../components/common/EmptyState.jsx";
 import {
   HIERARCHICAL_TAG_COLORS,
   buildHierarchicalTagModel,
@@ -362,14 +363,15 @@ export function HierarchicalTagsPage() {
           },
           onDelete: () => deleteTag(tag)
         }, tag.id))
-      }) : jsxs("section", {
-        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
-        children: [
-          jsx(Search, { className: "mx-auto h-12 w-12 text-gray-600" }),
-          jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "لا توجد وسوم مطابقة" }),
-          jsx("p", { className: "mt-2 text-sm text-gray-500", children: "جرب كلمة أبسط أو امسح البحث للعودة إلى الشجرة." }),
-          jsx("button", { type: "button", onClick: () => setQuery(""), className: "mt-4 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "مسح البحث" })
-        ]
+      }) : jsx("section", {
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35",
+        children: jsx(EmptyState, {
+          type: "search",
+          title: "لا توجد وسوم مطابقة",
+          description: "جرب كلمة أبسط أو امسح البحث للعودة إلى الشجرة.",
+          actionLabel: "مسح البحث",
+          onAction: () => setQuery("")
+        })
       }) : model.roots.length ? jsx("section", {
         className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4",
         role: "tree",
@@ -391,14 +393,15 @@ export function HierarchicalTagsPage() {
           onMove: moveTag,
           getTagUsageCount
         }, tag.id))
-      }) : jsxs("section", {
-        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
-        children: [
-          jsx(FolderTree, { className: "mx-auto h-12 w-12 text-gray-600" }),
-          jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "ابدأ شجرة الوسوم" }),
-          jsx("p", { className: "mt-2 text-sm text-gray-500", children: "أنشئ وسمًا جذرًا ثم أضف فروعًا لتسهيل الاستدعاء عبر #." }),
-          jsx("button", { type: "button", onClick: startCreateRoot, className: "mt-4 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "إنشاء أول وسم" })
-        ]
+      }) : jsx("section", {
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35",
+        children: jsx(EmptyState, {
+          icon: jsx(FolderTree, { className: "h-16 w-16" }),
+          title: "ابدأ شجرة الوسوم",
+          description: "أنشئ وسمًا جذرًا ثم أضف فروعًا لتسهيل الاستدعاء عبر #.",
+          actionLabel: "إنشاء أول وسم",
+          onAction: startCreateRoot
+        })
       })
     ]
   });
