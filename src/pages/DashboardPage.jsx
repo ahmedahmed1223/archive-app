@@ -147,8 +147,8 @@ export function DashboardPage() {
     auditLogs,
     users,
     settings,
-    sqliteReady,
     sqliteError,
+    isPasswordSet,
     setCurrentPage,
     setSelectedItemId,
     updateSettings,
@@ -229,6 +229,21 @@ export function DashboardPage() {
           demoIds.length > 0 && jsx("div", {
             className: "mt-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-100",
             children: `توجد ${demoIds.length} عناصر تجريبية. راجع الأرشيف أو الإعدادات قبل الاستخدام الفعلي.`
+          }),
+          settings.ui?.onboardingSecurityMode === "quick" && !isPasswordSet && jsx("div", {
+            className: "mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-100",
+            children: [
+              jsx("span", { children: "الحماية مؤجلة. يفضّل تعيين كلمة مرور المدير قبل استخدام التطبيق يوميًا." }),
+              jsx("button", {
+                type: "button",
+                onClick: () => {
+                  updateSettings?.({ ui: { ...(settings.ui || {}), lastSettingsTab: "security" } });
+                  goTo("settings");
+                },
+                className: "rounded-lg border border-amber-300/25 px-3 py-1.5 text-xs font-semibold text-amber-50 hover:bg-amber-500/10",
+                children: "فتح الأمان"
+              })
+            ]
           })
         ]
       }),
@@ -272,7 +287,7 @@ export function DashboardPage() {
               jsxs("div", {
                 className: "space-y-2",
                 children: [
-                  jsx(ReadinessRow, { label: "التخزين المحلي", value: sqliteReady ? "SQLite جاهز" : "IndexedDB أساسي", status: sqliteError ? "warning" : "ok" }),
+                  jsx(ReadinessRow, { label: "التخزين المحلي", value: sqliteError ? "تحقق التخزين" : "IndexedDB محلي", status: sqliteError ? "warning" : "ok" }),
                   jsx(ReadinessRow, { label: "آخر نسخة احتياطية", value: lastBackup, status: settings.lastBackupAt ? "ok" : "warning" }),
                   jsx(ReadinessRow, { label: "آخر فحص نظام", value: lastHealth, status: settings.systemHealth?.lastCheckAt ? "ok" : "neutral" }),
                   jsx(ReadinessRow, { label: "المفضلة", value: `${stats.favorites} عنصر`, status: "neutral" }),

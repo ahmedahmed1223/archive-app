@@ -7,12 +7,14 @@ import {
   PenLine,
   Plus,
   Search,
-  Trash2
+  Trash2,
+  X
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   FIELD_TYPE_OPTIONS,
   TYPE_COLORS,
@@ -73,7 +75,7 @@ function SubtypesEditor({ draft, setDraft }) {
       ] }),
       (draft.subtypes || []).length ? jsx("div", { className: "mt-3 flex flex-wrap gap-2", children: (draft.subtypes || []).map((subtype) => jsxs("span", { className: "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-gray-300", children: [
         subtype.name,
-        jsx("button", { type: "button", onClick: () => removeSubtype(subtype.id), className: "text-gray-500 hover:text-red-300", children: "×" })
+        jsx("button", { type: "button", onClick: () => removeSubtype(subtype.id), className: "text-gray-500 hover:text-red-300", "aria-label": `حذف الفرع ${subtype.name}`, children: jsx(X, { className: "h-3.5 w-3.5" }) })
       ] }, subtype.id)) }) : jsx("p", { className: "mt-3 text-xs text-gray-600", children: "لا توجد فروع بعد." })
     ]
   });
@@ -159,7 +161,7 @@ function TypeCard({ type, count, active, index, onOpen, onEdit, onArchive }) {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
     onClick: onOpen,
-    className: `cursor-pointer rounded-2xl border p-4 text-right transition-colors ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-emerald-500/25"}`,
+    className: `va-entity-card cursor-pointer rounded-2xl border p-4 text-right transition-colors ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-emerald-500/25"}`,
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
         jsxs("div", { className: "flex min-w-0 items-start gap-3", children: [
@@ -218,7 +220,12 @@ export function TypesPage() {
   };
 
   const archiveType = async (type) => {
-    if (!window.confirm(`هل تريد أرشفة نوع المحتوى "${type.name}"؟ لن يتم حذف عناصر الفيديو.`)) return;
+    const confirmed = await appConfirm(`هل تريد أرشفة نوع المحتوى "${type.name}"؟ لن يتم حذف عناصر الفيديو.`, {
+      title: "أرشفة نوع محتوى",
+      kind: "warning",
+      confirmLabel: "أرشفة"
+    });
+    if (!confirmed) return;
     await deleteContentType?.(type.id);
   };
 
@@ -226,10 +233,10 @@ export function TypesPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", { className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
+      jsxs("section", { className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
         jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
           jsxs("div", { className: "min-w-0", children: [
             jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Database, { className: "h-6 w-6 text-emerald-400" }), "إدارة الأنواع والحقول"] }),
@@ -241,7 +248,7 @@ export function TypesPage() {
       showEditor && jsx(TypeEditor, { type: editingType, onCancel: () => { setShowEditor(false); setEditingType(null); }, onSave: saveType }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]", children: [
         jsxs("div", { className: "space-y-4", children: [
-          jsxs("div", { className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]", children: [
+          jsxs("div", { className: "va-filter-surface grid gap-3 rounded-2xl border border-white/10 bg-gray-900/45 p-3 lg:grid-cols-[minmax(0,1fr)_auto]", children: [
             jsxs("label", { className: "relative block", children: [
               jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
               jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث في الأنواع والفروع...", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
@@ -251,13 +258,13 @@ export function TypesPage() {
               "إظهار المؤرشف"
             ] })
           ] }),
-          filteredTypes.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: filteredTypes.map((type, index) => jsx(TypeCard, { type, index, count: usageCounts[type.id] || 0, active: selectedType?.id === type.id, onOpen: () => setSelectedTypeId(type.id), onEdit: () => { setEditingType(type); setShowEditor(true); }, onArchive: () => archiveType(type) }, type.id)) }) : jsxs("div", { className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
+          filteredTypes.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: filteredTypes.map((type, index) => jsx(TypeCard, { type, index, count: usageCounts[type.id] || 0, active: selectedType?.id === type.id, onOpen: () => setSelectedTypeId(type.id), onEdit: () => { setEditingType(type); setShowEditor(true); }, onArchive: () => archiveType(type) }, type.id)) }) : jsxs("div", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
             jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
             jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "لا توجد أنواع مطابقة" }),
             jsx("p", { className: "mt-2 text-sm text-gray-500", children: "امسح البحث أو أنشئ نوعًا جديدًا." })
           ] })
         ] }),
-        jsxs("aside", { className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: selectedType ? [
+        jsxs("aside", { className: "va-preview-panel rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: selectedType ? [
           jsxs("div", { className: "flex items-start gap-3", children: [
             jsx("span", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl", style: { backgroundColor: `${selectedType.color || "#6366f1"}22`, color: selectedType.color || "#6366f1" }, children: selectedType.icon || "📁" }),
             jsxs("div", { className: "min-w-0", children: [

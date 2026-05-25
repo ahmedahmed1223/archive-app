@@ -6,6 +6,8 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  ChevronLeft,
+  ChevronRight,
   CirclePlus,
   Clock,
   FileText,
@@ -19,6 +21,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   HISTORY_ACTIONS,
   createHistoryRouteParams,
@@ -53,7 +56,8 @@ function HistoryMetric({ action, label, value, active, onClick }) {
   return jsxs("button", {
     type: "button",
     onClick,
-    className: `flex min-h-[92px] items-center gap-3 rounded-2xl border p-4 text-right transition-colors ${active ? toneClasses(getHistoryActionTone(action)) : "border-white/10 bg-gray-900/45 text-gray-300 hover:bg-white/5"}`,
+    "aria-pressed": active,
+    className: `va-action-card flex min-h-[92px] items-center gap-3 rounded-2xl border p-4 text-right transition-colors ${active ? toneClasses(getHistoryActionTone(action)) : "border-white/10 bg-gray-900/45 text-gray-300 hover:bg-white/5"}`,
     children: [
       jsx("span", {
         className: `flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${toneClasses(getHistoryActionTone(action))}`,
@@ -73,14 +77,14 @@ function HistoryMetric({ action, label, value, active, onClick }) {
 function Pagination({ page, totalPages, onChange }) {
   if (totalPages <= 1) return null;
   return jsxs("div", {
-    className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
     children: [
       jsx("button", {
         type: "button",
         disabled: page <= 1,
         onClick: () => onChange(page - 1),
-        className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
-        children: "السابق"
+        className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
+        children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"]
       }),
       jsx("p", {
         className: "text-sm text-gray-500",
@@ -90,8 +94,8 @@ function Pagination({ page, totalPages, onChange }) {
         type: "button",
         disabled: page >= totalPages,
         onClick: () => onChange(page + 1),
-        className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
-        children: "التالي"
+        className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
+        children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })]
       })
     ]
   });
@@ -104,7 +108,7 @@ function HistoryRecord({ record, itemTitle, index, settings }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: [
       jsxs("div", {
@@ -222,7 +226,12 @@ export function HistoryPage() {
   }, [currentPage, page]);
 
   const handleClearHistory = async () => {
-    if (!window.confirm("هل تريد مسح سجل التغييرات بالكامل؟ لا يمكن التراجع عن هذه العملية.")) return;
+    const confirmed = await appConfirm("هل تريد مسح سجل التغييرات بالكامل؟ لا يمكن التراجع عن هذه العملية.", {
+      title: "مسح سجل التغييرات",
+      kind: "danger",
+      confirmLabel: "مسح السجل"
+    });
+    if (!confirmed) return;
     try {
       if (typeof clearHistory === "function") await clearHistory();
       else showToast?.("تعذر العثور على إجراء مسح السجل", "error");
@@ -235,11 +244,11 @@ export function HistoryPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -275,7 +284,7 @@ export function HistoryPage() {
         ]
       }),
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4",
         children: [
           jsxs("div", {
             className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]",
@@ -321,7 +330,7 @@ export function HistoryPage() {
           settings
         }, record.id || `${record.itemId}-${record.timestamp}-${index}`))
       }) : jsxs("section", {
-        className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
         children: [
           jsx(FileText, { className: "mx-auto h-12 w-12 text-gray-600" }),
           jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: changeHistory.length ? "لا توجد نتائج مطابقة" : "لا توجد تغييرات مسجلة" }),

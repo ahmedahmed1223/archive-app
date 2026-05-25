@@ -2,7 +2,6 @@ import {
   CheckCircle2,
   FileVideo,
   FolderOpen,
-  Loader2,
   Upload,
   X
 } from "lucide-react";
@@ -242,7 +241,7 @@ export function FileArchiveWizard({
               tone="primary"
               disabled={!selectedRows.length || isSaving}
               onClick={createItems}
-              icon={isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              icon={<Upload className={`h-4 w-4 ${isSaving ? "opacity-60" : ""}`} />}
             >
               {isSaving ? "جار الإضافة..." : `إضافة ${formatNumber(selectedRows.length)} ملف`}
             </WizardButton>

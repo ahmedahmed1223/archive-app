@@ -71,7 +71,7 @@ function OptionButton({ active, children, onClick }) {
   return jsx("button", {
     type: "button",
     onClick,
-    className: `min-h-[88px] rounded-2xl border p-4 text-right transition-all ${
+    className: `va-tool-button min-h-[88px] rounded-2xl border p-4 text-right transition-all ${
       active
         ? "border-emerald-400/45 bg-emerald-500/15 text-white shadow-lg shadow-emerald-500/10"
         : "border-white/10 bg-white/[0.035] text-gray-300 hover:border-emerald-500/25 hover:bg-white/[0.06]"
@@ -85,7 +85,7 @@ function PrimaryButton({ children, onClick, disabled = false, type = "button" })
     type,
     onClick,
     disabled,
-    className: "inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50",
+    className: "va-primary-button inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50",
     children
   });
 }
@@ -95,7 +95,7 @@ function SecondaryButton({ children, onClick, disabled = false }) {
     type: "button",
     onClick,
     disabled,
-    className: "inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-5 py-2 text-sm font-semibold text-gray-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50",
+    className: "va-secondary-button inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 px-5 py-2 text-sm font-semibold text-gray-200 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50",
     children
   });
 }
@@ -397,7 +397,7 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
           jsx("h2", { className: "mt-2 text-lg font-bold text-white", children: "أرشيف الفيديو" }),
           jsx("p", { className: "mt-2 text-xs leading-6 text-gray-500", children: "تجهيز آمن وواضح بعد شاشة التحميل، ثم دخول يومي مباشر." })
         ] }),
-        jsx("ol", { className: "grid gap-2 rounded-3xl border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-3 lg:grid-cols-6", dir: "rtl", children: steps.map((step, index) => jsxs("li", {
+        jsx("ol", { className: "va-stepper-rtl grid gap-2 rounded-3xl border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-3 lg:grid-cols-6", dir: "rtl", children: steps.map((step, index) => jsxs("li", {
           className: `rounded-2xl border px-3 py-2 ${index === activeStepIndex ? "border-emerald-400/45 bg-emerald-500/15" : index < activeStepIndex ? "border-emerald-500/20 bg-emerald-500/5" : "border-white/5 bg-white/[0.02]"}`,
           children: [
             jsx("span", { className: "text-xs text-gray-500", children: String(index + 1).padStart(2, "0") }),

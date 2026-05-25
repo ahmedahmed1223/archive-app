@@ -13,6 +13,7 @@ import {
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { hashPassword } from "../utils/passwordHash.js";
 import {
   USER_ROLES,
@@ -115,7 +116,7 @@ function UserCard({ user, currentUser, users, index, onEdit, onToggle, onDelete 
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
@@ -201,7 +202,12 @@ export function UsersPage() {
 
   const disableUser = async (user) => {
     if (!canDeactivateUser(user, users) || currentUser?.id === user.id) return;
-    if (!window.confirm(`هل تريد تعطيل المستخدم "${user.displayName || user.username}"؟`)) return;
+    const confirmed = await appConfirm(`هل تريد تعطيل المستخدم "${user.displayName || user.username}"؟`, {
+      title: "تعطيل مستخدم",
+      kind: "warning",
+      confirmLabel: "تعطيل"
+    });
+    if (!confirmed) return;
     await deleteUser?.(user.id);
   };
 
@@ -209,10 +215,10 @@ export function UsersPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", { className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
+      jsxs("section", { className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
         jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
           jsxs("div", { className: "min-w-0", children: [
             jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Users, { className: "h-6 w-6 text-emerald-400" }), "المستخدمون"] }),
@@ -227,14 +233,14 @@ export function UsersPage() {
         ["نشط", summary.active, ShieldCheck],
         ["معطل", summary.inactive, Trash2],
         ["مدير نشط", summary.activeAdmins, Shield]
-      ].map(([label, value, Icon]) => jsxs("div", { className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+      ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
         jsxs("div", { className: "flex items-center justify-between gap-3", children: [
           jsx("span", { className: "text-sm text-gray-500", children: label }),
           jsx(Icon, { className: "h-5 w-5 text-emerald-400" })
         ] }),
         jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: formatNumber(value, settings.numberSystem) })
       ] }, label)) }),
-      jsxs("section", { className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4", children: [
+      jsxs("section", { className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4", children: [
         jsxs("div", { className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]", children: [
           jsxs("label", { className: "relative block", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),

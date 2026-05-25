@@ -14,6 +14,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
@@ -126,8 +127,8 @@ export function DetailPage() {
   const previewSource = item?.path && isHtml5PreviewableVideo(item.path) ? getHtml5VideoPreviewSource(item.path) : null;
 
   if (!item) {
-    return jsxs("div", { className: "space-y-6 p-4 text-center sm:p-6", dir: "rtl", children: [
-      jsx("section", { className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10", children: [
+    return jsxs("div", { className: "va-page-shell space-y-6 p-4 text-center sm:p-6", dir: "rtl", children: [
+      jsx("section", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10", children: [
         jsx(Video, { className: "mx-auto h-12 w-12 text-gray-600" }),
         jsx("h1", { className: "mt-3 text-xl font-bold text-white", children: "لم يتم اختيار فيديو" }),
         jsx("p", { className: "mt-2 text-sm text-gray-500", children: "افتح عنصرًا من الأرشيف لعرض تفاصيله." }),
@@ -172,7 +173,12 @@ export function DetailPage() {
       await restoreVideoItem?.(item.id);
       return;
     }
-    if (!window.confirm(`هل تريد نقل "${item.title}" إلى سلة المحذوفات؟`)) return;
+    const confirmed = await appConfirm(`هل تريد نقل "${item.title}" إلى سلة المحذوفات؟`, {
+      title: "حذف فيديو",
+      kind: "warning",
+      confirmLabel: "نقل للسلة"
+    });
+    if (!confirmed) return;
     await deleteVideoItem?.(item.id);
   };
 
@@ -180,10 +186,10 @@ export function DetailPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", { className: "overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 text-right shadow-2xl shadow-black/10", children: [
+      jsxs("section", { className: "va-page-hero overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 text-right shadow-2xl shadow-black/10", children: [
         previewSource ? jsx("video", { src: previewSource, controls: true, className: "aspect-video w-full bg-black object-contain" }) : item.thumbnail ? jsx("img", { src: item.thumbnail, alt: item.title, className: "h-64 w-full object-cover" }) : jsx("div", { className: "flex h-48 items-center justify-center bg-gray-950/60", children: jsx(Video, { className: "h-16 w-16 text-gray-700" }) }),
         jsxs("div", { className: "p-5", children: [
           jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
@@ -194,13 +200,13 @@ export function DetailPage() {
             ] }),
             jsxs("div", { className: "flex flex-wrap gap-2", children: [
               jsx("button", { type: "button", onClick: () => toggleFavorite?.(item.id), className: "rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200 hover:bg-amber-500/15", children: item.isFavorite ? "إزالة المفضلة" : "مفضلة" }),
-              jsx("button", { type: "button", onClick: () => setEditing((value) => !value), className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(PenLine, { className: "h-4 w-4" }), editing ? "إغلاق التحرير" : "تحرير"] }),
+              jsx("button", { type: "button", onClick: () => setEditing((value) => !value), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(PenLine, { className: "h-4 w-4" }), editing ? "إغلاق التحرير" : "تحرير"] }),
               jsx("button", { type: "button", onClick: deleteOrRestore, className: "inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200 hover:bg-red-500/15", children: [item.isDeleted ? jsx(RefreshCw, { className: "h-4 w-4" }) : jsx(Trash2, { className: "h-4 w-4" }), item.isDeleted ? "استعادة" : "حذف"] })
             ] })
           ] })
         ] })
       ] }),
-      editing && draft && jsxs("section", { className: "space-y-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-right", children: [
+      editing && draft && jsxs("section", { className: "va-card space-y-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-right", children: [
         jsx("h2", { className: "text-lg font-bold text-white", children: "تحرير التفاصيل" }),
         jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: draft.title || "", onChange: (event) => updateDraft({ title: event.target.value }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
@@ -225,7 +231,7 @@ export function DetailPage() {
         ] })
       ] }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]", children: [
-        jsxs("div", { className: "space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
+        jsxs("div", { className: "va-card space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
           jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(FileText, { className: "h-5 w-5 text-emerald-400" }), "البيانات"] }),
           item.notes && jsx("p", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3 text-sm leading-relaxed text-gray-400", children: item.notes }),
           item.metadata?.localFile && jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3", children: [
@@ -237,7 +243,7 @@ export function DetailPage() {
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
           ] }, field.id)) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })
         ] }),
-        jsxs("aside", { className: "space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
+        jsxs("aside", { className: "va-preview-panel space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
           jsxs("section", { children: [
             jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(Tags, { className: "h-5 w-5 text-emerald-400" }), "الوسوم"] }),
             item.tags?.length ? jsx("div", { className: "mt-3 flex flex-wrap gap-2", children: item.tags.map((tag) => jsx("span", { className: "rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs text-gray-300", children: tag }, tag)) }) : jsx("p", { className: "mt-3 text-sm text-gray-500", children: "لا توجد وسوم." })

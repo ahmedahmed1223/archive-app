@@ -2,6 +2,8 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  ChevronLeft,
+  ChevronRight,
   Database,
   FileText,
   HardDrive,
@@ -163,21 +165,21 @@ export function AddVideoPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", { className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
+      jsxs("section", { className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", children: [
         jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Video, { className: "h-6 w-6 text-emerald-400" }), "إضافة فيديو"] }),
         jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "نموذج متعدد الخطوات لإضافة مادة أرشيفية بدون عرض كل الحقول دفعة واحدة." }),
         jsx("div", { className: "mt-5 grid gap-2 sm:grid-cols-4", children: STEPS.map((step, index) => {
           const Icon = step.icon;
-          return jsxs("button", { type: "button", onClick: () => setStepIndex(index), className: `rounded-xl border p-3 text-right transition-colors ${stepIndex === index ? "border-emerald-500/35 bg-emerald-500/10 text-white" : "border-white/10 bg-gray-950/35 text-gray-500 hover:bg-white/5"}`, children: [
+          return jsxs("button", { type: "button", onClick: () => setStepIndex(index), "aria-pressed": stepIndex === index, className: `va-tool-button rounded-xl border p-3 text-right transition-colors ${stepIndex === index ? "border-emerald-500/35 bg-emerald-500/10 text-white" : "border-white/10 bg-gray-950/35 text-gray-500 hover:bg-white/5"}`, children: [
             jsx(Icon, { className: "mb-2 h-5 w-5 text-emerald-400" }),
             jsx("span", { className: "text-sm font-semibold", children: step.label })
           ] }, step.id);
         }) })
       ] }),
-      jsxs("section", { className: "rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
+      jsxs("section", { className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
         jsx("h2", { className: "mb-4 text-lg font-bold text-white", children: currentStep.label }),
         currentStep.id === "basic" && jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
@@ -206,12 +208,12 @@ export function AddVideoPage() {
           jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300", children: `حقول مخصصة: ${Object.keys(metadata).length}` })
         ] })
       ] }),
-      jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3", children: [
-        jsx("button", { type: "button", disabled: stepIndex <= 0, onClick: () => setStepIndex((value) => Math.max(0, value - 1)), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "السابق" }),
+      jsxs("div", { className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3", children: [
+        jsx("button", { type: "button", disabled: stepIndex <= 0, onClick: () => setStepIndex((value) => Math.max(0, value - 1)), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"] }),
         jsxs("div", { className: "flex flex-wrap gap-2", children: [
-          stepIndex < STEPS.length - 1 && jsx("button", { type: "button", onClick: () => setStepIndex((value) => Math.min(STEPS.length - 1, value + 1)), className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "التالي" }),
-          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(false), className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وفتح التفاصيل" }),
-          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(true), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وإضافة آخر" })
+          stepIndex < STEPS.length - 1 && jsx("button", { type: "button", onClick: () => setStepIndex((value) => Math.min(STEPS.length - 1, value + 1)), className: "va-primary-button inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })] }),
+          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(false), className: "va-primary-button rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وفتح التفاصيل" }),
+          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(true), className: "va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وإضافة آخر" })
         ] })
       ] })
     ]

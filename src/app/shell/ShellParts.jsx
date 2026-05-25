@@ -6,7 +6,6 @@ import {
   Home,
   Info,
   KeyRound,
-  Loader2,
   Lock,
   LogIn,
   Search,
@@ -196,15 +195,15 @@ export class AppErrorBoundary extends React.Component {
 export function DashboardSkeleton() {
   return (
     <div dir="rtl" className="space-y-5 p-6">
-      <div className="h-24 rounded-2xl bg-white/5 shimmer" />
+      <div className="va-skeleton h-24 rounded-2xl" />
       <div className="grid gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-32 rounded-2xl bg-white/5 shimmer" />
+          <div key={index} className="va-skeleton h-32 rounded-2xl" />
         ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="h-96 rounded-2xl bg-white/5 shimmer" />
-        <div className="h-96 rounded-2xl bg-white/5 shimmer" />
+        <div className="va-skeleton h-96 rounded-2xl" />
+        <div className="va-skeleton h-96 rounded-2xl" />
       </div>
     </div>
   );
@@ -266,16 +265,19 @@ export function SplashScreen({ steps = STARTUP_STEPS, currentStepId, progress = 
 export function StartupRecoveryScreen({ report, onRetry, onOpenDiagnostics }) {
   const message = report?.fatalError?.userMessage || report?.fatalError?.message || "تعذر بدء التطبيق بشكل كامل.";
   return (
-    <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
-      <section className="w-full max-w-xl rounded-3xl border border-red-500/25 bg-[#0b1626] p-7">
+    <main dir="rtl" className="va-onboarding-shell flex min-h-screen items-center justify-center bg-[#07111f] p-6 text-right text-white">
+      <section className="va-onboarding-panel w-full max-w-xl rounded-3xl border border-red-500/25 bg-[#0b1626] p-7">
         <ShieldAlert className="h-10 w-10 text-red-300" />
         <h1 className="mt-4 text-2xl font-bold">شاشة استرداد بدء التشغيل</h1>
         <p className="mt-3 text-sm leading-7 text-slate-300">{message}</p>
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-sm leading-7 text-slate-300">
+          بياناتك لا تُنقل إلى أي خادم. إذا استمر الخطأ، افتح فحص النظام لمعرفة حالة IndexedDB والمساحة المتاحة.
+        </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <button type="button" onClick={onOpenDiagnostics} className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">
+          <button type="button" onClick={onOpenDiagnostics} className="va-primary-button rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">
             فتح فحص النظام
           </button>
-          <button type="button" onClick={onRetry} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-200">
+          <button type="button" onClick={onRetry} className="va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-200">
             إعادة المحاولة
           </button>
         </div>
@@ -454,7 +456,7 @@ export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
           {filtered.map((command) => {
             const Icon = command.icon || Command;
             return (
-              <button key={command.id} type="button" onClick={() => runCommand(command)} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-right hover:bg-white/7">
+              <button key={command.id} type="button" onClick={() => runCommand(command)} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.07]">
                 <Icon className="h-5 w-5 shrink-0 text-emerald-300" />
                 <span className="min-w-0">
                   <span className="block font-semibold">{command.label}</span>

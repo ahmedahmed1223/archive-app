@@ -26,7 +26,7 @@ import {
 
 function ReportPanel({ children, className = "" }) {
   return jsx("section", {
-    className: `rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children
   });
@@ -190,11 +190,11 @@ export function ReportsPage() {
   };
 
   return jsxs("div", {
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -208,8 +208,8 @@ export function ReportsPage() {
               jsxs("div", {
                 className: "flex flex-wrap gap-2",
                 children: [
-                  jsxs("button", { type: "button", onClick: exportJson, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(Download, { className: "h-4 w-4" }), "JSON"] }),
-                  jsxs("button", { type: "button", onClick: exportExcel, className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(FileSpreadsheet, { className: "h-4 w-4" }), "Excel"] })
+                  jsxs("button", { type: "button", onClick: exportJson, className: "va-secondary-button inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(Download, { className: "h-4 w-4" }), "JSON"] }),
+                  jsxs("button", { type: "button", onClick: exportExcel, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(FileSpreadsheet, { className: "h-4 w-4" }), "Excel"] })
                 ]
               })
             ]

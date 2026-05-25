@@ -5,6 +5,7 @@ import {
   useAppStore
 } from "../../stores/index.js";
 import {
+  ArrowRight,
   Archive,
   CirclePlus,
   CircleQuestionMark,
@@ -39,7 +40,6 @@ export function PageContextBar({ currentPage, currentPageTitle }) {
     settings,
     updateSettings,
     videoItems,
-    sqliteReady,
     sqliteError
   } = useAppStore();
   const meta = getPageContextBarModel(currentPage, currentPageTitle);
@@ -105,7 +105,7 @@ export function PageContextBar({ currentPage, currentPageTitle }) {
   })();
 
   const secondaryActions = [
-    currentPage !== "dashboard" && { label: "رجوع", icon: "→", onClick: goBack },
+    currentPage !== "dashboard" && { label: "رجوع", icon: jsx(ArrowRight, { className: "h-4 w-4" }), onClick: goBack },
     currentPage !== "archive" && { label: "الأرشيف", icon: jsx(Archive, { className: "h-4 w-4" }), onClick: () => goToPage("archive") },
     currentPage === "archive" && { label: "استيراد ملفات", icon: jsx(Upload, { className: "h-4 w-4" }), onClick: openArchiveImport },
     currentPage !== "search" && { label: "بحث", icon: jsx(Search, { className: "h-4 w-4" }), onClick: () => goToPage("search") },
@@ -133,10 +133,8 @@ export function PageContextBar({ currentPage, currentPageTitle }) {
                   className: "rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-200",
                   children: "تحقق التخزين"
                 }) : jsx("span", {
-                  className: `rounded-full border px-2 py-0.5 text-[11px] ${
-                    sqliteReady ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-white/10 bg-white/5 text-gray-400"
-                  }`,
-                  children: sqliteReady ? "SQLite جاهز" : "IndexedDB محلي"
+                  className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-200",
+                  children: "IndexedDB محلي"
                 })
               ]
             }),

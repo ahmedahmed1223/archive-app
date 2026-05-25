@@ -11,6 +11,8 @@ import {
 } from "../stores/index.js";
 import {
   Archive,
+  ChevronLeft,
+  ChevronRight,
   FolderOpen,
   RefreshCw,
   Search,
@@ -35,7 +37,7 @@ const PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
 
 function SearchMetric({ label, value, hint }) {
   return jsxs("div", {
-    className: "rounded-xl border border-white/5 bg-gray-950/35 p-3 text-right",
+    className: "va-metric-card rounded-xl border border-white/5 bg-gray-950/35 p-3 text-right",
     children: [
       jsx("p", { className: "text-xs text-gray-500", children: label }),
       jsx("p", { className: "mt-1 text-lg font-bold text-white", children: value }),
@@ -49,7 +51,7 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-video-list-item rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: jsxs("div", {
       className: "grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]",
@@ -79,7 +81,7 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
         jsx("button", {
           type: "button",
           onClick: onOpen,
-          className: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+          className: "va-primary-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
           children: [jsx(Video, { className: "h-4 w-4" }), "فتح التفاصيل"]
         })
       ]
@@ -90,22 +92,22 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
 function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
   return jsxs("div", {
-    className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
     children: [
       jsx("button", {
         type: "button",
         onClick: () => onPageChange(currentPage - 1),
         disabled: currentPage <= 1,
-        className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
-        children: "السابق"
+        className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
+        children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"]
       }),
       jsx("p", { className: "text-sm text-gray-500", children: `الصفحة ${formatNumber(currentPage)} من ${formatNumber(totalPages)}` }),
       jsx("button", {
         type: "button",
         onClick: () => onPageChange(currentPage + 1),
         disabled: currentPage >= totalPages,
-        className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
-        children: "التالي"
+        className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40",
+        children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })]
       })
     ]
   });
@@ -238,11 +240,11 @@ export function SearchPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -257,8 +259,8 @@ export function SearchPage() {
               jsxs("div", {
                 className: "flex flex-wrap gap-2",
                 children: [
-                  jsx("button", { type: "button", onClick: openInArchive, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-white/5", children: [jsx(Archive, { className: "h-4 w-4" }), "عرض في الأرشيف"] }),
-                  jsx("button", { type: "button", onClick: () => setCurrentPage?.("add"), className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"] })
+                  jsx("button", { type: "button", onClick: openInArchive, className: "va-secondary-button inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-white/5", children: [jsx(Archive, { className: "h-4 w-4" }), "عرض في الأرشيف"] }),
+                  jsx("button", { type: "button", onClick: () => setCurrentPage?.("add"), className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"] })
                 ]
               })
             ]
@@ -275,7 +277,7 @@ export function SearchPage() {
         ]
       }),
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
+        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
         children: [
           jsxs("div", {
             className: "grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_180px_160px]",
@@ -356,7 +358,7 @@ export function SearchPage() {
         ]
       }),
       results.length === 0 ? jsxs("section", {
-        className: "rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35 p-8 text-center",
         children: [
           jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-500" }),
           jsx("h2", { className: "mt-4 text-lg font-bold text-white", children: activeFilterCount ? "لا توجد نتائج مطابقة" : "ابدأ بكتابة كلمة بحث" }),
@@ -367,7 +369,7 @@ export function SearchPage() {
         className: "space-y-4",
         children: [
           jsxs("div", {
-            className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
+            className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
             children: [
               jsx("p", { className: "font-semibold text-white", children: `عرض ${formatNumber(visibleResults.length)} من ${formatNumber(results.length)} نتيجة` }),
               jsx("p", { className: "text-xs text-gray-500", children: query ? `بحث عن: ${query}` : "كل النتائج حسب الفلاتر" })

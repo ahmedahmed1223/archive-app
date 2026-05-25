@@ -500,7 +500,9 @@ export function App() {
 
   if (isLoading) {
     return jsxs("div", {
-      className: `flex min-h-screen ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"}`,
+      className: `va-app-shell flex min-h-screen ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"}`,
+      "data-density": settings.ui?.visualDensity === "compact" ? "compact" : "comfortable",
+      "data-accent": settings.accentColor || "teal",
       children: [
         jsxs("div", {
           className: `hidden md:flex w-[280px] ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"} border-l ${resolvedTheme === "dark" ? "border-white/10" : "border-gray-200"} flex-col shrink-0`,
@@ -508,12 +510,12 @@ export function App() {
             jsxs("div", {
               className: `flex items-center gap-3 p-6 border-b ${resolvedTheme === "dark" ? "border-white/10" : "border-gray-200"}`,
               children: [
-                jsx("div", { className: `h-10 w-10 ${resolvedTheme === "dark" ? "bg-gray-800" : "bg-gray-200"} rounded-xl animate-pulse` }),
+                jsx("div", { className: "va-skeleton h-10 w-10 rounded-xl" }),
                 jsxs("div", {
                   className: "space-y-2 flex-1",
                   children: [
-                    jsx("div", { className: `h-4 w-24 ${resolvedTheme === "dark" ? "bg-gray-800" : "bg-gray-200"} rounded animate-pulse` }),
-                    jsx("div", { className: `h-3 w-32 ${resolvedTheme === "dark" ? "bg-gray-800" : "bg-gray-200"} rounded animate-pulse` })
+                    jsx("div", { className: "va-skeleton h-4 w-24 rounded" }),
+                    jsx("div", { className: "va-skeleton h-3 w-32 rounded" })
                   ]
                 })
               ]
@@ -521,7 +523,7 @@ export function App() {
             jsx("div", {
               className: "py-4 px-3 space-y-1",
               children: Array.from({ length: 8 }).map((_, index) => jsx("div", {
-                className: `h-11 ${resolvedTheme === "dark" ? "bg-gray-800/50" : "bg-gray-100"} rounded-xl animate-pulse`
+                className: "va-skeleton h-11 rounded-xl"
               }, index))
             })
           ]
@@ -545,6 +547,8 @@ export function App() {
   return jsxs("div", {
     dir: "rtl",
     className: `va-app-shell flex min-h-screen text-right ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"}`,
+    "data-density": settings.ui?.visualDensity === "compact" ? "compact" : "comfortable",
+    "data-accent": settings.accentColor || "teal",
     children: [
       jsx("a", {
         href: "#main-content",

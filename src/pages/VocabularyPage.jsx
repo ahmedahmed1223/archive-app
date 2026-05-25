@@ -17,6 +17,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   VOCABULARY_CATEGORIES,
   createVocabularyEntryValue,
@@ -127,7 +128,7 @@ function VocabularyCard({ entry, index, onEdit, onDelete }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: [
       jsxs("div", {
@@ -256,7 +257,12 @@ export function VocabularyPage() {
   };
 
   const deleteEntry = async (entry) => {
-    if (!window.confirm(`هل تريد حذف المصطلح "${entry.term}"؟`)) return;
+    const confirmed = await appConfirm(`هل تريد حذف المصطلح "${entry.term}"؟`, {
+      title: "حذف مصطلح",
+      kind: "danger",
+      confirmLabel: "حذف"
+    });
+    if (!confirmed) return;
     try {
       await deleteVocabularyEntry?.(entry.id);
       showToast?.("تم حذف المصطلح", "info");
@@ -269,11 +275,11 @@ export function VocabularyPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", {
             className: "flex flex-wrap items-start justify-between gap-4",
@@ -297,7 +303,7 @@ export function VocabularyPage() {
         onSave: saveEntry
       }),
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4",
         children: [
           jsxs("div", {
             className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",

@@ -10,6 +10,8 @@ import {
   Bell,
   BookOpen,
   ChartColumn,
+  ChevronLeft,
+  ChevronRight,
   CirclePlus,
   CircleQuestionMark,
   Database,
@@ -18,10 +20,12 @@ import {
   HardDrive,
   History,
   LayoutGrid,
+  Menu,
   Search,
   Shield,
   Tag,
   Users,
+  X,
   Video
 } from "lucide-react";
 import * as React from "react";
@@ -142,15 +146,17 @@ export function Sidebar() {
           !isMobile && jsx("button", {
             type: "button",
             onClick: () => setCollapsed((value) => !value),
-            className: "rounded-lg border border-white/10 px-2 py-1 text-xs text-gray-400 hover:bg-white/5 hover:text-white",
+            className: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white",
             title: collapsed ? "توسيع القائمة" : "طي القائمة",
-            children: collapsed ? "»" : "«"
+            "aria-label": collapsed ? "توسيع القائمة" : "طي القائمة",
+            children: collapsed ? jsx(ChevronLeft, { className: "h-4 w-4" }) : jsx(ChevronRight, { className: "h-4 w-4" })
           }),
           isMobile && jsx("button", {
             type: "button",
             onClick: toggleSidebar,
-            className: "rounded-lg border border-white/10 px-2 py-1 text-xs text-gray-400 hover:bg-white/5 hover:text-white",
-            children: "إغلاق"
+            className: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white",
+            "aria-label": "إغلاق القائمة الجانبية",
+            children: jsx(X, { className: "h-4 w-4" })
           })
         ]
       }),
@@ -228,9 +234,9 @@ export function Sidebar() {
       isMobile && jsx("button", {
         type: "button",
         onClick: toggleSidebar,
-        className: "fixed right-4 top-4 z-50 rounded-xl border border-white/10 bg-gray-950/85 px-3 py-2 text-sm text-white shadow-lg backdrop-blur md:hidden",
+        className: "fixed right-4 top-4 z-50 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-gray-950/85 text-white shadow-lg backdrop-blur md:hidden",
         "aria-label": sidebarOpen ? "إغلاق القائمة الجانبية" : "فتح القائمة الجانبية",
-        children: sidebarOpen ? "×" : "☰"
+        children: sidebarOpen ? jsx(X, { className: "h-5 w-5" }) : jsx(Menu, { className: "h-5 w-5" })
       }),
       isMobile && sidebarOpen && jsx("div", {
         className: "fixed inset-0 z-30 bg-black/50 md:hidden",

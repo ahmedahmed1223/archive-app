@@ -1,5 +1,8 @@
 import {
+  ChevronLeft,
+  ChevronRight,
   HardDrive,
+  MoreHorizontal,
   RotateCcw,
   Trash2,
   Video
@@ -122,6 +125,7 @@ export function ToolbarButton({ children, onClick, active = false, danger = fals
   return jsxs("button", {
     type: "button",
     onClick,
+    "aria-pressed": active,
     className: `va-tool-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
       active
         ? danger
@@ -163,7 +167,7 @@ export function ArchivePagination({ currentPage, totalPages, onPageChange }) {
         onClick: () => onPageChange(currentPage - 1),
         disabled: currentPage <= 1,
         className: `${buttonBase} border-white/10 text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40`,
-        children: "السابق"
+        children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"]
       }),
       jsx("div", {
         className: "flex flex-wrap justify-center gap-1.5",
@@ -175,7 +179,7 @@ export function ArchivePagination({ currentPage, totalPages, onPageChange }) {
           children: formatNumber(slot)
         }, slot) : jsx("span", {
           className: "inline-flex min-h-9 min-w-9 items-center justify-center px-2 text-gray-600",
-          children: "..."
+          children: jsx(MoreHorizontal, { className: "h-4 w-4" })
         }, slot))
       }),
       jsx("button", {
@@ -183,7 +187,7 @@ export function ArchivePagination({ currentPage, totalPages, onPageChange }) {
         onClick: () => onPageChange(currentPage + 1),
         disabled: currentPage >= totalPages,
         className: `${buttonBase} border-white/10 text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40`,
-        children: "التالي"
+        children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })]
       })
     ]
   });
@@ -257,6 +261,7 @@ export function SegmentedControl({ label, value, options, onChange }) {
         children: options.map((option) => jsx("button", {
           type: "button",
           onClick: () => onChange(option.value),
+          "aria-pressed": value === option.value,
           className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${value === option.value ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
           children: [option.icon, option.label]
         }, option.value))

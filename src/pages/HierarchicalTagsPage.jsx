@@ -17,6 +17,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   HIERARCHICAL_TAG_COLORS,
   buildHierarchicalTagModel,
@@ -162,7 +163,7 @@ function FlatTagCard({ tag, tags, index, onEdit, onDelete }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
         jsxs("div", { className: "min-w-0", children: [
@@ -254,7 +255,12 @@ export function HierarchicalTagsPage() {
     const message = descendantCount
       ? `سيتم حذف "${tag.name}" و${descendantCount} وسم فرعي. هل تريد المتابعة؟`
       : `هل تريد حذف الوسم "${tag.name}"؟`;
-    if (!window.confirm(message)) return;
+    const confirmed = await appConfirm(message, {
+      title: "حذف وسم هرمي",
+      kind: "danger",
+      confirmLabel: "حذف"
+    });
+    if (!confirmed) return;
     try {
       await deleteHierarchicalTag?.(tag.id);
       showToast?.("تم حذف الوسم", "info");
@@ -281,11 +287,11 @@ export function HierarchicalTagsPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
             jsxs("div", { className: "min-w-0", children: [
@@ -318,7 +324,7 @@ export function HierarchicalTagsPage() {
           ["وسوم جذر", rootCount, FolderTree],
           ["وسوم فرعية", childCount, ChevronLeft]
         ].map(([label, value, Icon]) => jsxs("div", {
-          className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+          className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
           children: [
             jsxs("div", { className: "flex items-center justify-between gap-3", children: [
               jsx("span", { className: "text-sm text-gray-500", children: label }),
@@ -329,7 +335,7 @@ export function HierarchicalTagsPage() {
         }, label))
       }),
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4",
         children: [
           jsxs("label", { className: "relative block", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
@@ -357,7 +363,7 @@ export function HierarchicalTagsPage() {
           onDelete: () => deleteTag(tag)
         }, tag.id))
       }) : jsxs("section", {
-        className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
         children: [
           jsx(Search, { className: "mx-auto h-12 w-12 text-gray-600" }),
           jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "لا توجد وسوم مطابقة" }),
@@ -365,7 +371,7 @@ export function HierarchicalTagsPage() {
           jsx("button", { type: "button", onClick: () => setQuery(""), className: "mt-4 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "مسح البحث" })
         ]
       }) : model.roots.length ? jsx("section", {
-        className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4",
         role: "tree",
         "aria-label": "شجرة الوسوم الهرمية",
         children: model.roots.map((tag) => jsx(TagNode, {
@@ -386,7 +392,7 @@ export function HierarchicalTagsPage() {
           getTagUsageCount
         }, tag.id))
       }) : jsxs("section", {
-        className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
+        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center",
         children: [
           jsx(FolderTree, { className: "mx-auto h-12 w-12 text-gray-600" }),
           jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "ابدأ شجرة الوسوم" }),

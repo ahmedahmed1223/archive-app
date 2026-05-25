@@ -73,6 +73,46 @@ main {
   color: var(--va-text);
 }
 
+html.light .va-app-shell {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.64), transparent 18rem),
+    #f7f4ee;
+  color: #172033;
+}
+
+.va-app-shell[data-accent="teal"] {
+  --va-action: #14b8a6;
+  --va-action-strong: #0f766e;
+}
+
+.va-app-shell[data-accent="indigo"] {
+  --va-action: #6366f1;
+  --va-action-strong: #4f46e5;
+}
+
+.va-app-shell[data-density="compact"] {
+  --va-page-gutter: clamp(0.75rem, 1.25vw, 1.1rem);
+  --va-panel-radius: 0.875rem;
+  --va-card-radius: 0.75rem;
+}
+
+.va-app-shell[data-density="compact"] .va-page-shell {
+  padding: var(--va-page-gutter);
+}
+
+.va-app-shell[data-density="compact"] .va-page-hero,
+.va-app-shell[data-density="compact"] .va-card,
+.va-app-shell[data-density="compact"] .va-data-card,
+.va-app-shell[data-density="compact"] .va-control-surface,
+.va-app-shell[data-density="compact"] .va-filter-surface {
+  padding: 0.9rem !important;
+}
+
+.va-app-shell[data-density="compact"] .va-metric-card,
+.va-app-shell[data-density="compact"] .va-action-card {
+  min-height: 5.75rem;
+}
+
 .va-page-shell {
   padding: var(--va-page-gutter);
 }
@@ -147,6 +187,12 @@ main textarea::placeholder {
   color: #64748b !important;
 }
 
+main :focus-visible,
+.va-onboarding-shell :focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--va-action) 76%, #ffffff);
+  outline-offset: 3px;
+}
+
 html.light main section[class*="bg-gradient-to-l"][class*="from-gray-900"],
 html.light .va-page-hero,
 html.light .va-card,
@@ -204,6 +250,36 @@ html.light main .text-gray-500 {
   color: #64748b !important;
 }
 
+html.light .va-sidebar {
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(247, 244, 238, 0.98)) !important;
+  border-inline-start-color: rgba(120, 113, 108, 0.18) !important;
+  box-shadow: -14px 0 34px rgba(88, 72, 48, 0.08);
+}
+
+html.light .va-sidebar .text-white,
+html.light .va-sidebar h2 {
+  color: #172033 !important;
+}
+
+html.light .va-sidebar .text-gray-400,
+html.light .va-sidebar .text-gray-500,
+html.light .va-context-bar .text-gray-400,
+html.light .va-context-bar .text-gray-500 {
+  color: #64748b !important;
+}
+
+html.light .va-context-bar {
+  background: rgba(255, 253, 248, 0.9) !important;
+  border-bottom-color: rgba(120, 113, 108, 0.16) !important;
+  box-shadow: 0 12px 30px rgba(88, 72, 48, 0.08);
+}
+
+html.light .va-secondary-button,
+html.light .va-tool-button {
+  background: rgba(255, 253, 248, 0.92) !important;
+  color: #485466 !important;
+}
+
 .va-page-hero {
   border-radius: var(--va-panel-radius) !important;
   padding: clamp(1rem, 2vw, 1.4rem) !important;
@@ -240,6 +316,11 @@ html.light main .text-gray-500 {
   background: rgba(8, 19, 34, 0.56) !important;
 }
 
+.va-entity-card,
+.va-status-badge {
+  isolation: isolate;
+}
+
 .va-title {
   color: var(--va-text-strong);
   letter-spacing: 0;
@@ -259,6 +340,12 @@ html.light main .text-gray-500 {
   background: linear-gradient(180deg, color-mix(in srgb, var(--va-action) 16%, transparent), rgba(255, 255, 255, 0.02)) !important;
   color: color-mix(in srgb, var(--va-action) 72%, #ffffff) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.va-tone-accent {
+  border-color: color-mix(in srgb, var(--va-action) 32%, transparent) !important;
+  background: color-mix(in srgb, var(--va-action) 14%, transparent) !important;
+  color: color-mix(in srgb, var(--va-action) 72%, #ffffff) !important;
 }
 
 .va-primary-button,
@@ -342,6 +429,22 @@ html.light main .text-gray-500 {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--va-action) 12%, transparent);
 }
 
+.va-skeleton {
+  position: relative;
+  overflow: hidden;
+  min-height: 1rem;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent),
+    rgba(148, 163, 184, 0.11);
+  background-size: 220% 100%, 100% 100%;
+  animation: va-shimmer 1.45s ease-in-out infinite;
+}
+
+@keyframes va-shimmer {
+  from { background-position: 120% 0, 0 0; }
+  to { background-position: -120% 0, 0 0; }
+}
+
 .va-video-card,
 .va-video-list-item,
 .va-preview-panel {
@@ -412,6 +515,21 @@ html.light main .text-gray-500 {
   white-space: nowrap;
 }
 
+.va-context-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem var(--va-page-gutter);
+}
+
+.va-context-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .va-onboarding-shell {
   background:
     linear-gradient(145deg, #07111f 0%, #0b1626 50%, #07111f 100%) !important;
@@ -441,6 +559,7 @@ html.light main .text-gray-500 {
 
 @media (prefers-reduced-motion: reduce) {
   .va-enter,
+  .va-skeleton,
   .va-video-card,
   .va-video-list-item,
   .va-action-card,
@@ -449,6 +568,10 @@ html.light main .text-gray-500 {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+
+  .va-skeleton {
+    background-position: 0 0 !important;
   }
 }
 
@@ -472,5 +595,17 @@ html.light main .text-gray-500 {
   .va-video-card:hover,
   .va-video-list-item:hover {
     transform: none;
+  }
+
+  .va-context-bar-inner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .va-context-actions {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding-bottom: 0.15rem;
   }
 }

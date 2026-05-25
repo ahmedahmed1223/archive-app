@@ -78,6 +78,7 @@ export function SegmentedButton({ active, children, onClick, danger = false }) {
   return jsx("button", {
     type: "button",
     onClick,
+    "aria-pressed": active,
     className: `va-tool-button min-h-10 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
       active
         ? danger

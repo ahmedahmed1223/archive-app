@@ -64,7 +64,6 @@ export function SettingsPage() {
     unlockApp,
     lockApp,
     runSystemHealthCheck,
-    sqliteReady,
     sqliteError,
     showToast,
     setCurrentPage
@@ -423,7 +422,7 @@ export function SettingsPage() {
         title: "فحص النظام",
         description: "فحص IndexedDB والمساحة والحالة العامة. SQLite مؤجل لهذه النسخة.",
         icon: jsx(Database, { className: "h-5 w-5 text-emerald-400" }),
-        aside: jsx("span", { className: cx("rounded-full border px-3 py-1 text-xs", sqliteReady ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-sky-500/20 bg-sky-500/10 text-sky-200"), children: sqliteReady ? "SQLite جاهز" : "IndexedDB أساسي" }),
+        aside: jsx("span", { className: cx("rounded-full border px-3 py-1 text-xs", sqliteError ? "border-amber-500/20 bg-amber-500/10 text-amber-200" : "border-emerald-500/20 bg-emerald-500/10 text-emerald-200"), children: sqliteError ? "تحقق التخزين" : "IndexedDB محلي" }),
         children: jsxs("div", {
           className: "space-y-3",
           children: [

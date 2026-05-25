@@ -139,6 +139,7 @@ export function ArchivePage() {
     showDeleted,
     showFavoritesOnly
   }), [filterType, filterSubtype, localSearch, showDeleted, showFavoritesOnly, sortDirection, sortField, videoItems]);
+  const quickSearchMatches = React.useMemo(() => localSearch.trim() ? filteredItems.slice(0, 5) : [], [filteredItems, localSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / activePageSize));
   const currentPage = Math.min(normalizeArchivePage(page), totalPages);
@@ -352,7 +353,7 @@ export function ArchivePage() {
         ]
       }),
       jsxs("section", {
-        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
+        className: "va-filter-surface z-20 rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm xl:sticky xl:top-3",
         children: [
           jsxs("div", {
             className: "grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_180px_180px]",
@@ -408,6 +409,27 @@ export function ArchivePage() {
               })
             ]
           }),
+          quickSearchMatches.length > 0 && jsxs("div", {
+            className: "mt-3 rounded-2xl border border-white/10 bg-gray-950/30 p-3",
+            children: [
+              jsx("p", { className: "mb-2 text-xs font-semibold text-gray-500", children: "نتائج سريعة" }),
+              jsx("div", {
+                className: "grid gap-2 md:grid-cols-2 xl:grid-cols-5",
+                children: quickSearchMatches.map((item) => jsx("button", {
+                  type: "button",
+                  onClick: () => {
+                    setPage(1);
+                    setPreviewId(item.id);
+                  },
+                  className: "va-action-card min-w-0 rounded-xl border border-white/10 bg-gray-900/35 px-3 py-2 text-right hover:border-emerald-500/25",
+                  children: [
+                    jsx("span", { className: "block truncate text-sm font-semibold text-white", children: item.title || "بدون عنوان" }),
+                    jsx("span", { className: "mt-1 block truncate text-xs text-gray-500", children: item.updatedAt ? `آخر تحديث: ${item.updatedAt.slice(0, 10)}` : "بدون تاريخ" })
+                  ]
+                }, item.id))
+              })
+            ]
+          }),
           jsxs("div", {
             className: "mt-3 flex gap-2 overflow-x-auto pb-1",
             "aria-label": "فلاتر الأنواع السريعة",
@@ -448,18 +470,21 @@ export function ArchivePage() {
                   jsx("button", {
                     type: "button",
                     onClick: () => setViewMode?.("grid"),
+                    "aria-pressed": activeViewMode === "grid",
                     className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "grid" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
                     children: [jsx(LayoutGrid, { className: "h-4 w-4" }), "شبكة"]
                   }),
                   jsx("button", {
                     type: "button",
                     onClick: () => setViewMode?.("list"),
+                    "aria-pressed": activeViewMode === "list",
                     className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "list" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
                     children: [jsx(Archive, { className: "h-4 w-4" }), "قائمة"]
                   }),
                   jsx("button", {
                     type: "button",
                     onClick: () => setViewMode?.("table"),
+                    "aria-pressed": activeViewMode === "table",
                     className: `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${activeViewMode === "table" ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
                     children: [jsx(FolderOpen, { className: "h-4 w-4" }), "جدول"]
                   })

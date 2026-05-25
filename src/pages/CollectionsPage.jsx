@@ -14,6 +14,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
+import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   COLLECTION_COLORS,
   createVirtualCollectionValue,
@@ -84,7 +85,7 @@ function CollectionCard({ collection, itemCount, active, index, onOpen, onEdit, 
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
     onClick: onOpen,
-    className: `cursor-pointer rounded-2xl border p-4 text-right transition-colors ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-emerald-500/25"}`,
+    className: `va-entity-card cursor-pointer rounded-2xl border p-4 text-right transition-colors ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-emerald-500/25"}`,
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
@@ -118,7 +119,7 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
 
   if (!collection) {
     return jsxs("aside", {
-      className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-8 text-center",
+      className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-8 text-center",
       children: [
         jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
         jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: "اختر مجموعة" }),
@@ -130,7 +131,7 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
   const canManageItems = collection.type !== "smart";
 
   return jsxs("aside", {
-    className: "space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+    className: "va-preview-panel space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start gap-3", children: [
@@ -233,7 +234,12 @@ export function CollectionsPage() {
   };
 
   const deleteCollection = async (collection) => {
-    if (!window.confirm(`هل تريد حذف المجموعة "${collection.name}"؟ لن يتم حذف عناصر الفيديو نفسها.`)) return;
+    const confirmed = await appConfirm(`هل تريد حذف المجموعة "${collection.name}"؟ لن يتم حذف عناصر الفيديو نفسها.`, {
+      title: "حذف مجموعة",
+      kind: "danger",
+      confirmLabel: "حذف"
+    });
+    if (!confirmed) return;
     try {
       await deleteVirtualCollection?.(collection.id);
       if (selectedCollectionId === collection.id) setSelectedCollectionId(null);
@@ -251,11 +257,11 @@ export function CollectionsPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.2 },
-    className: "space-y-6 p-4 sm:p-6",
+    className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
       jsxs("section", {
-        className: "rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
+        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
         children: [
           jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
             jsxs("div", { className: "min-w-0", children: [
@@ -281,7 +287,7 @@ export function CollectionsPage() {
           ["يدوية", summary.manual, FolderOpen],
           ["ذكية", summary.smart, Sparkles],
           ["عناصر مرتبطة", summary.linkedItems, Video]
-        ].map(([label, value, Icon]) => jsxs("div", { className: "rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+        ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
           jsxs("div", { className: "flex items-center justify-between gap-3", children: [
             jsx("span", { className: "text-sm text-gray-500", children: label }),
             jsx(Icon, { className: "h-5 w-5 text-emerald-400" })
@@ -291,7 +297,7 @@ export function CollectionsPage() {
       }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]", children: [
         jsxs("div", { className: "space-y-4", children: [
-          jsxs("label", { className: "relative block", children: [
+          jsxs("label", { className: "va-filter-surface relative block rounded-2xl border border-white/10 bg-gray-900/45 p-3", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
             jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث في المجموعات...", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
           ] }),
@@ -306,7 +312,7 @@ export function CollectionsPage() {
               setShowForm(true);
             },
             onDelete: () => deleteCollection(collection)
-          }, collection.id)) }) : jsxs("div", { className: "rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
+          }, collection.id)) }) : jsxs("div", { className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-900/35 p-10 text-center", children: [
             jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
             jsx("h2", { className: "mt-3 text-lg font-bold text-white", children: virtualCollections.length ? "لا توجد مجموعات مطابقة" : "ابدأ تنظيم الأرشيف" }),
             jsx("p", { className: "mt-2 text-sm text-gray-500", children: virtualCollections.length ? "امسح البحث أو استخدم كلمة أبسط." : "أنشئ مجموعة يدوية لتجميع الفيديوهات المهمة." }),

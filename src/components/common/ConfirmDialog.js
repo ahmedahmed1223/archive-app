@@ -19,24 +19,26 @@ function ensureDialogStyles() {
     }
     .va-native-dialog-panel {
       width: min(100%, 32rem);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--va-line-soft, rgba(255, 255, 255, 0.12));
       border-radius: 1.25rem;
-      background: #0b1626;
-      color: #f8fafc;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+        var(--color-bg-surface, #0b1626);
+      color: var(--color-text-primary, #f8fafc);
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
       padding: 1.25rem;
       text-align: right;
     }
     .va-native-dialog-title {
       margin: 0;
-      color: #fff;
+      color: var(--color-text-primary, #fff);
       font-size: 1rem;
       font-weight: 700;
       line-height: 1.6;
     }
     .va-native-dialog-message {
       margin: .75rem 0 0;
-      color: #cbd5e1;
+      color: var(--color-text-secondary, #cbd5e1);
       font-size: .9rem;
       line-height: 1.8;
       white-space: pre-wrap;
@@ -47,17 +49,17 @@ function ensureDialogStyles() {
       margin-top: 1rem;
       width: 100%;
       min-height: 2.75rem;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--va-line-soft, rgba(255, 255, 255, 0.12));
       border-radius: .85rem;
-      background: rgba(15, 23, 42, 0.88);
-      color: #fff;
+      background: color-mix(in srgb, var(--color-bg-primary, #07111f) 82%, transparent);
+      color: var(--color-text-primary, #fff);
       padding: .65rem .8rem;
       outline: none;
       text-align: right;
     }
     .va-native-dialog-input:focus {
-      border-color: rgba(16, 185, 129, 0.58);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.14);
+      border-color: color-mix(in srgb, var(--va-action, #14b8a6) 58%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--va-action, #14b8a6) 14%, transparent);
     }
     .va-native-dialog-actions {
       display: flex;
@@ -68,24 +70,24 @@ function ensureDialogStyles() {
     }
     .va-native-dialog-button {
       min-height: 2.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--va-line-soft, rgba(255, 255, 255, 0.12));
       border-radius: .85rem;
       padding: .55rem 1rem;
-      color: #e2e8f0;
-      background: rgba(255, 255, 255, 0.05);
+      color: var(--color-text-secondary, #e2e8f0);
+      background: color-mix(in srgb, var(--color-bg-primary, #07111f) 72%, transparent);
       font: inherit;
       cursor: pointer;
     }
     .va-native-dialog-button:hover {
-      background: rgba(255, 255, 255, 0.09);
+      background: color-mix(in srgb, var(--va-action, #14b8a6) 12%, transparent);
     }
     .va-native-dialog-confirm {
-      border-color: rgba(16, 185, 129, 0.35);
-      background: #059669;
+      border-color: color-mix(in srgb, var(--va-action, #14b8a6) 42%, transparent);
+      background: var(--va-action-strong, #0f766e);
       color: #fff;
     }
     .va-native-dialog-confirm:hover {
-      background: #10b981;
+      background: var(--va-action, #14b8a6);
     }
     .va-native-dialog-danger {
       border-color: rgba(239, 68, 68, 0.42);
@@ -118,10 +120,9 @@ function normalizeDialogInput(message, options = {}) {
 }
 
 function fallbackDialog(request, mode) {
-  const text = [request.title, request.message].filter(Boolean).join("\n\n");
-  if (mode === "prompt") return Promise.resolve(window.prompt(text, request.defaultValue));
-  if (mode === "confirm") return Promise.resolve(window.confirm(text));
-  window.alert(text);
+  console.warn("[VideoArchiveDialog]", [request.title, request.message].filter(Boolean).join(" | "));
+  if (mode === "prompt") return Promise.resolve(null);
+  if (mode === "confirm") return Promise.resolve(false);
   return Promise.resolve(true);
 }
 
