@@ -32,6 +32,7 @@ import {
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
   MotionPage,
+  PageHero,
   StatusBadge,
   Stepper
 } from "../components/ui/index.js";
@@ -675,34 +676,22 @@ export function DataCenterPage() {
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
-      jsxs("section", {
-        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
-        children: [
-          jsxs("div", {
-            className: "flex flex-wrap items-start justify-between gap-4",
+      jsx(PageHero, {
+        icon: jsx(Database, { className: "h-6 w-6 text-emerald-400" }),
+        title: "مركز البيانات",
+        description: "تدفق واحد للتصدير والاستيراد والنقل والنسخ الاحتياطي، بدون تمرير طويل أو خيارات مبعثرة.",
+        actions: jsx(StatusBadge, {
+          tone: settings.lastBackupAt ? "emerald" : "amber",
+          className: "shrink-0",
+          children: jsxs("span", {
+            className: "inline-flex items-center gap-1.5",
             children: [
-              jsxs("div", {
-                className: "min-w-0",
-                children: [
-                  jsxs("h2", { className: "va-title flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(Database, { className: "h-6 w-6 text-emerald-400" }), "مركز البيانات"] }),
-                  jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "تدفق واحد للتصدير والاستيراد والنقل والنسخ الاحتياطي، بدون تمرير طويل أو خيارات مبعثرة." })
-                ]
-              }),
-              jsx(StatusBadge, {
-                tone: settings.lastBackupAt ? "emerald" : "amber",
-                className: "shrink-0",
-                children: jsxs("span", {
-                  className: "inline-flex items-center gap-1.5",
-                  children: [
-                    jsx(Database, { className: "h-3.5 w-3.5" }),
-                    "آخر نسخة: ",
-                    settings.lastBackupAt ? formatDateTime(settings.lastBackupAt) : "لم تنشأ بعد"
-                  ]
-                })
-              })
+              jsx(Database, { className: "h-3.5 w-3.5" }),
+              "آخر نسخة: ",
+              settings.lastBackupAt ? formatDateTime(settings.lastBackupAt) : "لم تنشأ بعد"
             ]
           })
-        ]
+        })
       }),
       jsx("section", {
         className: "grid gap-4 sm:grid-cols-2 xl:grid-cols-4",

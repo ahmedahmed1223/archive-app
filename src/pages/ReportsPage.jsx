@@ -18,7 +18,7 @@ import { XLSX } from "../vendor/xlsx.js";
 import {
   downloadArchiveBlob
 } from "../services/data-portability/index.js";
-import { MotionPage } from "../components/ui/index.js";
+import { MotionPage, PageHero } from "../components/ui/index.js";
 import {
   formatDateTime,
   formatFileSize,
@@ -193,28 +193,17 @@ export function ReportsPage() {
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
-      jsxs("section", {
-        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
-        children: [
-          jsxs("div", {
-            className: "flex flex-wrap items-start justify-between gap-4",
-            children: [
-              jsxs("div", {
-                children: [
-                  jsxs("h2", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(ChartColumn, { className: "h-6 w-6 text-emerald-400" }), "التقارير والإحصائيات"] }),
-                  jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "ملخص بصري سريع لاتجاهات الأرشيف، توزيع الأنواع، النشاط الأخير، وقابلية التصدير." })
-                ]
-              }),
-              jsxs("div", {
-                className: "flex flex-wrap gap-2",
-                children: [
-                  jsxs("button", { type: "button", onClick: exportJson, className: "va-secondary-button inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(Download, { className: "h-4 w-4" }), "JSON"] }),
-                  jsxs("button", { type: "button", onClick: exportExcel, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(FileSpreadsheet, { className: "h-4 w-4" }), "Excel"] })
-                ]
-              })
-            ]
-          })
-        ]
+      jsx(PageHero, {
+        icon: jsx(ChartColumn, { className: "h-6 w-6 text-emerald-400" }),
+        title: "التقارير والإحصائيات",
+        description: "ملخص بصري سريع لاتجاهات الأرشيف، توزيع الأنواع، النشاط الأخير، وقابلية التصدير.",
+        actions: jsxs("div", {
+          className: "flex flex-wrap gap-2",
+          children: [
+            jsxs("button", { type: "button", onClick: exportJson, className: "va-secondary-button inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(Download, { className: "h-4 w-4" }), "JSON"] }),
+            jsxs("button", { type: "button", onClick: exportExcel, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white", children: [jsx(FileSpreadsheet, { className: "h-4 w-4" }), "Excel"] })
+          ]
+        })
       }),
       jsx("section", {
         className: "grid gap-4 sm:grid-cols-2 xl:grid-cols-4",

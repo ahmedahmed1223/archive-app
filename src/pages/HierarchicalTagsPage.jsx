@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
+import { PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   HIERARCHICAL_TAG_COLORS,
   buildHierarchicalTagModel,
@@ -291,21 +292,15 @@ export function HierarchicalTagsPage() {
     className: "va-page-shell space-y-6 p-4 sm:p-6",
     dir: "rtl",
     children: [
-      jsxs("section", {
-        className: "va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10",
-        children: [
-          jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
-            jsxs("div", { className: "min-w-0", children: [
-              jsxs("h1", { className: "flex items-center gap-2 text-2xl font-bold text-white", children: [jsx(FolderTree, { className: "h-6 w-6 text-emerald-400" }), "الوسوم الهرمية"] }),
-              jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "وسوم جذرية وفرعية تظهر في حقول الوسوم عند كتابة الرمز # مع حفظ المسار الكامل للوسم." })
-            ] }),
-            jsxs("div", { className: "flex flex-wrap gap-2", children: [
-              jsx("button", { type: "button", onClick: expandAll, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(ChevronDown, { className: "h-4 w-4" }), "توسيع الكل"] }),
-              jsx("button", { type: "button", onClick: collapseAll, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(ChevronLeft, { className: "h-4 w-4" }), "طي الكل"] }),
-              jsx("button", { type: "button", onClick: startCreateRoot, className: "inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(Plus, { className: "h-4 w-4" }), "وسم جذر"] })
-            ] })
-          ] })
-        ]
+      jsx(PageHero, {
+        icon: jsx(FolderTree, { className: "h-6 w-6 text-emerald-400" }),
+        title: "الوسوم الهرمية",
+        description: "وسوم جذرية وفرعية تظهر في حقول الوسوم عند كتابة الرمز # مع حفظ المسار الكامل للوسم.",
+        actions: jsxs("div", { className: "flex flex-wrap gap-2", children: [
+          jsxs("button", { type: "button", onClick: expandAll, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(ChevronDown, { className: "h-4 w-4" }), "توسيع الكل"] }),
+          jsxs("button", { type: "button", onClick: collapseAll, className: "inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(ChevronLeft, { className: "h-4 w-4" }), "طي الكل"] }),
+          jsxs("button", { type: "button", onClick: startCreateRoot, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white", children: [jsx(Plus, { className: "h-4 w-4" }), "وسم جذر"] })
+        ] })
       }),
       showForm && jsx(TagForm, {
         tag: editingTag,
