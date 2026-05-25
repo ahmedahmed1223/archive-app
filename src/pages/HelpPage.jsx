@@ -47,10 +47,17 @@ import {
   SHORTCUT_DISABLED,
   getEffectiveKeyboardShortcuts
 } from "../features/settings/keyboardShortcuts.js";
+import {
+  PageHero,
+  StatusBadge
+} from "../components/ui/index.js";
+import {
+  formatNumber
+} from "../utils/formatting.js";
 
 function HelpPanel({ title, children, icon = null, className = "" }) {
   return jsxs("section", {
-    className: `rounded-xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children: [
       jsxs("h3", {
@@ -67,8 +74,8 @@ function HelpPanel({ title, children, icon = null, className = "" }) {
 
 function HelpText({ children }) {
   return jsx("p", {
-    className: "text-sm leading-relaxed text-gray-300",
-    dir: "auto",
+    className: "va-bidi-text text-sm leading-relaxed text-gray-300",
+    dir: "rtl",
     children
   });
 }
@@ -80,7 +87,7 @@ function InfoGrid({ items }) {
       className: "rounded-lg border border-white/5 bg-gray-800/30 p-3",
       children: [
         jsx("h4", { className: "mb-1 text-sm font-medium text-emerald-400", children: title }),
-        jsx("p", { className: "text-sm leading-relaxed text-gray-400", dir: "auto", children: description })
+        jsx("p", { className: "va-bidi-text text-sm leading-relaxed text-gray-400", dir: "rtl", children: description })
       ]
     }, title))
   });
@@ -368,7 +375,7 @@ function createHelpSections(keyboardShortcuts) {
 }
 
 export function HelpPage() {
-  const { settings, updateSettings } = useAppStore();
+  const { settings, updateSettings, setCurrentPage } = useAppStore();
   const [activeSection, setActiveSection] = React.useState(settings.ui?.lastHelpSection || "getting-started");
   const [helpQuery, setHelpQuery] = React.useState("");
   const contentRef = React.useRef(null);
@@ -415,7 +422,7 @@ export function HelpPage() {
   };
 
   return jsxs("div", {
-    className: "help-page flex h-[calc(100vh-4rem)] gap-6 p-4 text-right sm:p-6",
+    className: "va-page-shell va-enter help-page flex h-[calc(100vh-4rem)] gap-6 p-4 text-right sm:p-6",
     dir: "rtl",
     role: "main",
     "aria-label": "المساعدة والدليل",
@@ -423,7 +430,7 @@ export function HelpPage() {
       jsx("aside", {
         className: "hidden w-56 shrink-0 lg:block",
         children: jsxs("div", {
-          className: "sticky top-6 rounded-xl border border-white/10 bg-gray-900/50 backdrop-blur-sm",
+          className: "va-tab-surface sticky top-6 rounded-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm",
           children: [
             jsxs("div", {
               className: "flex items-center gap-2 border-b border-white/5 p-4 text-sm font-semibold text-white",
@@ -455,49 +462,72 @@ export function HelpPage() {
       jsxs("div", {
         className: "min-w-0 flex-1",
         children: [
-          jsxs("header", {
-            className: "mb-6 space-y-3",
-            children: [
-              jsxs("h1", {
-                className: "flex items-center gap-2 text-2xl font-bold text-white",
-                children: [jsx(CircleQuestionMark, { className: "h-6 w-6 text-emerald-400" }), "المساعدة والدليل"]
-              }),
-              jsx("p", { className: "text-sm text-gray-400", children: "مركز معرفة قابل للبحث مع روابط مباشرة للأقسام" }),
-              jsxs("button", {
-                type: "button",
-                onClick: restartV1Tour,
-                className: "inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5",
-                children: [jsx(Sparkles, { className: "h-4 w-4 text-amber-300" }), "إعادة الجولة التعريفية"]
-              }),
-              jsxs("div", {
-                className: "relative max-w-2xl",
-                role: "search",
-                children: [
-                  jsx(Search, { className: "absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
-                  jsx("input", {
-                    value: helpQuery,
-                    onChange: (event) => setHelpQuery(event.target.value),
-                    placeholder: "ابحث في المساعدة، الاستيراد، النسخ الاحتياطي، الاختصارات...",
-                    dir: "auto",
-                    className: "va-bidi-input w-full rounded-lg border border-white/10 bg-gray-900/60 py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
-                  })
-                ]
-              }),
-              jsx("div", {
-                className: "flex flex-wrap gap-2",
-                children: HELP_QUICK_SECTION_LINKS.map(([sectionId, label]) => jsx("button", {
+          jsx(PageHero, {
+            className: "mb-6",
+            icon: jsx(CircleQuestionMark, { className: "h-6 w-6 text-emerald-400" }),
+            title: "المساعدة والدليل",
+            description: "مركز معرفة قابل للبحث، بروابط مباشرة للأقسام، ومصمم ليعطي المستخدم إجابة عملية بدون مغادرة السياق.",
+            actions: jsxs(Fragment, {
+              children: [
+                jsxs("button", {
                   type: "button",
-                  onClick: () => scrollToSection(sectionId),
-                  className: `rounded-lg border border-white/10 px-3 py-1.5 text-sm ${activeSection === sectionId ? "bg-emerald-500/10 text-emerald-300" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
-                  children: label
-                }, sectionId))
-              })
-            ]
+                  onClick: restartV1Tour,
+                  className: "va-secondary-button inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5",
+                  children: [jsx(Sparkles, { className: "h-4 w-4 text-amber-300" }), "إعادة الجولة"]
+                }),
+                jsxs("button", {
+                  type: "button",
+                  onClick: () => setCurrentPage?.("settings"),
+                  className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white",
+                  children: [jsx(Shield, { className: "h-4 w-4" }), "الإعدادات"]
+                })
+              ]
+            }),
+            children: jsxs("div", {
+              className: "mt-5 space-y-4",
+              children: [
+                jsxs("div", {
+                  className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
+                  children: [
+                    jsxs("div", {
+                      className: "relative",
+                      role: "search",
+                      children: [
+                        jsx(Search, { className: "absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
+                        jsx("input", {
+                          value: helpQuery,
+                          onChange: (event) => setHelpQuery(event.target.value),
+                          placeholder: "ابحث في المساعدة، الاستيراد، النسخ الاحتياطي، الاختصارات...",
+                          dir: "auto",
+                          className: "va-bidi-input w-full rounded-xl border border-white/10 bg-gray-950/45 py-3 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                        })
+                      ]
+                    }),
+                    jsxs("div", {
+                      className: "flex flex-wrap items-center gap-2",
+                      children: [
+                        jsx(StatusBadge, { tone: "emerald", children: `${formatNumber(filteredSections.length)} قسم` }),
+                        jsx(StatusBadge, { tone: "slate", children: `${formatNumber(keyboardShortcuts.length)} اختصار` })
+                      ]
+                    })
+                  ]
+                }),
+                jsx("div", {
+                  className: "flex flex-wrap gap-2",
+                  children: HELP_QUICK_SECTION_LINKS.map(([sectionId, label]) => jsx("button", {
+                    type: "button",
+                    onClick: () => scrollToSection(sectionId),
+                    className: `va-tool-button rounded-xl border px-3 py-2 text-sm ${activeSection === sectionId ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                    children: label
+                  }, sectionId))
+                })
+              ]
+            })
           }),
           jsx("div", {
             className: "mb-4 lg:hidden",
             children: jsx("div", {
-              className: "rounded-xl border border-white/10 bg-gray-900/50 p-3",
+              className: "va-tab-surface rounded-xl border border-white/10 bg-gray-900/50 p-3",
               children: jsx("div", {
                 className: "flex flex-wrap gap-2",
                 children: filteredSections.map((section) => jsxs("button", {
@@ -511,7 +541,7 @@ export function HelpPage() {
           }),
           jsx("div", {
             ref: contentRef,
-            className: "h-[calc(100vh-14rem)] overflow-y-auto pr-1",
+            className: "h-[calc(100vh-18rem)] overflow-y-auto pr-1",
             children: jsxs("div", {
               className: "space-y-6 pb-4",
               children: [

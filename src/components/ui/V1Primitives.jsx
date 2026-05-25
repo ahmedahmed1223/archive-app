@@ -25,7 +25,7 @@ export function StatusBadge({ tone = "slate", children, className = "" }) {
 
 export function PageHero({ icon, title, description, actions, children, className = "" }) {
   return (
-    <section className={cx("va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", className)}>
+    <section className={cx("va-page-hero rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 p-5 text-right shadow-2xl shadow-black/10", className)} dir="rtl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="va-title flex items-center gap-2 text-2xl font-bold text-white">
@@ -38,6 +38,31 @@ export function PageHero({ icon, title, description, actions, children, classNam
       </div>
       {children}
     </section>
+  );
+}
+
+export function Stepper({ steps, activeStepId, className = "" }) {
+  const activeIndex = Math.max(0, steps.findIndex((step) => step.id === activeStepId));
+  return (
+    <ol className={cx("va-stepper-rtl grid gap-2 rounded-2xl border border-white/10 bg-white/[0.035] p-2 text-right", className)} dir="rtl">
+      {steps.map((step, index) => (
+        <li
+          key={step.id}
+          className={cx(
+            "rounded-xl border px-3 py-2",
+            index === activeIndex
+              ? "border-emerald-400/45 bg-emerald-500/15 text-white"
+              : index < activeIndex
+                ? "border-emerald-500/20 bg-emerald-500/5 text-gray-200"
+                : "border-white/5 bg-white/[0.02] text-gray-500"
+          )}
+        >
+          <span className="va-number-badge text-xs">{String(index + 1).padStart(2, "0")}</span>
+          <p className="mt-1 text-sm font-semibold">{step.label}</p>
+          {step.detail && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-gray-500">{step.detail}</p>}
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -95,31 +120,6 @@ export function FormSection({ title, description, icon, actions, children, class
       </div>
       {children && <div className="mt-4 space-y-3">{children}</div>}
     </section>
-  );
-}
-
-export function Stepper({ steps, activeStepId, className = "" }) {
-  const activeIndex = Math.max(0, steps.findIndex((step) => step.id === activeStepId));
-  return (
-    <ol className={cx("va-stepper-rtl grid gap-2 rounded-2xl border border-white/10 bg-white/[0.035] p-2 text-right", className)} dir="rtl">
-      {steps.map((step, index) => (
-        <li
-          key={step.id}
-          className={cx(
-            "rounded-xl border px-3 py-2",
-            index === activeIndex
-              ? "border-emerald-400/45 bg-emerald-500/15 text-white"
-              : index < activeIndex
-                ? "border-emerald-500/20 bg-emerald-500/5 text-gray-200"
-                : "border-white/5 bg-white/[0.02] text-gray-500"
-          )}
-        >
-          <span className="va-number-badge text-xs">{String(index + 1).padStart(2, "0")}</span>
-          <p className="mt-1 text-sm font-semibold">{step.label}</p>
-          {step.detail && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-gray-500">{step.detail}</p>}
-        </li>
-      ))}
-    </ol>
   );
 }
 

@@ -4,6 +4,7 @@ import {
 import {
   Database,
   Download,
+  Eye,
   FileSpreadsheet,
   FileText,
   HardDrive,
@@ -29,6 +30,10 @@ import {
   runOperationPreflight
 } from "../services/health/index.js";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import {
+  StatusBadge,
+  Stepper
+} from "../components/ui/index.js";
 import {
   DATA_CENTER_TABS
 } from "../features/data-center/tabs.js";
@@ -61,6 +66,13 @@ import {
   formatFileSize,
   formatNumber
 } from "../utils/formatting.js";
+
+const DATA_SAFETY_STEPS = [
+  { id: "preflight", label: "فحص مبدئي", detail: "التخزين والمساحة وحجم العملية" },
+  { id: "preview", label: "معاينة", detail: "الجديد والمكرر والمتعارض" },
+  { id: "backup", label: "نسخة أمان", detail: "قبل الدمج أو الاستعادة" },
+  { id: "apply", label: "تطبيق", detail: "تصدير أو دمج أو استبدال" }
+];
 
 
 export function DataCenterPage() {
@@ -144,6 +156,13 @@ export function DataCenterPage() {
 
   const nextBackup = getNextBackupTime(settings.backupSchedule, settings.lastBackupAt);
   const nextBackupLabel = formatTimeUntilBackup(nextBackup) || "يدوي";
+  const activeSafetyStep = isWorking
+    ? "apply"
+    : activeTab === "backup" || activeTab === "transfer"
+      ? "backup"
+      : activeTab === "import" && importPreview
+        ? "preview"
+        : "preflight";
 
   const setActiveTab = (tabId) => {
     setActiveTabState(tabId);
@@ -369,7 +388,7 @@ export function DataCenterPage() {
           jsx(ActionButton, {
             onClick: () => handleExport(selectedFormat),
             disabled: isWorking,
-            icon: isWorking ? jsx(RefreshCw, { className: "h-4 w-4 animate-spin" }) : jsx(Download, { className: "h-4 w-4" }),
+            icon: isWorking ? jsx(RefreshCw, { className: "h-4 w-4 opacity-70" }) : jsx(Download, { className: "h-4 w-4" }),
             children: "تنزيل الآن"
           })
         ]
@@ -484,7 +503,21 @@ export function DataCenterPage() {
             children: [
               jsx(Upload, { className: "mx-auto h-8 w-8 text-gray-500" }),
               jsx("p", { className: "mt-3 text-sm font-medium text-gray-300", children: "لم يتم اختيار ملف بعد" }),
-              jsx("p", { className: "mt-1 text-xs text-gray-500", children: "اختر ملفاً لرؤية الجديد والمكرر والمتعارض قبل التنفيذ." })
+              jsx("p", { className: "mt-1 text-xs text-gray-500", children: "اختر ملفاً لرؤية الجديد والمكرر والمتعارض قبل التنفيذ." }),
+              jsx("div", {
+                className: "mt-5 grid gap-2 text-right sm:grid-cols-3",
+                children: [
+                  ["JSON", "نسخ احتياطي أو ملف نقل"],
+                  ["Excel", "ملف صادر من التطبيق فقط"],
+                  ["آمن", "لا كتابة قبل المعاينة"]
+                ].map(([label, detail]) => jsxs("div", {
+                  className: "rounded-xl border border-white/5 bg-white/[0.03] p-3",
+                  children: [
+                    jsx("p", { className: "text-xs font-semibold text-emerald-200", children: label }),
+                    jsx("p", { className: "mt-1 text-[11px] leading-5 text-gray-500", children: detail })
+                  ]
+                }, label))
+              })
             ]
           })
       }),
@@ -494,7 +527,7 @@ export function DataCenterPage() {
           jsx(ActionButton, {
             onClick: handleApplyImport,
             disabled: isWorking,
-            icon: isWorking ? jsx(RefreshCw, { className: "h-4 w-4 animate-spin" }) : jsx(Shield, { className: "h-4 w-4" }),
+            icon: isWorking ? jsx(RefreshCw, { className: "h-4 w-4 opacity-70" }) : jsx(Shield, { className: "h-4 w-4" }),
             children: importMode === "replace" ? "استبدال بعد النسخ" : "دمج بعد النسخ"
           }),
           jsx("button", {
@@ -655,9 +688,17 @@ export function DataCenterPage() {
                   jsx("p", { className: "mt-2 max-w-3xl text-sm leading-relaxed text-gray-400", children: "تدفق واحد للتصدير والاستيراد والنقل والنسخ الاحتياطي، بدون تمرير طويل أو خيارات مبعثرة." })
                 ]
               }),
-              jsxs("div", {
-                className: "rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100",
-                children: ["آخر نسخة: ", settings.lastBackupAt ? formatDateTime(settings.lastBackupAt) : "لم تنشأ بعد"]
+              jsx(StatusBadge, {
+                tone: settings.lastBackupAt ? "emerald" : "amber",
+                className: "shrink-0",
+                children: jsxs("span", {
+                  className: "inline-flex items-center gap-1.5",
+                  children: [
+                    jsx(Database, { className: "h-3.5 w-3.5" }),
+                    "آخر نسخة: ",
+                    settings.lastBackupAt ? formatDateTime(settings.lastBackupAt) : "لم تنشأ بعد"
+                  ]
+                })
               })
             ]
           })
@@ -670,6 +711,29 @@ export function DataCenterPage() {
           jsx(DataMetric, { label: "أنواع المحتوى", value: formatNumber(contentTypes.length), hint: `${formatNumber(hierarchicalTags.length)} وسم هرمي`, icon: jsx(Database, { className: "h-5 w-5" }) }),
           jsx(DataMetric, { label: "المجموعات", value: formatNumber(virtualCollections.length), hint: `${formatNumber(vocabulary.length)} مصطلح`, icon: jsx(HardDrive, { className: "h-5 w-5" }) }),
           jsx(DataMetric, { label: "الحجم المتوقع", value: formatFileSize(estimatedSize), hint: "حسب الفلاتر الحالية", icon: jsx(Download, { className: "h-5 w-5" }) })
+        ]
+      }),
+      jsxs("section", {
+        className: "va-control-surface rounded-2xl border border-white/10 bg-gray-900/50 p-4",
+        children: [
+          jsxs("div", {
+            className: "mb-3 flex flex-wrap items-center justify-between gap-3",
+            children: [
+              jsxs("div", {
+                className: "flex items-center gap-2",
+                children: [
+                  jsx(Eye, { className: "h-5 w-5 text-emerald-300" }),
+                  jsx("h3", { className: "text-sm font-bold text-white", children: "مسار الأمان قبل العمليات" })
+                ]
+              }),
+              jsx("p", { className: "text-xs text-gray-500", children: "يوضح أين تقف العملية الحالية قبل أي كتابة على البيانات." })
+            ]
+          }),
+          jsx(Stepper, {
+            steps: DATA_SAFETY_STEPS,
+            activeStepId: activeSafetyStep,
+            className: "md:grid-cols-4"
+          })
         ]
       }),
       jsxs("section", {
