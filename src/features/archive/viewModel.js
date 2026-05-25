@@ -23,6 +23,26 @@ export function normalizeArchivePage(page = 1) {
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
 }
 
+function flattenSearchValues(value, depth = 0) {
+  if (value == null || depth > 2) return [];
+  if (Array.isArray(value)) return value.flatMap((item) => flattenSearchValues(item, depth + 1));
+  if (typeof value === "object") return Object.values(value).flatMap((item) => flattenSearchValues(item, depth + 1));
+  return [String(value)];
+}
+
+function getArchiveItemSearchValues(item = {}) {
+  const metadata = item.metadata && typeof item.metadata === "object" ? item.metadata : {};
+  return [
+    item.title,
+    item.path,
+    item.filePath,
+    item.url,
+    item.notes,
+    ...(item.tags || []),
+    ...flattenSearchValues(metadata)
+  ];
+}
+
 export function getFilteredArchiveItems({
   videoItems = [],
   filterType = "all",
@@ -43,9 +63,7 @@ export function getFilteredArchiveItems({
     if (showFavoritesOnly && !item.isFavorite) return false;
     if (!query) return true;
 
-    return normalizeArabicSearchText(item.title).includes(query)
-      || (item.tags || []).some((tag) => normalizeArabicSearchText(tag).includes(query))
-      || Boolean(item.notes && normalizeArabicSearchText(item.notes).includes(query));
+    return getArchiveItemSearchValues(item).some((value) => normalizeArabicSearchText(value).includes(query));
   });
 
   return items.sort((a, b) => {

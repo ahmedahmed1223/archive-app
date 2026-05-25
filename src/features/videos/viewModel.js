@@ -61,6 +61,32 @@ export function normalizeLocalFileValue(value) {
   return null;
 }
 
+export function getLocalFileDisplayPath(localFile) {
+  const file = normalizeLocalFileValue(localFile);
+  if (!file) return "";
+  return file.relativePath || file.path || file.name || "";
+}
+
+export function createVideoLocalFilePatch(file, { currentTitle = "", metadataKey = "localFile" } = {}) {
+  const localFile = typeof file === "string"
+    ? normalizeLocalFileValue(file)
+    : normalizeLocalFileValue(createLocalFileValue(file) || file);
+  if (!localFile) return null;
+
+  const path = getLocalFileDisplayPath(localFile);
+  const title = String(currentTitle || "").trim()
+    ? undefined
+    : String(localFile.name || path || "").replace(/\.[^.]+$/, "");
+
+  return {
+    ...(title ? { title } : {}),
+    path,
+    metadata: {
+      [metadataKey]: localFile
+    }
+  };
+}
+
 export function getTypeLabel(contentTypes = [], typeId = "") {
   return contentTypes.find((type) => type.id === typeId)?.name || typeId || "غير مصنف";
 }

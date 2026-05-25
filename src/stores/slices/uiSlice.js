@@ -4,7 +4,7 @@ export const uiInitialState = {
   currentPage: "dashboard",
   selectedItemId: null,
   selectedTypeId: null,
-  sidebarOpen: true,
+  sidebarOpen: false,
   isLoading: true,
   isLocked: false,
   toast: null,

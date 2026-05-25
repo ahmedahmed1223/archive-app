@@ -8,59 +8,39 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { createLocalFileValue, createVideoItemValue } from "../videos/viewModel.js";
+import {
+  createFileImportRows,
+  createImportedVideoItem
+} from "./fileImport.js";
 import { formatFileSize, formatNumber } from "../../utils/formatting.js";
 
-const VIDEO_EXTENSIONS = new Set(["mp4", "webm", "ogg", "mov", "m4v", "avi", "mkv", "wmv"]);
-
-function getExtension(name = "") {
-  return String(name).includes(".") ? String(name).split(".").pop().toLowerCase() : "";
-}
-
-function isLikelyVideoFile(file) {
-  if (!file) return false;
-  if (String(file.type || "").startsWith("video/")) return true;
-  return VIDEO_EXTENSIONS.has(getExtension(file.name));
-}
-
-function createImportRows(files = [], existingItems = []) {
-  const existingFingerprints = new Set(existingItems.map((item) => {
-    const title = String(item.title || "").trim().toLowerCase();
-    const path = String(item.path || item.filePath || "").trim().toLowerCase();
-    return [title, path].filter(Boolean).join("|");
-  }));
-
-  return files.filter(isLikelyVideoFile).map((file, index) => {
-    const localFile = createLocalFileValue(file);
-    const title = file.name?.replace(/\.[^.]+$/, "") || `فيديو ${index + 1}`;
-    const path = localFile?.relativePath || localFile?.path || file.name || "";
-    const fingerprint = [title.trim().toLowerCase(), path.trim().toLowerCase()].filter(Boolean).join("|");
-    return {
-      id: `${file.name}-${file.size}-${file.lastModified}-${index}`,
-      file,
-      title,
-      path,
-      localFile,
-      duplicate: existingFingerprints.has(fingerprint),
-      selected: !existingFingerprints.has(fingerprint)
-    };
-  });
-}
-
-function WizardButton({ children, onClick, disabled = false, tone = "neutral", icon }) {
+function getWizardButtonClass(tone = "neutral", disabled = false) {
   const toneClass = tone === "primary"
     ? "border-emerald-500/30 bg-emerald-600 text-white hover:bg-emerald-500"
     : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10";
+  return `inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors ${disabled ? "cursor-not-allowed opacity-50" : ""} ${toneClass}`;
+}
+
+function WizardButton({ children, onClick, disabled = false, tone = "neutral", icon }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toneClass}`}
+      className={getWizardButtonClass(tone, disabled)}
     >
       {icon}
       {children}
     </button>
+  );
+}
+
+function FileChoiceLabel({ children, htmlFor, tone = "neutral", icon }) {
+  return (
+    <label htmlFor={htmlFor} className={getWizardButtonClass(tone)}>
+      {icon}
+      {children}
+    </label>
   );
 }
 
@@ -72,8 +52,8 @@ export function FileArchiveWizard({
   addVideoItem,
   showToast
 }) {
-  const fileInputRef = React.useRef(null);
-  const folderInputRef = React.useRef(null);
+  const fileInputId = React.useId();
+  const folderInputId = React.useId();
   const firstType = contentTypes.find((type) => type.status !== "archived") || contentTypes[0] || null;
   const [rows, setRows] = React.useState([]);
   const [typeId, setTypeId] = React.useState(firstType?.id || "");
@@ -104,9 +84,14 @@ export function FileArchiveWizard({
 
   const readFiles = (fileList) => {
     const files = Array.from(fileList || []);
-    const nextRows = createImportRows(files, videoItems);
+    const nextRows = createFileImportRows(files, videoItems);
     setRows(nextRows);
     if (!nextRows.length) showToast?.("لم يتم العثور على ملفات فيديو قابلة للإضافة", "warning");
+  };
+
+  const handleFileInputChange = (event) => {
+    readFiles(event.target.files);
+    event.target.value = "";
   };
 
   const selectedRows = rows.filter((row) => row.selected);
@@ -122,18 +107,10 @@ export function FileArchiveWizard({
     setIsSaving(true);
     try {
       for (const row of selectedRows) {
-        const item = createVideoItemValue({
-          title: row.title,
-          type: typeId,
-          subtype: subtypeId,
-          path: row.path,
-          notes,
-          metadata: {
-            localFile: row.localFile,
-            importedFrom: "fileArchiveWizard",
-            importedAt: new Date().toISOString()
-          },
-          tags: row.localFile?.extension ? [row.localFile.extension] : []
+        const item = createImportedVideoItem(row, {
+          typeId,
+          subtypeId,
+          notes
         });
         await addVideoItem?.(item);
       }
@@ -147,7 +124,7 @@ export function FileArchiveWizard({
   };
 
   return createPortal(
-    <div dir="rtl" className="fixed inset-0 z-[9985] overflow-y-auto bg-black/65 p-4 text-right text-white backdrop-blur-sm">
+    <div dir="rtl" className="fixed inset-0 z-[9985] overflow-y-auto bg-black/65 p-4 text-right text-white backdrop-blur-sm" style={{ zIndex: 2147483000 }}>
       <section className="mx-auto my-6 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] shadow-2xl shadow-black/35">
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 p-5">
           <div className="min-w-0">
@@ -182,15 +159,15 @@ export function FileArchiveWizard({
                 يمكنك اختيار ملفات منفردة أو مجلد كامل. تظهر معاينة ومكررّات محتملة قبل إنشاء العناصر.
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <WizardButton icon={<Upload className="h-4 w-4" />} onClick={() => fileInputRef.current?.click()} tone="primary">
+                <FileChoiceLabel htmlFor={fileInputId} icon={<Upload className="h-4 w-4" />} tone="primary">
                   اختيار ملفات
-                </WizardButton>
-                <WizardButton icon={<FolderOpen className="h-4 w-4" />} onClick={() => folderInputRef.current?.click()}>
+                </FileChoiceLabel>
+                <FileChoiceLabel htmlFor={folderInputId} icon={<FolderOpen className="h-4 w-4" />}>
                   اختيار مجلد
-                </WizardButton>
+                </FileChoiceLabel>
               </div>
-              <input ref={fileInputRef} type="file" multiple accept="video/*,.mp4,.webm,.ogg,.mov,.m4v,.avi,.mkv,.wmv" className="hidden" onChange={(event) => readFiles(event.target.files)} />
-              <input ref={folderInputRef} type="file" multiple webkitdirectory="" directory="" className="hidden" onChange={(event) => readFiles(event.target.files)} />
+              <input id={fileInputId} type="file" multiple accept="video/*,.mp4,.webm,.ogg,.mov,.m4v,.avi,.mkv,.wmv" onChange={handleFileInputChange} style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }} />
+              <input id={folderInputId} type="file" multiple webkitdirectory="" directory="" onChange={handleFileInputChange} style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }} />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">

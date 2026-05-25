@@ -25,6 +25,10 @@ import {
   parseArchiveRouteParams
 } from "../src/features/archive/viewModel.js";
 import {
+  createFileImportRows,
+  isLikelyVideoFile
+} from "../src/features/archive/fileImport.js";
+import {
   findShortcutConflict,
   getDefaultKeyboardShortcuts,
   getEffectiveKeyboardShortcuts,
@@ -77,6 +81,7 @@ import {
   createContentTypeValue,
   createCustomFieldValue,
   createSubtypeValue,
+  getDefaultArchiveContentTypes,
   getFieldsForSelection,
   getFilteredContentTypes,
   getTypeUsageCounts,
@@ -85,6 +90,7 @@ import {
 } from "../src/features/types/viewModel.js";
 import {
   createLocalFileValue,
+  createVideoLocalFilePatch,
   createVideoItemValue,
   getSubtypeLabel,
   getTypeLabel,
@@ -205,12 +211,19 @@ run("archive view model", () => {
     videoItems: [
       { id: "1", title: "حلقة خاصة", type: "show", subtype: "episode", tags: ["أخبار"], notes: "", updatedAt: "2026-01-02" },
       { id: "2", title: "مقطع محذوف", type: "show", tags: [], isDeleted: true, updatedAt: "2026-01-03" },
-      { id: "3", title: "فيلم", type: "movie", tags: ["وثائقي"], isFavorite: true, updatedAt: "2026-01-01" }
+      { id: "3", title: "فيلم", type: "movie", tags: ["وثائقي"], isFavorite: true, updatedAt: "2026-01-01" },
+      { id: "4", title: "لقطة محلية", type: "clip", tags: [], updatedAt: "2026-01-04", metadata: { localFile: { name: "field-recording.MOV", relativePath: "field/field-recording.MOV" } } }
     ],
     filterType: "show",
     searchQuery: "حلقه"
   });
   assert.deepEqual(items.map((item) => item.id), ["1"]);
+  assert.deepEqual(getFilteredArchiveItems({
+    videoItems: [
+      { id: "local", title: "مادة", metadata: { localFile: { name: "field-recording.MOV", relativePath: "field/field-recording.MOV" } } }
+    ],
+    searchQuery: "recording"
+  }).map((item) => item.id), ["local"]);
   assert.equal(getArchiveActiveFilterCount({ searchQuery: "x", filterType: "show", showDeleted: true }), 3);
   assert.equal(hasArchiveContentFilters({ showDeleted: true }), false);
   assert.equal(getArchiveResultRangeText({ total: 55, page: 3, itemsPerPage: 20 }), "عرض 41-55 من 55");
@@ -401,6 +414,9 @@ run("types view model", () => {
   assert.deepEqual(getFilteredContentTypes([archived, type], "مقاب", false).map((item) => item.id), ["interview"]);
   assert.equal(getTypeUsageCounts([type], [{ id: "v1", type: "interview" }, { id: "v2", type: "interview", isDeleted: true }]).interview, 1);
   assert.deepEqual(getFieldsForSelection([type], "interview", "full").map((field) => field.id), ["guest", "season", "file"]);
+  const defaults = getDefaultArchiveContentTypes();
+  assert.equal(defaults.length >= 5, true);
+  assert.equal(defaults.some((item) => (item.fields || []).some((field) => field.type === "localFile")), true);
 });
 
 run("videos view model", () => {
@@ -408,10 +424,29 @@ run("videos view model", () => {
   const file = createLocalFileValue({ name: "clip.mp4", size: 1024, type: "video/mp4", lastModified: Date.UTC(2026, 0, 1), webkitRelativePath: "clips/clip.mp4" });
   assert.equal(file.extension, "mp4");
   assert.equal(normalizeLocalFileValue("D:\\clips\\clip.mp4").name, "clip.mp4");
+  const patch = createVideoLocalFilePatch({ name: "raw.mov", size: 2048, type: "video/quicktime", webkitRelativePath: "raw/raw.mov" }, { currentTitle: "" });
+  assert.equal(patch.title, "raw");
+  assert.equal(patch.path, "raw/raw.mov");
+  assert.equal(patch.metadata.localFile.extension, "mov");
   const item = createVideoItemValue({ title: "فيديو", type: "movie", tags: "أ، ب", metadata: { local: file } });
   assert.deepEqual(item.tags, ["أ", "ب"]);
   assert.equal(getTypeLabel([{ id: "movie", name: "أفلام", subtypes: [{ id: "full", name: "كامل" }] }], "movie"), "أفلام");
   assert.equal(getSubtypeLabel([{ id: "movie", subtypes: [{ id: "full", name: "كامل" }] }], "movie", "full"), "كامل");
+});
+
+run("archive file import helpers", () => {
+  assert.equal(isLikelyVideoFile({ name: "clip.mkv", type: "" }), true);
+  assert.equal(isLikelyVideoFile({ name: "notes.pdf", type: "application/pdf" }), false);
+  const rows = createFileImportRows([
+    { name: "clip.mp4", size: 2048, type: "video/mp4", lastModified: Date.UTC(2026, 0, 1), webkitRelativePath: "batch/clip.mp4" },
+    { name: "notes.txt", size: 20, type: "text/plain", lastModified: Date.UTC(2026, 0, 1) }
+  ], [
+    { title: "old", path: "old.mp4" }
+  ]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].title, "clip");
+  assert.equal(rows[0].path, "batch/clip.mp4");
+  assert.equal(rows[0].localFile.extension, "mp4");
 });
 
 run("global shortcut action resolver", () => {

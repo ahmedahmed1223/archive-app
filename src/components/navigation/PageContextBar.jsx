@@ -73,6 +73,11 @@ export function PageContextBar({ currentPage, currentPageTitle }) {
     setCurrentPage("archive");
     if (typeof window !== "undefined") window.__videoArchiveApplyingHistory = false;
     writeAppRoute("archive", { params }, settings, false);
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("videoarchive:archive-import-open"));
+      }, 0);
+    }
   };
 
   const openDataTab = async (tab) => {

@@ -104,17 +104,20 @@ export function ArchivePage() {
   React.useEffect(() => {
     const applyRouteFlags = () => {
       const nextRouteState = parseArchiveRouteParams(parseAppRoute().params);
-      if (nextRouteState.openImport) setShowFileImportWizard(true);
+      setShowFileImportWizard(Boolean(nextRouteState.openImport));
       if (nextRouteState.viewMode && nextRouteState.viewMode !== viewMode) setViewMode?.(nextRouteState.viewMode);
       if (nextRouteState.page !== page) setPage(nextRouteState.page);
       if (nextRouteState.pageSize !== activePageSize) setPageSize(nextRouteState.pageSize);
       if (nextRouteState.itemSize !== activeItemSize) setItemSize(nextRouteState.itemSize);
     };
+    const applyImportEvent = () => setShowFileImportWizard(true);
     window.addEventListener("hashchange", applyRouteFlags);
     window.addEventListener("popstate", applyRouteFlags);
+    window.addEventListener("videoarchive:archive-import-open", applyImportEvent);
     return () => {
       window.removeEventListener("hashchange", applyRouteFlags);
       window.removeEventListener("popstate", applyRouteFlags);
+      window.removeEventListener("videoarchive:archive-import-open", applyImportEvent);
     };
   }, [activeItemSize, activePageSize, page, setViewMode, viewMode]);
 
@@ -186,11 +189,21 @@ export function ArchivePage() {
   }, [activeItemSize, activePageSize, activeViewMode, currentPage, filterType, filterSubtype, localSearch, settings, showDeleted, showFavoritesOnly, showFileImportWizard, sortDirection, sortField]);
 
   const typeById = React.useMemo(() => new Map(contentTypes.map((type) => [type.id, type])), [contentTypes]);
+  const typeCounts = React.useMemo(() => new Map(contentTypes.map((type) => [
+    type.id,
+    videoItems.filter((item) => item.type === type.id && !item.isDeleted).length
+  ])), [contentTypes, videoItems]);
   const activeType = typeById.get(filterType);
   const subtypes = activeType?.subtypes || [];
   const previewItem = filteredItems.find((item) => item.id === previewId) || visibleItems[0] || null;
   const activeFilterCount = getArchiveActiveFilterCount({ searchQuery: localSearch, filterType, filterSubtype, showDeleted, showFavoritesOnly });
   const hasFilters = hasArchiveContentFilters({ searchQuery: localSearch, filterType, filterSubtype, showFavoritesOnly });
+
+  React.useEffect(() => {
+    if (filterSubtype !== "all" && !subtypes.some((subtype) => subtype.id === filterSubtype)) {
+      setFilterSubtype?.("all");
+    }
+  }, [filterSubtype, setFilterSubtype, subtypes]);
 
   const goToPage = (nextPage) => {
     const normalized = normalizeArchivePage(nextPage);
@@ -358,7 +371,10 @@ export function ArchivePage() {
               }),
               jsxs("select", {
                 value: filterType,
-                onChange: (event) => setFilterType?.(event.target.value),
+                onChange: (event) => {
+                  setFilterType?.(event.target.value);
+                  setFilterSubtype?.("all");
+                },
                 className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
                 children: [
                   jsx("option", { value: "all", children: "كل الأنواع" }),
@@ -390,6 +406,35 @@ export function ArchivePage() {
                   jsx("option", { value: "title:desc", children: "العنوان ي-أ" })
                 ]
               })
+            ]
+          }),
+          jsxs("div", {
+            className: "mt-3 flex gap-2 overflow-x-auto pb-1",
+            "aria-label": "فلاتر الأنواع السريعة",
+            children: [
+              jsx("button", {
+                type: "button",
+                onClick: () => {
+                  setFilterType?.("all");
+                  setFilterSubtype?.("all");
+                },
+                className: `inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${filterType === "all" ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                children: ["كل المواد", jsx("span", { className: "rounded-full bg-white/10 px-2 py-0.5 text-xs", children: formatNumber(videoItems.filter((item) => !item.isDeleted).length) }, "count")]
+              }, "all"),
+              ...contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("button", {
+                type: "button",
+                onClick: () => {
+                  setFilterType?.(type.id);
+                  setFilterSubtype?.("all");
+                },
+                className: `inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${filterType === type.id ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5 hover:text-white"}`,
+                style: filterType === type.id && type.color ? { boxShadow: `inset 0 0 0 1px ${type.color}44` } : undefined,
+                children: [
+                  jsx("span", { className: "text-base", children: type.icon || "📁" }),
+                  jsx("span", { children: type.name || type.id }),
+                  jsx("span", { className: "rounded-full bg-white/10 px-2 py-0.5 text-xs", children: formatNumber(typeCounts.get(type.id) || 0) })
+                ]
+              }, type.id))
             ]
           }),
           jsxs("div", {

@@ -360,6 +360,9 @@
       flex-direction: column;
       padding: .75rem 1rem;
     }
+    .va-context-title {
+      padding-inline-start: 3.25rem;
+    }
     .va-context-actions {
       justify-content: stretch;
     }

@@ -4,6 +4,7 @@ import {
 import {
   Database,
   FileText,
+  HardDrive,
   Tags,
   Video
 } from "lucide-react";
@@ -14,9 +15,12 @@ import { motion } from "framer-motion";
 import { getFieldsForSelection } from "../features/types/viewModel.js";
 import {
   createLocalFileValue,
+  createVideoLocalFilePatch,
   createVideoItemValue,
+  normalizeLocalFileValue,
   parseVideoTags
 } from "../features/videos/viewModel.js";
+import { formatFileSize } from "../utils/formatting.js";
 
 
 const STEPS = [
@@ -28,6 +32,33 @@ const STEPS = [
 
 function fieldKey(field) {
   return field.storageKey || field.name || field.id;
+}
+
+function LocalFilePicker({ value, onFileSelect }) {
+  const file = normalizeLocalFileValue(value);
+  const inputRef = React.useRef(null);
+  return jsxs("div", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-3", children: [
+    jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3", children: [
+      jsxs("div", { className: "flex min-w-0 items-center gap-2 text-sm text-gray-300", children: [
+        jsx(HardDrive, { className: "h-4 w-4 shrink-0 text-emerald-300" }),
+        jsx("span", { className: "truncate", children: file?.name || "لم يتم اختيار ملف" })
+      ] }),
+      jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "استعراض" })
+    ] }),
+    file && jsxs("div", { className: "mt-2 space-y-1 text-xs text-gray-600", children: [
+      file.size > 0 && jsx("p", { children: formatFileSize(file.size) }),
+      (file.relativePath || file.path) && jsx("p", { dir: "ltr", className: "truncate text-left", children: file.relativePath || file.path })
+    ] }),
+    jsx("input", {
+      ref: inputRef,
+      type: "file",
+      onChange: (event) => {
+        onFileSelect(event.target.files?.[0]);
+        event.target.value = "";
+      },
+      style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }
+    })
+  ] });
 }
 
 function FieldInput({ field, value, onChange }) {
@@ -52,10 +83,7 @@ function FieldInput({ field, value, onChange }) {
     return jsx("input", { value: Array.isArray(value) ? value.join("، ") : value || "", onChange: (event) => onChange(key, parseVideoTags(event.target.value)), className: commonClass, placeholder: "قيم مفصولة بفاصلة" });
   }
   if (field.type === "localFile") {
-    return jsxs("div", { className: "space-y-2", children: [
-      jsx("input", { type: "file", onChange: (event) => onChange(key, createLocalFileValue(event.target.files?.[0])), className: "block w-full rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300 file:ml-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-white" }),
-      value?.name && jsx("p", { className: "truncate rounded-lg bg-gray-950/45 px-3 py-2 text-xs text-gray-400", children: value.name })
-    ] });
+    return jsx(LocalFilePicker, { value, onFileSelect: (file) => onChange(key, createLocalFileValue(file)) });
   }
   return jsx("input", { type: field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text", value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, placeholder: field.placeholder || field.label });
 }
@@ -91,6 +119,13 @@ export function AddVideoPage() {
   }, [subtypeId, subtypes]);
 
   const updateMetadata = (key, value) => setMetadata((current) => ({ ...current, [key]: value }));
+  const applyPrimaryLocalFile = (file) => {
+    const patch = createVideoLocalFilePatch(file, { currentTitle: title });
+    if (!patch) return;
+    if (patch.title) setTitle(patch.title);
+    setPath(patch.path);
+    setMetadata((current) => ({ ...current, ...patch.metadata }));
+  };
 
   const save = async (addAnother = false) => {
     if (!canSave) return;
@@ -147,6 +182,10 @@ export function AddVideoPage() {
         currentStep.id === "basic" && jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الرابط أو المسار" }), jsx("input", { value: path, onChange: (event) => setPath(event.target.value), dir: "ltr", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "https:// أو D:\\..." })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+            jsx("span", { children: "ملف محلي من الجهاز" }),
+            jsx(LocalFilePicker, { value: metadata.localFile, onFileSelect: applyPrimaryLocalFile })
+          ] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الصورة المصغرة" }), jsx("input", { value: thumbnail, onChange: (event) => setThumbnail(event.target.value), dir: "ltr", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "رابط صورة اختياري" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: notes, onChange: (event) => setNotes(event.target.value), className: "min-h-[100px] w-full rounded-xl border border-white/10 bg-gray-950/45 p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملخص أو ملاحظات أرشيفية" })] })
         ] }),

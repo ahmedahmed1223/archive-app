@@ -1,4 +1,5 @@
 import {
+  HardDrive,
   RotateCcw,
   Trash2,
   Video
@@ -12,8 +13,10 @@ import {
 } from "./mediaPreview.js";
 import {
   formatDateTime,
+  formatFileSize,
   formatNumber
 } from "../../utils/formatting.js";
+import { normalizeLocalFileValue } from "../videos/viewModel.js";
 
 export const ARCHIVE_ITEM_SIZE_OPTIONS = [
   { value: "compact", label: "صغير" },
@@ -87,9 +90,9 @@ const ARCHIVE_LIST_SIZE = {
 };
 
 const ARCHIVE_TABLE_SIZE = {
-  compact: { table: "min-w-[760px]", cell: "px-3 py-2", actionButton: "px-2.5 py-1 text-[11px]", tags: 3 },
-  comfortable: { table: "min-w-[820px]", cell: "px-4 py-3", actionButton: "px-3 py-1.5 text-xs", tags: 4 },
-  large: { table: "min-w-[920px]", cell: "px-5 py-4", actionButton: "px-4 py-2 text-sm", tags: 6 }
+  compact: { table: "min-w-[860px]", cell: "px-3 py-2", actionButton: "px-2.5 py-1 text-[11px]", tags: 3 },
+  comfortable: { table: "min-w-[940px]", cell: "px-4 py-3", actionButton: "px-3 py-1.5 text-xs", tags: 4 },
+  large: { table: "min-w-[1040px]", cell: "px-5 py-4", actionButton: "px-4 py-2 text-sm", tags: 6 }
 };
 
 export const ARCHIVE_ITEM_SIZE_LABELS = {
@@ -207,6 +210,41 @@ function VideoThumb({ item }) {
   });
 }
 
+function getArchiveFileMeta(item = {}) {
+  const localFile = normalizeLocalFileValue(item.metadata?.localFile || item.localFile);
+  const path = localFile?.relativePath || localFile?.path || item.path || item.filePath || item.url || "";
+  const name = localFile?.name || String(path || "").split(/[\\/]/).pop() || "";
+  const extension = localFile?.extension || (name.includes(".") ? name.split(".").pop()?.toLowerCase() || "" : "");
+  return {
+    localFile,
+    path,
+    name,
+    extension,
+    size: Number(localFile?.size || 0)
+  };
+}
+
+function FileMetaStrip({ item, compact = false }) {
+  const file = getArchiveFileMeta(item);
+  if (!file.name && !file.path) return null;
+
+  return jsxs("div", {
+    className: `rounded-xl border border-white/5 bg-gray-950/35 ${compact ? "px-2.5 py-2" : "px-3 py-2"}`,
+    children: [
+      jsxs("div", {
+        className: "flex items-center gap-2 text-xs text-gray-400",
+        children: [
+          jsx(HardDrive, { className: "h-3.5 w-3.5 shrink-0 text-emerald-300" }),
+          jsx("span", { className: "min-w-0 truncate font-medium text-gray-300", children: file.name || "ملف محلي" }),
+          file.extension && jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] uppercase text-emerald-100", children: file.extension })
+        ]
+      }),
+      file.size > 0 && jsx("p", { className: "mt-1 text-[11px] text-gray-600", children: formatFileSize(file.size) }),
+      file.path && !compact && jsx("p", { className: "mt-1 truncate text-left text-[11px] text-gray-600", dir: "ltr", children: file.path })
+    ]
+  });
+}
+
 export function SegmentedControl({ label, value, options, onChange }) {
   return jsxs("div", {
     className: "flex flex-wrap items-center gap-2",
@@ -264,6 +302,7 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
                   children: tag
                 }, tag))
               }),
+              jsx(FileMetaStrip, { item, compact: itemSize === "compact" }),
               jsx("p", { className: `${size.meta} text-gray-600`, children: item.updatedAt ? formatDateTime(item.updatedAt) : "لم يسجل تحديث" })
             ]
           })
@@ -348,6 +387,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
               children: tag
             }, tag))
           }),
+          jsx("div", { className: "mt-3", children: jsx(FileMetaStrip, { item, compact: itemSize === "compact" }) }),
           jsx("p", { className: "mt-3 text-xs text-gray-600", children: item.updatedAt ? formatDateTime(item.updatedAt) : "لم يسجل تحديث" })
         ]
       }),
@@ -400,6 +440,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
               children: [
                 jsx("th", { className: `${size.cell} font-medium`, children: "العنوان" }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "النوع" }),
+                jsx("th", { className: `${size.cell} font-medium`, children: "الملف" }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "الوسوم" }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "آخر تحديث" }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "إجراءات" })
@@ -427,6 +468,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   ]
                 }),
                 jsx("td", { className: `${size.cell} text-gray-400`, children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف" }),
+                jsx("td", { className: size.cell, children: jsx(FileMetaStrip, { item, compact: true }) }),
                 jsx("td", {
                   className: size.cell,
                   children: item.tags?.length ? jsx("div", {
@@ -471,6 +513,7 @@ export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
   }
 
   const source = getHtml5VideoPreviewSource(item.path || item.filePath || item.url || "");
+  const file = getArchiveFileMeta(item);
   return jsxs("aside", {
     className: "va-preview-panel h-fit rounded-2xl border border-white/10 bg-gray-900/55 p-4 text-right backdrop-blur-sm xl:sticky xl:top-4",
     dir: "rtl",
@@ -489,6 +532,14 @@ export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
       }),
       jsx("h3", { className: "mt-4 text-lg font-bold leading-relaxed text-white", children: item.title || "بدون عنوان" }),
       jsx("p", { className: "mt-1 text-sm text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
+      (file.name || file.path) && jsxs("div", {
+        className: "mt-4 rounded-xl border border-white/10 bg-gray-950/35 p-3",
+        children: [
+          jsxs("div", { className: "flex items-center gap-2 text-sm font-semibold text-gray-200", children: [jsx(HardDrive, { className: "h-4 w-4 text-emerald-300" }), file.name || "ملف محلي"] }),
+          file.size > 0 && jsx("p", { className: "mt-1 text-xs text-gray-600", children: formatFileSize(file.size) }),
+          file.path && jsx("p", { className: "mt-2 break-all text-left text-xs text-gray-600", dir: "ltr", children: file.path })
+        ]
+      }),
       item.notes && jsx("p", { className: "mt-3 line-clamp-4 text-sm leading-relaxed text-gray-400", children: item.notes }),
       item.tags?.length > 0 && jsxs("div", {
         className: "mt-4 flex flex-wrap gap-1.5",

@@ -93,6 +93,110 @@ export function createContentTypeValue(partial = {}) {
   };
 }
 
+const DEFAULT_ARCHIVE_CONTENT_TYPE_DEFINITIONS = [
+  {
+    id: "type_raw-footage",
+    name: "مواد خام",
+    nameEn: "raw-footage",
+    icon: "🎞️",
+    color: "#14b8a6",
+    fields: [
+      { id: "field_raw_local_file", label: "الملف المحلي", storageKey: "localFile", type: "localFile", order: 0, description: "اختر الملف الأصلي من الجهاز لحفظ بياناته داخل المادة." },
+      { id: "field_raw_source", label: "المصدر", storageKey: "source", type: "text", order: 1 },
+      { id: "field_raw_recorded_at", label: "تاريخ التسجيل", storageKey: "recordedAt", type: "date", order: 2 }
+    ],
+    subtypes: ["لقطة ميدانية", "B-roll", "أرشيف قديم"]
+  },
+  {
+    id: "type_interviews",
+    name: "مقابلات",
+    nameEn: "interviews",
+    icon: "🎙️",
+    color: "#10b981",
+    fields: [
+      { id: "field_interview_local_file", label: "ملف المقابلة", storageKey: "localFile", type: "localFile", order: 0 },
+      { id: "field_interview_guest", label: "الضيف", storageKey: "guest", type: "text", order: 1 },
+      { id: "field_interview_location", label: "الموقع", storageKey: "location", type: "text", order: 2 }
+    ],
+    subtypes: ["كاملة", "مقتطفات", "عن بعد"]
+  },
+  {
+    id: "type_reports",
+    name: "تقارير",
+    nameEn: "reports",
+    icon: "🧾",
+    color: "#3b82f6",
+    fields: [
+      { id: "field_report_local_file", label: "ملف التقرير", storageKey: "localFile", type: "localFile", order: 0 },
+      { id: "field_report_subject", label: "الموضوع", storageKey: "subject", type: "text", order: 1 },
+      { id: "field_report_status", label: "الحالة", storageKey: "status", type: "select", options: ["مسودة", "جاهز", "منشور"], order: 2 }
+    ],
+    subtypes: ["إخباري", "تحقيقي", "تحليلي"]
+  },
+  {
+    id: "type_programs",
+    name: "برامج وحلقات",
+    nameEn: "programs",
+    icon: "📺",
+    color: "#8b5cf6",
+    fields: [
+      { id: "field_program_local_file", label: "ملف الحلقة", storageKey: "localFile", type: "localFile", order: 0 },
+      { id: "field_program_name", label: "اسم البرنامج", storageKey: "programName", type: "text", order: 1 },
+      { id: "field_episode_number", label: "رقم الحلقة", storageKey: "episodeNumber", type: "number", order: 2 }
+    ],
+    subtypes: ["حلقة كاملة", "برومو", "مقطع من الحلقة"]
+  },
+  {
+    id: "type_social-clips",
+    name: "مقاطع قصيرة",
+    nameEn: "social-clips",
+    icon: "⚡",
+    color: "#f59e0b",
+    fields: [
+      { id: "field_clip_local_file", label: "ملف المقطع", storageKey: "localFile", type: "localFile", order: 0 },
+      { id: "field_clip_platform", label: "المنصة", storageKey: "platform", type: "select", options: ["YouTube", "TikTok", "Instagram", "X"], order: 1 }
+    ],
+    subtypes: ["عمودي", "أفقي", "مربع"]
+  },
+  {
+    id: "type_documents",
+    name: "وثائق وملفات",
+    nameEn: "documents",
+    icon: "📁",
+    color: "#6b7280",
+    fields: [
+      { id: "field_document_local_file", label: "الملف المحلي", storageKey: "localFile", type: "localFile", order: 0 },
+      { id: "field_document_owner", label: "الجهة المالكة", storageKey: "owner", type: "text", order: 1 }
+    ],
+    subtypes: ["مستند داعم", "صورة مصغرة", "ملف مشروع"]
+  }
+];
+
+export function getDefaultArchiveContentTypes() {
+  return DEFAULT_ARCHIVE_CONTENT_TYPE_DEFINITIONS.map((type, typeIndex) => createContentTypeValue({
+    ...type,
+    order: typeIndex,
+    fields: (type.fields || []).map((field) => createCustomFieldValue(field)),
+    subtypes: (type.subtypes || []).map((name, subtypeIndex) => createSubtypeValue({
+      id: `${type.id}_subtype_${subtypeIndex + 1}`,
+      name,
+      order: subtypeIndex
+    }))
+  }));
+}
+
+export function getMissingDefaultArchiveContentTypes(contentTypes = []) {
+  const existingKeys = new Set((contentTypes || []).flatMap((type) => [
+    type.id,
+    normalizeArabicSearchText(type.name),
+    normalizeArabicSearchText(type.nameEn)
+  ].filter(Boolean)));
+
+  return getDefaultArchiveContentTypes().filter((type) => !existingKeys.has(type.id)
+    && !existingKeys.has(normalizeArabicSearchText(type.name))
+    && !existingKeys.has(normalizeArabicSearchText(type.nameEn)));
+}
+
 export function parseFieldOptions(value = "") {
   if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
   return String(value).split(/[,،\n]/).map((item) => item.trim()).filter(Boolean);

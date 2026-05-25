@@ -1,5 +1,8 @@
 import { createVideoItemValue } from "../../features/videos/viewModel.js";
-import { createContentTypeValue } from "../../features/types/viewModel.js";
+import {
+  createContentTypeValue,
+  getMissingDefaultArchiveContentTypes
+} from "../../features/types/viewModel.js";
 import { createVirtualCollectionValue } from "../../features/collections/viewModel.js";
 import {
   STORES,
@@ -60,8 +63,14 @@ export function createArchiveActions({ set, get, getAuthStore }) {
         const settingsDoc = await dbGet(STORES.SETTINGS, "app_settings").catch(() => null);
         const settings = mergeSettings(defaultSettings(), settingsDoc || {});
         const users = (await dbGetAll(STORES.USERS).catch(() => [])).map(normalizeUser);
+        const storedContentTypes = await dbGetAll(STORES.TYPES).catch(() => []);
+        const missingDefaultTypes = getMissingDefaultArchiveContentTypes(storedContentTypes);
+        for (const type of missingDefaultTypes) {
+          await dbPut(STORES.TYPES, type).catch(() => {});
+        }
+
         set({
-          contentTypes: await dbGetAll(STORES.TYPES).catch(() => []),
+          contentTypes: [...storedContentTypes, ...missingDefaultTypes],
           videoItems: await dbGetAll(STORES.ITEMS).catch(() => []),
           changeHistory: await dbGetAll(STORES.HISTORY).catch(() => []),
           bookmarks: await dbGetAll(STORES.BOOKMARKS).catch(() => []),

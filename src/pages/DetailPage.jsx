@@ -3,6 +3,7 @@ import {
 } from "../stores/index.js";
 import {
   FileText,
+  HardDrive,
   PenLine,
   RefreshCw,
   Tags,
@@ -20,6 +21,7 @@ import {
 import { getFieldsForSelection } from "../features/types/viewModel.js";
 import {
   createLocalFileValue,
+  createVideoLocalFilePatch,
   createVideoItemValue,
   getSubtypeLabel,
   getTypeLabel,
@@ -33,6 +35,33 @@ function fieldKey(field) {
   return field.storageKey || field.name || field.id;
 }
 
+function LocalFilePicker({ value, onFileSelect }) {
+  const file = normalizeLocalFileValue(value);
+  const inputRef = React.useRef(null);
+  return jsxs("div", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-3", children: [
+    jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3", children: [
+      jsxs("div", { className: "flex min-w-0 items-center gap-2 text-sm text-gray-300", children: [
+        jsx(HardDrive, { className: "h-4 w-4 shrink-0 text-emerald-300" }),
+        jsx("span", { className: "truncate", children: file?.name || "لم يتم اختيار ملف" })
+      ] }),
+      jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "استعراض" })
+    ] }),
+    file && jsxs("div", { className: "mt-2 space-y-1 text-xs text-gray-600", children: [
+      file.size > 0 && jsx("p", { children: formatFileSize(file.size) }),
+      (file.relativePath || file.path) && jsx("p", { dir: "ltr", className: "truncate text-left", children: file.relativePath || file.path })
+    ] }),
+    jsx("input", {
+      ref: inputRef,
+      type: "file",
+      onChange: (event) => {
+        onFileSelect(event.target.files?.[0]);
+        event.target.value = "";
+      },
+      style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }
+    })
+  ] });
+}
+
 function EditableField({ field, value, onChange }) {
   const key = fieldKey(field);
   const commonClass = "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40";
@@ -43,10 +72,7 @@ function EditableField({ field, value, onChange }) {
     ...(field.options || []).map((option) => jsx("option", { value: option, children: option }, option))
   ] });
   if (field.type === "tags" || field.type === "multiselect") return jsx("input", { value: Array.isArray(value) ? value.join("، ") : value || "", onChange: (event) => onChange(key, parseVideoTags(event.target.value)), className: commonClass });
-  if (field.type === "localFile") return jsxs("div", { className: "space-y-2", children: [
-    jsx("input", { type: "file", onChange: (event) => onChange(key, createLocalFileValue(event.target.files?.[0])), className: "block w-full rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-3 text-sm text-gray-300 file:ml-3 file:rounded-lg file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-white" }),
-    value?.name && jsx("p", { className: "truncate rounded-lg bg-gray-950/45 px-3 py-2 text-xs text-gray-400", children: value.name })
-  ] });
+  if (field.type === "localFile") return jsx(LocalFilePicker, { value, onFileSelect: (file) => onChange(key, createLocalFileValue(file)) });
   return jsx("input", { type: field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text", value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass });
 }
 
@@ -112,6 +138,16 @@ export function DetailPage() {
 
   const updateDraft = (patch) => setDraft((current) => ({ ...current, ...patch }));
   const updateMetadata = (key, value) => setDraft((current) => ({ ...current, metadata: { ...(current.metadata || {}), [key]: value } }));
+  const applyPrimaryLocalFile = (file) => {
+    const patch = createVideoLocalFilePatch(file, { currentTitle: draft?.title || item.title });
+    if (!patch) return;
+    setDraft((current) => ({
+      ...current,
+      ...(patch.title ? { title: patch.title } : {}),
+      path: patch.path,
+      metadata: { ...(current.metadata || {}), ...patch.metadata }
+    }));
+  };
 
   const save = async () => {
     const updated = createVideoItemValue({
@@ -171,6 +207,10 @@ export function DetailPage() {
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "النوع" }), jsx("select", { value: draft.type || "", onChange: (event) => updateDraft({ type: event.target.value, subtype: "" }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الفرع" }), jsx("select", { value: draft.subtype || "", onChange: (event) => updateDraft({ subtype: event.target.value }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "المسار" }), jsx("input", { value: draft.path || "", onChange: (event) => updateDraft({ path: event.target.value }), dir: "ltr", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+            jsx("span", { children: "ملف محلي من الجهاز" }),
+            jsx(LocalFilePicker, { value: draft.metadata?.localFile, onFileSelect: applyPrimaryLocalFile })
+          ] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الصورة المصغرة" }), jsx("input", { value: draft.thumbnail || "", onChange: (event) => updateDraft({ thumbnail: event.target.value }), dir: "ltr", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full rounded-xl border border-white/10 bg-gray-950/45 p-3 text-sm text-white outline-none" })] })
@@ -188,6 +228,10 @@ export function DetailPage() {
         jsxs("div", { className: "space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
           jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(FileText, { className: "h-5 w-5 text-emerald-400" }), "البيانات"] }),
           item.notes && jsx("p", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3 text-sm leading-relaxed text-gray-400", children: item.notes }),
+          item.metadata?.localFile && jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3", children: [
+            jsx("p", { className: "text-xs text-gray-600", children: "الملف المحلي" }),
+            jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field: { type: "localFile" }, value: item.metadata.localFile }) })
+          ] }),
           fields.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: fields.map((field) => jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3", children: [
             jsx("p", { className: "text-xs text-gray-600", children: field.label }),
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
