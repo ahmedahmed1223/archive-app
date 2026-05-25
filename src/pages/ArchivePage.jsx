@@ -421,7 +421,7 @@ export function ArchivePage() {
             jsx("button", {
               type: "button",
               onClick: openAdd,
-              className: "va-primary-button inline-flex min-h-9 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600",
+              className: "va-primary-button inline-flex min-h-9 items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold text-white",
               children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
             })
           ]

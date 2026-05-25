@@ -50,7 +50,7 @@ function LocalFilePicker({ value, onFileSelect }) {
         jsx(HardDrive, { className: "h-4 w-4 shrink-0 text-emerald-300" }),
         jsx("span", { className: "truncate", children: file?.name || "لم يتم اختيار ملف" })
       ] }),
-      jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "استعراض" })
+      jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center va-primary-button rounded-lg px-3 py-1.5 text-xs font-semibold text-white", children: "استعراض" })
     ] }),
     file && jsxs("div", { className: "mt-2 space-y-1 text-xs text-gray-600", children: [
       file.size > 0 && jsx("p", { children: formatFileSize(file.size) }),
@@ -266,7 +266,7 @@ export function DetailPage() {
         ] }, field.id)) }),
         jsxs("div", { className: "flex justify-end gap-2", children: [
           jsx("button", { type: "button", onClick: () => setEditing(false), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "إلغاء" }),
-          jsx("button", { type: "button", onClick: save, className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "حفظ" })
+          jsx("button", { type: "button", onClick: save, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "حفظ" })
         ] })
       ] }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]", children: [

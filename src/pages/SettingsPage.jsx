@@ -173,7 +173,7 @@ export function SettingsPage() {
                 jsx("p", { className: "mt-1 text-xs text-gray-500", children: settings.ui?.onboardingCoreUiSeenAt ? `شوهد شرح الواجهة: ${formatDateTime(settings.ui.onboardingCoreUiSeenAt)}` : "شرح الواجهة لم يسجل بعد." })
               ]
             }),
-            jsx("button", { type: "button", onClick: openOnboardingWizard, className: "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: [jsx(RefreshCw, { className: "h-4 w-4" }), "تشغيل معالج البداية"] })
+            jsx("button", { type: "button", onClick: openOnboardingWizard, className: "inline-flex min-h-11 items-center justify-center gap-2 va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: [jsx(RefreshCw, { className: "h-4 w-4" }), "تشغيل معالج البداية"] })
           ]
         })
       }),
@@ -275,7 +275,7 @@ export function SettingsPage() {
           children: [
             jsx("p", { className: "text-sm font-semibold text-white", children: "إدارة الأيقونات الفعلية" }),
             jsx("p", { className: "mt-1 text-xs leading-relaxed text-gray-500", children: "انتقل إلى إدارة الأنواع لإضافة أيقونة أو غلاف لكل نوع وفرع." }),
-            jsx("button", { type: "button", onClick: () => setCurrentPage?.("types"), className: "mt-3 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "فتح إدارة الأنواع" })
+            jsx("button", { type: "button", onClick: () => setCurrentPage?.("types"), className: "mt-3 va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "فتح إدارة الأنواع" })
           ]
         })
       ]
@@ -360,7 +360,7 @@ export function SettingsPage() {
           className: "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-gray-950/30 p-3",
           children: [
             jsx("p", { className: "text-sm text-gray-400", children: settings.lastBackupAt ? `آخر نسخة: ${formatDateTime(settings.lastBackupAt)}` : "لا توجد نسخة احتياطية مسجلة بعد." }),
-            jsx("button", { type: "button", onClick: () => setCurrentPage?.("backup"), className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "فتح مركز البيانات" })
+            jsx("button", { type: "button", onClick: () => setCurrentPage?.("backup"), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "فتح مركز البيانات" })
           ]
         })
       ]
@@ -381,7 +381,7 @@ export function SettingsPage() {
         jsxs("div", {
           className: "flex flex-wrap gap-2",
           children: [
-            jsx("button", { type: "button", onClick: handlePasswordSave, className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: isPasswordSet ? "تحديث كلمة المرور" : "تعيين كلمة المرور" }),
+            jsx("button", { type: "button", onClick: handlePasswordSave, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: isPasswordSet ? "تحديث كلمة المرور" : "تعيين كلمة المرور" }),
             jsx("button", { type: "button", onClick: lockApp, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "قفل التطبيق الآن" })
           ]
         }),
@@ -428,7 +428,7 @@ export function SettingsPage() {
           children: [
             sqliteError && jsx("p", { className: "rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-200", children: sqliteError }),
             jsx("p", { className: "text-sm text-gray-500", children: settings.systemHealth?.lastCheckAt ? `آخر فحص: ${formatDateTime(settings.systemHealth.lastCheckAt)}` : "لم يتم تشغيل فحص كامل بعد." }),
-            jsx("button", { type: "button", onClick: runHealth, disabled: healthRunning, className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-60", children: healthRunning ? "جار الفحص..." : "تشغيل فحص النظام" })
+            jsx("button", { type: "button", onClick: runHealth, disabled: healthRunning, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60", children: healthRunning ? "جار الفحص..." : "تشغيل فحص النظام" })
           ]
         })
       }),

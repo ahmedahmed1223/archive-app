@@ -84,7 +84,7 @@ function TagForm({ tag, parentTag, tags, onCancel, onSave }) {
         className: "mt-4 flex flex-wrap justify-end gap-2",
         children: [
           jsx("button", { type: "button", onClick: onCancel, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "إلغاء" }),
-          jsx("button", { type: "button", onClick: save, disabled: !name.trim(), className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: tag ? "حفظ التعديل" : "إنشاء الوسم" })
+          jsx("button", { type: "button", onClick: save, disabled: !name.trim(), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: tag ? "حفظ التعديل" : "إنشاء الوسم" })
         ]
       })
     ]

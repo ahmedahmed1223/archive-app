@@ -74,7 +74,7 @@ function CollectionForm({ collection, onCancel, onSave }) {
       }),
       jsxs("div", { className: "mt-4 flex flex-wrap justify-end gap-2", children: [
         jsx("button", { type: "button", onClick: onCancel, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "إلغاء" }),
-        jsx("button", { type: "button", onClick: save, disabled: !name.trim(), className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: collection ? "حفظ التعديل" : "إنشاء المجموعة" })
+        jsx("button", { type: "button", onClick: save, disabled: !name.trim(), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: collection ? "حفظ التعديل" : "إنشاء المجموعة" })
       ] })
     ]
   });
@@ -154,7 +154,7 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
             className: "h-32 w-full rounded-xl border border-white/10 bg-gray-950/60 p-2 text-sm text-white outline-none",
             children: availableItems.slice(0, 250).map((item) => jsx("option", { value: item.id, children: item.title || item.id }, item.id))
           }),
-          jsx("button", { type: "button", disabled: selectedIds.length === 0, onClick: () => onAddItems(selectedIds), className: "mt-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: `إضافة ${formatNumber(selectedIds.length)}` })
+          jsx("button", { type: "button", disabled: selectedIds.length === 0, onClick: () => onAddItems(selectedIds), className: "mt-2 va-primary-button rounded-xl px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: `إضافة ${formatNumber(selectedIds.length)}` })
         ]
       }),
       items.length ? jsx("div", {

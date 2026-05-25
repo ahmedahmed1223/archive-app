@@ -86,7 +86,7 @@ function PrimaryButton({ children, onClick, disabled = false, type = "button" })
     type,
     onClick,
     disabled,
-    className: "va-primary-button inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50",
+    className: "va-primary-button inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50",
     children
   });
 }

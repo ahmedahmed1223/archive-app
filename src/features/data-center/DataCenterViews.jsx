@@ -95,7 +95,7 @@ export function ActionButton({ children, icon, onClick, disabled = false, tone =
     ? "border-amber-500/30 bg-amber-500/10 text-amber-100 hover:bg-amber-500/20"
     : tone === "red"
       ? "border-red-500/30 bg-red-500/10 text-red-100 hover:bg-red-500/20"
-      : "border-emerald-500/30 bg-emerald-600/90 text-white hover:bg-emerald-500";
+      : "va-primary-button text-white";
   return jsxs("button", {
     type: "button",
     onClick,

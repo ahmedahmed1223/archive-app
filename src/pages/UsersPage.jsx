@@ -104,7 +104,7 @@ function UserForm({ user, users, onCancel, onSave }) {
       }),
       jsxs("div", { className: "mt-4 flex flex-wrap justify-end gap-2", children: [
         jsx("button", { type: "button", onClick: onCancel, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "إلغاء" }),
-        jsx("button", { type: "button", onClick: save, disabled: !canSave, className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: user ? "حفظ التعديل" : "إنشاء المستخدم" })
+        jsx("button", { type: "button", onClick: save, disabled: !canSave, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: user ? "حفظ التعديل" : "إنشاء المستخدم" })
       ] })
     ]
   });
