@@ -1,110 +1,6 @@
-const dialogStyleId = "video-archive-native-dialog-styles";
-
-function ensureDialogStyles() {
-  if (typeof document === "undefined" || document.getElementById(dialogStyleId)) return;
-  const style = document.createElement("style");
-  style.id = dialogStyleId;
-  style.textContent = `
-    .va-native-dialog-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      background: rgba(3, 7, 18, 0.72);
-      backdrop-filter: blur(10px);
-      direction: rtl;
-    }
-    .va-native-dialog-panel {
-      width: min(100%, 32rem);
-      border: 1px solid var(--va-line-soft, rgba(255, 255, 255, 0.12));
-      border-radius: 1.25rem;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
-        var(--color-bg-surface, #0b1626);
-      color: var(--color-text-primary, #f8fafc);
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-      padding: 1.25rem;
-      text-align: right;
-    }
-    .va-native-dialog-title {
-      margin: 0;
-      color: var(--color-text-primary, #fff);
-      font-size: 1rem;
-      font-weight: 700;
-      line-height: 1.6;
-    }
-    .va-native-dialog-message {
-      margin: .75rem 0 0;
-      color: var(--color-text-secondary, #cbd5e1);
-      font-size: .9rem;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      unicode-bidi: plaintext;
-    }
-    .va-native-dialog-input {
-      margin-top: 1rem;
-      width: 100%;
-      min-height: 2.75rem;
-      border: 1px solid var(--va-line-soft, rgba(255, 255, 255, 0.12));
-      border-radius: .85rem;
-      background: color-mix(in srgb, var(--color-bg-primary, #07111f) 82%, transparent);
-      color: var(--color-text-primary, #fff);
-      padding: .65rem .8rem;
-      outline: none;
-      text-align: right;
-    }
-    .va-native-dialog-input:focus {
-      border-color: color-mix(in srgb, var(--va-action, #14b8a6) 58%, transparent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--va-action, #14b8a6) 14%, transparent);
-    }
-    .va-native-dialog-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      gap: .5rem;
-      margin-top: 1.25rem;
-    }
-    .va-native-dialog-button {
-      min-height: 2.5rem;
-      border: 1px solid var(--va-line-soft, rgba(255, 255, 255, 0.12));
-      border-radius: .85rem;
-      padding: .55rem 1rem;
-      color: var(--color-text-secondary, #e2e8f0);
-      background: color-mix(in srgb, var(--color-bg-primary, #07111f) 72%, transparent);
-      font: inherit;
-      cursor: pointer;
-    }
-    .va-native-dialog-button:hover {
-      background: color-mix(in srgb, var(--va-action, #14b8a6) 12%, transparent);
-    }
-    .va-native-dialog-confirm {
-      border-color: color-mix(in srgb, var(--va-action, #14b8a6) 42%, transparent);
-      background: var(--va-action-strong, #0f766e);
-      color: #fff;
-    }
-    .va-native-dialog-confirm:hover {
-      background: var(--va-action, #14b8a6);
-    }
-    .va-native-dialog-danger {
-      border-color: rgba(239, 68, 68, 0.42);
-      background: #dc2626;
-    }
-    .va-native-dialog-danger:hover {
-      background: #ef4444;
-    }
-    @media (max-width: 640px) {
-      .va-native-dialog-backdrop { align-items: flex-end; }
-      .va-native-dialog-panel { border-radius: 1.25rem 1.25rem 0 0; }
-      .va-native-dialog-actions { justify-content: stretch; }
-      .va-native-dialog-button { flex: 1 1 auto; }
-    }
-  `;
-  document.head.appendChild(style);
-}
+import * as React from "react";
+import { createRoot } from "react-dom/client";
+import { jsx, jsxs } from "react/jsx-runtime";
 
 function normalizeDialogInput(message, options = {}) {
   const fromObject = typeof message === "object" && message !== null ? message : {};
@@ -126,92 +22,134 @@ function fallbackDialog(request, mode) {
   return Promise.resolve(true);
 }
 
-function openNativeDialog(message, options = {}, mode = "alert") {
-  const request = normalizeDialogInput(message, options);
-  if (typeof document === "undefined" || typeof window === "undefined") {
-    return Promise.resolve(mode === "confirm" ? false : mode === "prompt" ? null : true);
-  }
-  if (!document.body) return fallbackDialog(request, mode);
+function DialogModal({ request, mode, onResolve }) {
+  const [value, setValue] = React.useState(request.defaultValue || "");
+  const inputRef = React.useRef(null);
+  const confirmRef = React.useRef(null);
 
-  ensureDialogStyles();
+  const close = React.useCallback((result) => {
+    onResolve(result);
+  }, [onResolve]);
+
+  const handleConfirm = () => {
+    if (mode === "prompt") close(value);
+    else close(true);
+  };
+
+  const handleCancel = () => {
+    if (mode === "confirm") close(false);
+    else if (mode === "prompt") close(null);
+    else close(true);
+  };
+
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") handleCancel();
+      else if (event.key === "Enter" && mode !== "alert") handleConfirm();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
+  React.useEffect(() => {
+    const target = mode === "prompt" ? inputRef.current : confirmRef.current;
+    if (target) {
+      window.requestAnimationFrame(() => target.focus());
+    }
+  }, [mode]);
+
+  const isDanger = request.kind === "danger";
+  const confirmText = request.confirmLabel || (mode === "alert" ? "حسنًا" : "متابعة");
+  const cancelText = request.cancelLabel || "إلغاء";
+
+  return jsx("div", {
+    className: "va-dialog-backdrop fixed inset-0 z-[9999] flex items-center justify-center p-4 backdrop-blur-md",
+    style: { background: "rgba(3, 7, 18, 0.72)" },
+    dir: "rtl",
+    onClick: (event) => {
+      if (event.target === event.currentTarget) handleCancel();
+    },
+    children: jsxs("section", {
+      role: mode === "alert" ? "alertdialog" : "dialog",
+      "aria-modal": "true",
+      "aria-labelledby": "va-dialog-title",
+      className: "va-card va-dialog-panel w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/90 p-5 text-right text-white shadow-2xl",
+      onClick: (event) => event.stopPropagation(),
+      children: [
+        jsx("h2", {
+          id: "va-dialog-title",
+          className: "text-base font-bold text-white",
+          children: request.title
+        }),
+        jsx("p", {
+          className: "mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-300",
+          dir: "auto",
+          style: { unicodeBidi: "plaintext", overflowWrap: "anywhere" },
+          children: request.message
+        }),
+        mode === "prompt" && jsx("input", {
+          ref: inputRef,
+          className: "mt-4 min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/50",
+          dir: "auto",
+          value,
+          onChange: (event) => setValue(event.target.value)
+        }),
+        jsxs("div", {
+          className: "mt-5 flex flex-wrap justify-start gap-2",
+          children: [
+            mode !== "alert" && jsx("button", {
+              type: "button",
+              onClick: handleCancel,
+              className: "va-secondary-button min-h-10 rounded-xl border border-white/10 bg-gray-950/55 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-white/5",
+              children: cancelText
+            }),
+            jsx("button", {
+              ref: confirmRef,
+              type: "button",
+              onClick: handleConfirm,
+              className: isDanger
+                ? "min-h-10 rounded-xl border border-red-500/45 bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500"
+                : "va-primary-button min-h-10 rounded-xl px-4 py-2 text-sm font-semibold text-white",
+              children: confirmText
+            })
+          ]
+        })
+      ]
+    })
+  });
+}
+
+function openReactDialog(message, options = {}, mode = "alert") {
+  const request = normalizeDialogInput(message, options);
+  if (typeof document === "undefined" || typeof window === "undefined" || !document.body) {
+    return fallbackDialog(request, mode);
+  }
 
   return new Promise((resolve) => {
-    const backdrop = document.createElement("div");
-    backdrop.className = "va-native-dialog-backdrop";
-    backdrop.dir = "rtl";
+    const host = document.createElement("div");
+    host.className = "va-dialog-host";
+    document.body.append(host);
+    const root = createRoot(host);
 
-    const panel = document.createElement("section");
-    panel.className = "va-native-dialog-panel";
-    panel.setAttribute("role", mode === "alert" ? "alertdialog" : "dialog");
-    panel.setAttribute("aria-modal", "true");
-
-    const title = document.createElement("h2");
-    title.className = "va-native-dialog-title";
-    title.textContent = request.title;
-
-    const body = document.createElement("p");
-    body.className = "va-native-dialog-message";
-    body.dir = "auto";
-    body.textContent = request.message;
-
-    panel.append(title, body);
-
-    let input = null;
-    if (mode === "prompt") {
-      input = document.createElement("input");
-      input.className = "va-native-dialog-input";
-      input.dir = "auto";
-      input.value = request.defaultValue;
-      panel.append(input);
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "va-native-dialog-actions";
-
-    const cleanup = (value) => {
-      document.removeEventListener("keydown", onKeyDown);
-      backdrop.remove();
-      resolve(value);
+    const cleanup = (result) => {
+      root.unmount();
+      host.remove();
+      resolve(result);
     };
 
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") cleanup(mode === "confirm" ? false : mode === "prompt" ? null : true);
-      if (event.key === "Enter" && mode !== "alert") cleanup(mode === "prompt" ? input.value : true);
-    };
-
-    const confirmButton = document.createElement("button");
-    confirmButton.type = "button";
-    confirmButton.className = `va-native-dialog-button va-native-dialog-confirm ${request.kind === "danger" ? "va-native-dialog-danger" : ""}`;
-    confirmButton.textContent = request.confirmLabel || (mode === "alert" ? "حسنًا" : "متابعة");
-    confirmButton.addEventListener("click", () => cleanup(mode === "prompt" ? input.value : true));
-
-    if (mode !== "alert") {
-      const cancelButton = document.createElement("button");
-      cancelButton.type = "button";
-      cancelButton.className = "va-native-dialog-button";
-      cancelButton.textContent = request.cancelLabel || "إلغاء";
-      cancelButton.addEventListener("click", () => cleanup(mode === "confirm" ? false : null));
-      actions.append(cancelButton);
-    }
-
-    actions.append(confirmButton);
-    panel.append(actions);
-    backdrop.append(panel);
-    document.body.append(backdrop);
-    document.addEventListener("keydown", onKeyDown);
-    window.requestAnimationFrame(() => (input || confirmButton).focus());
+    root.render(jsx(DialogModal, { request, mode, onResolve: cleanup }));
   });
 }
 
 export function appAlert(message, options = {}) {
-  return openNativeDialog(message, { title: "تنبيه", confirmLabel: "حسنًا", ...options }, "alert");
+  return openReactDialog(message, { title: "تنبيه", confirmLabel: "حسنًا", ...options }, "alert");
 }
 
 export function appConfirm(message, options = {}) {
-  return openNativeDialog(message, { title: "تأكيد الإجراء", confirmLabel: "متابعة", cancelLabel: "إلغاء", kind: "warning", ...options }, "confirm");
+  return openReactDialog(message, { title: "تأكيد الإجراء", confirmLabel: "متابعة", cancelLabel: "إلغاء", kind: "warning", ...options }, "confirm");
 }
 
 export function appPrompt(message, options = {}) {
   const normalizedOptions = typeof options === "string" ? { defaultValue: options } : options;
-  return openNativeDialog(message, { title: "إدخال مطلوب", confirmLabel: "حفظ", cancelLabel: "إلغاء", ...normalizedOptions }, "prompt");
+  return openReactDialog(message, { title: "إدخال مطلوب", confirmLabel: "حفظ", cancelLabel: "إلغاء", ...normalizedOptions }, "prompt");
 }
