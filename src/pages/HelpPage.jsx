@@ -478,7 +478,7 @@ export function HelpPage() {
                 jsxs("button", {
                   type: "button",
                   onClick: () => setCurrentPage?.("settings"),
-                  className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white",
+                  className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white",
                   children: [jsx(Shield, { className: "h-4 w-4" }), "الإعدادات"]
                 })
               ]

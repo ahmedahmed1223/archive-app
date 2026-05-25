@@ -290,7 +290,7 @@ export function StartupRecoveryScreen({ report, onRetry, onOpenDiagnostics }) {
           بياناتك لا تُنقل إلى أي خادم. إذا استمر الخطأ، افتح فحص النظام لمعرفة حالة IndexedDB والمساحة المتاحة.
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <button type="button" onClick={onOpenDiagnostics} className="va-primary-button rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">
+          <button type="button" onClick={onOpenDiagnostics} className="va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white">
             فتح فحص النظام
           </button>
           <button type="button" onClick={onRetry} className="va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-200">
@@ -333,7 +333,7 @@ export function LockScreen() {
           placeholder="كلمة المرور"
         />
         {error && <p className="mt-3 text-sm text-red-200">{error}</p>}
-        <button type="submit" className="mt-5 w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white">
+        <button type="submit" className="va-primary-button mt-5 w-full rounded-xl px-4 py-3 font-semibold text-white">
           فتح
         </button>
       </form>
@@ -393,7 +393,7 @@ export function LoginScreen() {
             تذكر الجلسة على هذا الجهاز
           </label>
           {authError && <p className="mt-4 rounded-xl border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-100">{authError}</p>}
-          <button type="submit" disabled={isLoading} className="mt-6 w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white disabled:opacity-60">
+          <button type="submit" disabled={isLoading} className="va-primary-button mt-6 w-full rounded-xl px-4 py-3 font-semibold text-white disabled:opacity-60">
             {isLoading ? "جار التحقق..." : "دخول"}
           </button>
           {users.length === 0 && (
@@ -413,14 +413,21 @@ export function ToastNotification() {
   const topItems = notifications.slice(0, 3);
   if (!topItems.length) return null;
   return createPortal(
-    <div dir="rtl" className="fixed bottom-4 left-4 z-[9990] flex w-[min(92vw,380px)] flex-col gap-2 text-right">
+    <div
+      dir="rtl"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      className="fixed bottom-4 left-4 z-[9990] flex w-[min(92vw,380px)] flex-col gap-2 text-right"
+    >
       {topItems.map((notification) => (
         <motion.div
           key={notification.id}
           initial={{ opacity: 0, x: -12, scale: 0.98 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="rounded-2xl border border-white/10 bg-[#0b1626]/95 p-4 text-white shadow-2xl shadow-black/25 backdrop-blur"
+          role={notification.type === "error" ? "alert" : undefined}
+          className="rounded-2xl border border-white/10 bg-[var(--color-bg-surface,#0b1626)]/95 p-4 text-white shadow-2xl shadow-black/25 backdrop-blur"
         >
           <div className="flex items-start gap-3">
             {notification.type === "success" ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" /> : notification.type === "error" ? <AlertTriangle className="mt-0.5 h-5 w-5 text-red-300" /> : <Info className="mt-0.5 h-5 w-5 text-sky-300" />}
@@ -543,7 +550,7 @@ export function ForceChangePasswordDialog() {
         <h2 className="mt-4 text-xl font-bold">تغيير كلمة المرور مطلوب</h2>
         <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-right" placeholder="كلمة المرور الجديدة" />
         {error && <p className="mt-3 text-sm text-red-200">{error}</p>}
-        <button type="submit" className="mt-5 w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold">حفظ كلمة المرور</button>
+        <button type="submit" className="va-primary-button mt-5 w-full rounded-xl px-4 py-3 font-semibold text-white">حفظ كلمة المرور</button>
       </form>
     </div>,
     document.body
@@ -572,7 +579,7 @@ export function V1ProductTour({ open, onComplete, onSkip }) {
         <p className="mt-3 text-sm leading-7 text-slate-300">{step.body}</p>
         <div className="mt-6 flex flex-wrap justify-between gap-3">
           <button type="button" onClick={onSkip} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-300">تخطي</button>
-          <button type="button" onClick={() => last ? onComplete?.() : setIndex((value) => value + 1)} className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold">
+          <button type="button" onClick={() => last ? onComplete?.() : setIndex((value) => value + 1)} className="va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white">
             {last ? "إنهاء الجولة" : "التالي"}
           </button>
         </div>

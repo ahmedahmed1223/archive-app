@@ -69,7 +69,7 @@ function LocalFilePicker({ value, onFileSelect }) {
         jsx(file ? HardDrive : UploadCloud, { className: "h-4 w-4 shrink-0 text-emerald-300" }),
         jsx("span", { className: "truncate", children: file?.name || "لم يتم اختيار ملف" })
       ] }),
-      jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600", children: "استعراض" })
+      jsx("button", { type: "button", onClick: () => inputRef.current?.click(), className: "inline-flex min-h-9 items-center justify-center va-primary-button rounded-lg px-3 py-1.5 text-xs font-semibold text-white", children: "استعراض" })
     ] }),
     !file && jsx("p", { className: "mt-2 text-xs leading-5 text-gray-500", children: "يمكنك سحب ملف فيديو هنا وسيتم ملء الاسم والمسار تلقائيًا قدر الإمكان." }),
     file && jsxs("div", { className: "mt-2 space-y-1 text-xs text-gray-600", children: [
@@ -283,8 +283,8 @@ export function AddVideoPage() {
       jsxs("div", { className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3", children: [
         jsx("button", { type: "button", disabled: stepIndex <= 0, onClick: () => setStepIndex((value) => Math.max(0, value - 1)), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"] }),
         jsxs("div", { className: "flex flex-wrap gap-2", children: [
-          stepIndex < STEPS.length - 1 && jsx("button", { type: "button", onClick: () => setStepIndex((value) => Math.min(STEPS.length - 1, value + 1)), className: "va-primary-button inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })] }),
-          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(false), className: "va-primary-button rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وفتح التفاصيل" }),
+          stepIndex < STEPS.length - 1 && jsx("button", { type: "button", onClick: () => setStepIndex((value) => Math.min(STEPS.length - 1, value + 1)), className: "va-primary-button inline-flex items-center gap-2  rounded-xl px-4 py-2 text-sm font-semibold text-white", children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })] }),
+          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(false), className: "va-primary-button  rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وفتح التفاصيل" }),
           stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(true), className: "va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وإضافة آخر" })
         ] })
       ] })

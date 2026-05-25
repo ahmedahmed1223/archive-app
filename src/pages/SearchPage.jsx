@@ -83,7 +83,7 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
         jsx("button", {
           type: "button",
           onClick: onOpen,
-          className: "va-primary-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+          className: "va-primary-button inline-flex min-h-10 items-center justify-center gap-2  rounded-xl px-4 py-2 text-sm font-semibold text-white",
           children: [jsx(Video, { className: "h-4 w-4" }), "فتح التفاصيل"]
         })
       ]

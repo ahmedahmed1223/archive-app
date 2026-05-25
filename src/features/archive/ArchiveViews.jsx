@@ -319,7 +319,7 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
           jsx("button", {
             type: "button",
             onClick: onOpen,
-            className: `va-primary-button ${size.button} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
+            className: `va-primary-button ${size.button} rounded-lg font-semibold text-white `,
             children: "فتح التفاصيل"
           }),
           !showDeleted && jsx("button", {
@@ -402,7 +402,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
           jsx("button", {
             type: "button",
             onClick: onOpen,
-            className: `va-primary-button ${size.actionButton} rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600`,
+            className: `va-primary-button ${size.actionButton} rounded-lg font-semibold text-white `,
             children: "التفاصيل"
           }),
           !showDeleted && jsx("button", {
@@ -490,7 +490,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   children: jsxs("div", {
                     className: "flex flex-wrap gap-2",
                     children: [
-                      jsx("button", { type: "button", onClick: () => onOpen(item), className: `va-primary-button rounded-lg bg-emerald-700 font-semibold text-white hover:bg-emerald-600 ${size.actionButton}`, children: "فتح" }),
+                      jsx("button", { type: "button", onClick: () => onOpen(item), className: `va-primary-button rounded-lg font-semibold text-white  ${size.actionButton}`, children: "فتح" }),
                       !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: `rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 ${size.actionButton}`, children: item.isFavorite ? "إزالة" : "مفضلة" }),
                       showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: `rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10 ${size.actionButton}`, children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: `rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10 ${size.actionButton}`, children: "حذف" })
                     ]
@@ -556,7 +556,7 @@ export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
       jsx("button", {
         type: "button",
         onClick: onOpen,
-        className: "va-primary-button mt-4 w-full rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600",
+        className: "va-primary-button mt-4 w-full rounded-xl px-4 py-2 text-sm font-semibold text-white ",
         children: "فتح صفحة التفاصيل"
       })
     ]

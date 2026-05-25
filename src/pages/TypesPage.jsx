@@ -78,7 +78,7 @@ function SubtypesEditor({ draft, setDraft }) {
       jsx("h3", { className: "text-sm font-bold text-white", children: "الفروع" }),
       jsxs("div", { className: "mt-3 flex gap-2", children: [
         jsx("input", { value: name, onChange: (event) => setName(event.target.value), className: "min-h-10 min-w-0 flex-1 rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", placeholder: "اسم الفرع" }),
-        jsx("button", { type: "button", onClick: addSubtype, className: "rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "إضافة" })
+        jsx("button", { type: "button", onClick: addSubtype, className: "va-primary-button rounded-xl px-3 py-2 text-sm font-semibold text-white", children: "إضافة" })
       ] }),
       (draft.subtypes || []).length ? jsx("div", { className: "mt-3 flex flex-wrap gap-2", children: (draft.subtypes || []).map((subtype) => jsxs("span", { className: "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-gray-300", children: [
         subtype.name,
@@ -122,7 +122,7 @@ function FieldsEditor({ draft, setDraft }) {
           jsx("input", { type: "checkbox", checked: fieldDraft.required, onChange: (event) => setFieldDraft({ ...fieldDraft, required: event.target.checked }) }),
           "مطلوب"
         ] }),
-        jsx("button", { type: "button", onClick: addField, className: "rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600", children: "إضافة" })
+        jsx("button", { type: "button", onClick: addField, className: "va-primary-button rounded-xl px-3 py-2 text-sm font-semibold text-white", children: "إضافة" })
       ] }),
       ["select", "tags"].includes(fieldDraft.type) && jsx("input", { value: fieldDraft.options, onChange: (event) => setFieldDraft({ ...fieldDraft, options: event.target.value }), className: "mt-2 min-h-10 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", placeholder: "خيارات مفصولة بفاصلة" }),
       (draft.fields || []).length ? jsx("div", { className: "mt-3 space-y-2", children: (draft.fields || []).map((field) => jsxs("div", { className: "grid gap-2 rounded-xl border border-white/5 bg-gray-950/35 p-3 sm:grid-cols-[1fr_auto_auto_auto]", children: [
@@ -156,7 +156,7 @@ function TypeEditor({ type, onCancel, onSave }) {
       jsx(FieldsEditor, { draft, setDraft }),
       jsxs("div", { className: "flex flex-wrap justify-end gap-2", children: [
         jsx("button", { type: "button", onClick: onCancel, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "إلغاء" }),
-        jsx("button", { type: "button", onClick: save, disabled: !draft.name.trim(), className: "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40", children: type ? "حفظ النوع" : "إنشاء النوع" })
+        jsx("button", { type: "button", onClick: save, disabled: !draft.name.trim(), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: type ? "حفظ النوع" : "إنشاء النوع" })
       ] })
     ]
   });
