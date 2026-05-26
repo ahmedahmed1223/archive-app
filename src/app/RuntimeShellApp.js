@@ -37,6 +37,7 @@ import {
   runStartupSequence,
   undoRedoManager
 } from "./shell/ShellParts.jsx";
+import { NotificationDrawer } from "../components/common/NotificationDrawer.jsx";
 import { KeyboardShortcutsDialog } from "../components/common/KeyboardShortcutsDialog.jsx";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
@@ -578,6 +579,7 @@ export function App() {
         })
       }),
       jsx(ToastNotification, {}),
+      jsx(NotificationDrawer, {}),
       jsx(UndoRedoBar, {}),
       jsx(StatusBar, {}),
       jsx(KeyboardShortcutsDialog, { open: showShortcuts, onOpenChange: setShowShortcuts }),

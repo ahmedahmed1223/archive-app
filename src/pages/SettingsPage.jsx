@@ -29,7 +29,8 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
-import { MotionPage, PageHero } from "../components/ui/index.js";
+import { MotionPage, PageHero, SaveIndicator } from "../components/ui/index.js";
+import { useFormSaveState } from "../components/common/useFormSaveState.js";
 
 import {
   createSettingsTabUiPatch,
@@ -77,6 +78,8 @@ export function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [passwordError, setPasswordError] = React.useState("");
   const [healthRunning, setHealthRunning] = React.useState(false);
+  const passwordSave = useFormSaveState();
+  const healthSave = useFormSaveState({ successTimeoutMs: 4000 });
   const tabState = getSettingsTabState(activeTab);
   const isDark = resolvedTheme === "dark";
 
@@ -138,18 +141,29 @@ export function SettingsPage() {
       setPasswordError("كلمة المرور وتأكيدها غير متطابقين.");
       return;
     }
-    await setMasterPassword?.(newPassword);
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    showToast?.("تم تحديث كلمة مرور المدير.", "success");
+    try {
+      await passwordSave.run(async () => {
+        await setMasterPassword?.(newPassword);
+      });
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      showToast?.("تم تحديث كلمة مرور المدير.", "success");
+    } catch (error) {
+      setPasswordError(error?.message || "تعذر تحديث كلمة المرور.");
+    }
   };
 
   const runHealth = async () => {
     setHealthRunning(true);
+    healthSave.begin();
     try {
       await runSystemHealthCheck?.();
+      healthSave.succeed();
       showToast?.("اكتمل فحص النظام.", "success");
+    } catch (error) {
+      healthSave.fail(error);
+      showToast?.(error?.message || "تعذر فحص النظام.", "error");
     } finally {
       setHealthRunning(false);
     }
@@ -379,10 +393,11 @@ export function SettingsPage() {
         jsx(TextInputRow, { label: "تأكيد كلمة المرور", value: confirmPassword, onChange: setConfirmPassword, dir: "ltr", type: "password" }),
         passwordError && jsx("p", { className: "rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200", children: passwordError }),
         jsxs("div", {
-          className: "flex flex-wrap gap-2",
+          className: "flex flex-wrap items-center gap-2",
           children: [
-            jsx("button", { type: "button", onClick: handlePasswordSave, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: isPasswordSet ? "تحديث كلمة المرور" : "تعيين كلمة المرور" }),
-            jsx("button", { type: "button", onClick: lockApp, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "قفل التطبيق الآن" })
+            jsx("button", { type: "button", onClick: handlePasswordSave, disabled: passwordSave.isSaving, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60", children: isPasswordSet ? "تحديث كلمة المرور" : "تعيين كلمة المرور" }),
+            jsx("button", { type: "button", onClick: lockApp, className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "قفل التطبيق الآن" }),
+            jsx(SaveIndicator, { state: passwordSave.state, onRetry: handlePasswordSave })
           ]
         }),
         jsx("div", {
@@ -428,7 +443,13 @@ export function SettingsPage() {
           children: [
             sqliteError && jsx("p", { className: "rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-200", children: sqliteError }),
             jsx("p", { className: "text-sm text-gray-500", children: settings.systemHealth?.lastCheckAt ? `آخر فحص: ${formatDateTime(settings.systemHealth.lastCheckAt)}` : "لم يتم تشغيل فحص كامل بعد." }),
-            jsx("button", { type: "button", onClick: runHealth, disabled: healthRunning, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60", children: healthRunning ? "جار الفحص..." : "تشغيل فحص النظام" })
+            jsxs("div", {
+              className: "flex flex-wrap items-center gap-2",
+              children: [
+                jsx("button", { type: "button", onClick: runHealth, disabled: healthRunning, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-60", children: healthRunning ? "جار الفحص..." : "تشغيل فحص النظام" }),
+                jsx(SaveIndicator, { state: healthSave.state, message: healthSave.isSaving ? "جار فحص النظام..." : healthSave.isSaved ? "اكتمل الفحص" : healthSave.isError ? "فشل الفحص" : null, onRetry: runHealth })
+              ]
+            })
           ]
         })
       }),

@@ -1,8 +1,66 @@
-import { motion, useReducedMotion } from "framer-motion";
+import { AlertTriangle, Check, Loader2 } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import * as React from "react";
 
 export function cx(...classes) {
   return classes.filter(Boolean).join(" ");
+}
+
+export function SaveIndicator({ state = "idle", message, onRetry, className = "" }) {
+  const prefersReducedMotion = useReducedMotion();
+  let content = null;
+  if (state === "saving") {
+    content = (
+      <span key="saving" className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-300">
+        <Loader2 className={cx("h-3.5 w-3.5", prefersReducedMotion ? "" : "animate-spin")} aria-hidden="true" />
+        <span>{message || "يحفظ..."}</span>
+      </span>
+    );
+  } else if (state === "saved") {
+    content = (
+      <span key="saved" className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300">
+        <Check className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{message || "تم الحفظ"}</span>
+      </span>
+    );
+  } else if (state === "error") {
+    content = (
+      <span key="error" className="inline-flex items-center gap-2 text-xs font-medium text-red-300">
+        <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{message || "فشل الحفظ"}</span>
+        {typeof onRetry === "function" && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-md border border-red-400/30 bg-red-500/10 px-2 py-0.5 text-[11px] font-semibold text-red-100 hover:bg-red-500/20"
+          >
+            إعادة
+          </button>
+        )}
+      </span>
+    );
+  }
+  return (
+    <span
+      className={cx("inline-flex min-h-[1.5rem] items-center", className)}
+      role={state === "error" ? "alert" : "status"}
+      aria-live={state === "error" ? "assertive" : "polite"}
+    >
+      <AnimatePresence initial={false} mode="popLayout">
+        {content && (
+          <motion.span
+            key={state}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -4 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.18 }}
+          >
+            {content}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
+  );
 }
 
 export const pageMotion = {

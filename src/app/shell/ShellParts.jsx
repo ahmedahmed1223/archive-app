@@ -14,11 +14,12 @@ import {
   Sparkles,
   X
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useAppStore, useAuthStore } from "../../stores/index.js";
 import { filterCommandPaletteCommands } from "../../components/common/commandPaletteViewModel.js";
+import { undoRedoManager as sharedUndoRedoManager, SimpleUndoRedoManager } from "../../components/common/undoManager.js";
 import { InsightPanel, SkeletonBlock, WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
 
 const STARTUP_STEPS = [
@@ -101,64 +102,8 @@ export async function runStartupSequence({ onStep, loadAllData, initAuth } = {})
   }
 }
 
-class SimpleUndoRedoManager {
-  constructor() {
-    this.undoStack = [];
-    this.redoStack = [];
-    this.listeners = new Set();
-  }
-
-  subscribe(listener) {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  notify() {
-    this.listeners.forEach((listener) => listener());
-  }
-
-  push(action) {
-    if (!action) return;
-    this.undoStack.push(action);
-    this.redoStack = [];
-    this.notify();
-  }
-
-  undo() {
-    const action = this.undoStack.pop();
-    if (!action) return null;
-    try {
-      action.undo?.();
-      this.redoStack.push(action);
-    } finally {
-      this.notify();
-    }
-    return action;
-  }
-
-  redo() {
-    const action = this.redoStack.pop();
-    if (!action) return null;
-    try {
-      action.redo?.();
-      this.undoStack.push(action);
-    } finally {
-      this.notify();
-    }
-    return action;
-  }
-
-  getSnapshot() {
-    return {
-      canUndo: this.undoStack.length > 0,
-      canRedo: this.redoStack.length > 0,
-      undoCount: this.undoStack.length,
-      redoCount: this.redoStack.length
-    };
-  }
-}
-
-export const undoRedoManager = new SimpleUndoRedoManager();
+export { SimpleUndoRedoManager };
+export const undoRedoManager = sharedUndoRedoManager;
 
 export class AppErrorBoundary extends React.Component {
   constructor(props) {
@@ -411,7 +356,6 @@ export function ToastNotification() {
   const notifications = useAppStore((state) => state.notifications || []);
   const dismissNotification = useAppStore((state) => state.dismissNotification);
   const topItems = notifications.slice(0, 3);
-  if (!topItems.length) return null;
   return createPortal(
     <div
       dir="rtl"
@@ -420,27 +364,43 @@ export function ToastNotification() {
       aria-atomic="true"
       className="fixed bottom-4 left-4 z-[9990] flex w-[min(92vw,380px)] flex-col gap-2 text-right"
     >
-      {topItems.map((notification) => (
-        <motion.div
-          key={notification.id}
-          initial={{ opacity: 0, x: -12, scale: 0.98 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          role={notification.type === "error" ? "alert" : undefined}
-          className="rounded-2xl border border-white/10 bg-[var(--color-bg-surface,#0b1626)]/95 p-4 text-white shadow-2xl shadow-black/25 backdrop-blur"
-        >
-          <div className="flex items-start gap-3">
-            {notification.type === "success" ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" /> : notification.type === "error" ? <AlertTriangle className="mt-0.5 h-5 w-5 text-red-300" /> : <Info className="mt-0.5 h-5 w-5 text-sky-300" />}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">{notification.title || "تنبيه"}</p>
-              <p className="mt-1 text-sm leading-6 text-slate-300">{notification.message}</p>
+      <AnimatePresence initial={false}>
+        {topItems.map((notification) => (
+          <motion.div
+            key={notification.id}
+            initial={{ opacity: 0, x: -12, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -24, scale: 0.96, transition: { duration: 0.18 } }}
+            transition={{ duration: 0.2 }}
+            role={notification.type === "error" ? "alert" : undefined}
+            className="rounded-2xl border border-white/10 bg-[var(--color-bg-surface,#0b1626)]/95 p-4 text-white shadow-2xl shadow-black/25 backdrop-blur"
+            layout
+          >
+            <div className="flex items-start gap-3">
+              {notification.type === "success" ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-300" /> : notification.type === "error" ? <AlertTriangle className="mt-0.5 h-5 w-5 text-red-300" /> : <Info className="mt-0.5 h-5 w-5 text-sky-300" />}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">{notification.title || "تنبيه"}</p>
+                <p className="mt-1 text-sm leading-6 text-slate-300">{notification.message}</p>
+                {notification.action && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try { notification.action.run(); } catch (error) { console.warn("[toast action]", error); }
+                      if (notification.action.dismissOnRun !== false) dismissNotification?.(notification.id);
+                    }}
+                    className="mt-2 inline-flex items-center gap-1 rounded-lg border border-[color-mix(in_srgb,var(--va-action)_40%,transparent)] bg-[color-mix(in_srgb,var(--va-action)_18%,transparent)] px-3 py-1 text-xs font-semibold text-white hover:bg-[color-mix(in_srgb,var(--va-action)_28%,transparent)]"
+                  >
+                    {notification.action.label}
+                  </button>
+                )}
+              </div>
+              <button type="button" onClick={() => dismissNotification?.(notification.id)} className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white" aria-label="إغلاق">
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <button type="button" onClick={() => dismissNotification?.(notification.id)} className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white" aria-label="إغلاق">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>,
     document.body
   );
