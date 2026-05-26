@@ -43,7 +43,7 @@ import { FileArchiveWizard } from "../features/archive/FileArchiveWizard.jsx";
 import { ArchiveFilterChips, ArchiveSortMenu } from "../features/archive/ArchiveToolbar.jsx";
 import { getGridStyleForColumns } from "../features/archive/ArchiveViews.jsx";
 import { ColumnManagerMenu } from "../features/archive/ColumnManagerMenu.jsx";
-import { getVisibleColumns, normalizeArchiveTableColumns } from "../features/archive/tableColumns.js";
+import { getVisibleColumns, normalizeArchiveTableColumns, setColumnWidth } from "../features/archive/tableColumns.js";
 import { BulkActionBar } from "../features/archive/BulkActionBar.jsx";
 import { SavedViewsBar } from "../features/archive/SavedViewsBar.jsx";
 import {
@@ -152,6 +152,26 @@ export function ArchivePage() {
     setTableColumns(normalized);
     await updateSettings?.({ ui: { ...(settings.ui || {}), archiveTableColumns: normalized } });
   }, [settings.ui, updateSettings]);
+
+  // Resize is driven by mouse-move 60+ times per second; defer the
+  // settings persistence until the user lets go so we don't thrash
+  // IndexedDB on every pixel.
+  const resizeFlushRef = React.useRef(null);
+  const handleColumnResize = React.useCallback((columnId, width) => {
+    setTableColumns((current) => {
+      const next = setColumnWidth(current, columnId, width);
+      if (resizeFlushRef.current) window.clearTimeout(resizeFlushRef.current);
+      resizeFlushRef.current = window.setTimeout(() => {
+        updateSettings?.({ ui: { ...(settings.ui || {}), archiveTableColumns: next } });
+        resizeFlushRef.current = null;
+      }, 280);
+      return next;
+    });
+  }, [settings.ui, updateSettings]);
+
+  React.useEffect(() => () => {
+    if (resizeFlushRef.current) window.clearTimeout(resizeFlushRef.current);
+  }, []);
   const [previewId, setPreviewId] = React.useState(null);
   const [showFileImportWizard, setShowFileImportWizard] = React.useState(initialRouteState.openImport || false);
   const [bulkMode, setBulkMode] = React.useState(false);
@@ -500,6 +520,7 @@ export function ArchivePage() {
         allSelected: allVisibleSelected,
         onSelectAll: toggleSelectAllVisible,
         columns: visibleTableColumns,
+        onColumnResize: handleColumnResize,
         onPreview: (item) => setPreviewId(item.id),
         onOpen: openItem,
         onFavorite: (item) => toggleFavorite?.(item.id),

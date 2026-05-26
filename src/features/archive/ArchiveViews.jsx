@@ -10,6 +10,7 @@ import {
   Video
 } from "lucide-react";
 import { motion } from "framer-motion";
+import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
 import {
@@ -344,12 +345,13 @@ export function SegmentedControl({ label, value, options, onChange }) {
   });
 }
 
-export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
+export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu }) {
   const size = ARCHIVE_CARD_SIZE[itemSize] || ARCHIVE_CARD_SIZE.comfortable;
   const highlight = bulkMode ? bulkSelected : selected;
   const handleCardClick = bulkMode ? () => onBulkToggle?.() : onPreview;
   return jsxs("article", {
-    className: `va-video-card ${highlight ? "va-video-card-selected" : ""} group relative overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
+    onContextMenu,
+    className: `va-video-card va-virtual-grid-cell ${highlight ? "va-video-card-selected" : ""} group relative overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
       highlight ? "border-[color-mix(in_srgb,var(--va-action)_55%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--va-action)_30%,transparent)]" : "border-white/10 hover:border-[color-mix(in_srgb,var(--va-action)_30%,transparent)]"
     }`,
     dir: "rtl",
@@ -444,14 +446,15 @@ export function AnimatedItem({ index, children, as = "div", className = "" }) {
  * key metadata stack on the other, and a single primary action.
  * Ideal for quick visual browsing without giving up titles or tags.
  */
-export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
+export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu }) {
   const highlight = bulkMode ? bulkSelected : selected;
   const handlePreview = bulkMode ? () => onBulkToggle?.() : onPreview;
   const tagLimit = itemSize === "xs" ? 1 : itemSize === "compact" ? 2 : itemSize === "comfortable" ? 3 : 4;
   const thumbWidth = itemSize === "xs" ? "w-20" : itemSize === "compact" ? "w-24" : itemSize === "large" || itemSize === "xl" ? "w-36" : "w-28";
 
   return jsxs("article", {
-    className: `va-video-list-item va-video-tile ${highlight ? "va-video-list-item-selected" : ""} group relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-gray-900/45 p-2 text-right transition-colors ${
+    onContextMenu,
+    className: `va-video-list-item va-video-tile va-virtual-tile-row ${highlight ? "va-video-list-item-selected" : ""} group relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-gray-900/45 p-2 text-right transition-colors ${
       highlight ? "border-[color-mix(in_srgb,var(--va-action)_55%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--va-action)_30%,transparent)]" : "border-white/10 hover:border-[color-mix(in_srgb,var(--va-action)_30%,transparent)]"
     }`,
     dir: "rtl",
@@ -525,13 +528,14 @@ export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPrevi
   });
 }
 
-export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
+export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu }) {
   const size = ARCHIVE_LIST_SIZE[itemSize] || ARCHIVE_LIST_SIZE.comfortable;
   const highlight = bulkMode ? bulkSelected : selected;
   const handlePreview = bulkMode ? () => onBulkToggle?.() : onPreview;
 
   return jsxs("article", {
-    className: `va-video-list-item ${highlight ? "va-video-list-item-selected" : ""} group relative grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
+    onContextMenu,
+    className: `va-video-list-item va-virtual-list-row ${highlight ? "va-video-list-item-selected" : ""} group relative grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
       highlight ? "border-[color-mix(in_srgb,var(--va-action)_55%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--va-action)_30%,transparent)]" : "border-white/10 hover:border-[color-mix(in_srgb,var(--va-action)_30%,transparent)]"
     }`,
     dir: "rtl",
@@ -693,7 +697,57 @@ function renderTableCell({ column, item, size, showDeleted, bulkMode, onPreview,
   }
 }
 
-export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable", bulkMode = false, isSelected, onBulkToggle, allSelected, onSelectAll, columns }) {
+function ResizableHeader({ column, label, cellClass, onResize }) {
+  const [resizing, setResizing] = React.useState(false);
+  const dragStateRef = React.useRef(null);
+
+  const handleMouseDown = React.useCallback((event) => {
+    if (!onResize) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setResizing(true);
+    dragStateRef.current = {
+      startX: event.clientX,
+      startWidth: column.width || 160
+    };
+    const handleMove = (moveEvent) => {
+      const state = dragStateRef.current;
+      if (!state) return;
+      // In RTL the visual leading edge moves opposite to the X delta.
+      const delta = state.startX - moveEvent.clientX;
+      const next = Math.max(60, state.startWidth + delta);
+      onResize(column.id, Math.round(next));
+    };
+    const handleUp = () => {
+      setResizing(false);
+      dragStateRef.current = null;
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseup", handleUp);
+    };
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseup", handleUp);
+  }, [column.id, column.width, onResize]);
+
+  return jsxs("th", {
+    className: `${cellClass} relative font-medium`,
+    style: { minWidth: column.width, width: column.width },
+    scope: "col",
+    children: [
+      label,
+      onResize && jsx("span", {
+        className: "va-column-resize-handle",
+        role: "separator",
+        "aria-orientation": "vertical",
+        "aria-label": `إعادة تحجيم عمود ${label}`,
+        "data-resizing": resizing ? "true" : undefined,
+        onMouseDown: handleMouseDown,
+        onClick: (event) => event.stopPropagation()
+      })
+    ]
+  }, column.id);
+}
+
+export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable", bulkMode = false, isSelected, onBulkToggle, allSelected, onSelectAll, columns, onColumnResize }) {
   const size = ARCHIVE_TABLE_SIZE[itemSize] || ARCHIVE_TABLE_SIZE.comfortable;
   const visibleColumns = (columns && columns.length ? columns : DEFAULT_TABLE_COLUMNS).filter((column) => column.visible !== false);
 
@@ -713,10 +767,11 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   className: `${size.cell} w-10 font-medium`,
                   children: jsx(BulkCheckbox, { checked: !!allSelected, onToggle: () => onSelectAll?.(), label: allSelected ? "إلغاء الكل" : "تحديد الكل" })
                 }),
-                ...visibleColumns.map((column) => jsx("th", {
-                  className: `${size.cell} font-medium`,
-                  style: { minWidth: column.width },
-                  children: COLUMN_LABELS[column.id] || column.id
+                ...visibleColumns.map((column) => jsx(ResizableHeader, {
+                  column,
+                  label: COLUMN_LABELS[column.id] || column.id,
+                  cellClass: size.cell,
+                  onResize: onColumnResize
                 }, column.id))
               ]
             })
@@ -729,9 +784,9 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                 initial: { opacity: 0, y: 6 },
                 animate: { opacity: 1, y: 0 },
                 transition: { duration: 0.16, delay: Math.min(index, 10) * 0.02 },
-                className: selectedRow
+                className: `va-virtual-table-row ${selectedRow
                   ? "bg-[color-mix(in_srgb,var(--va-action)_14%,transparent)]"
-                  : previewItem?.id === item.id ? "bg-emerald-500/10" : "hover:bg-white/[0.03]",
+                  : previewItem?.id === item.id ? "bg-emerald-500/10" : "hover:bg-white/[0.03]"}`,
                 children: [
                   bulkMode && jsx("td", {
                     className: size.cell,
