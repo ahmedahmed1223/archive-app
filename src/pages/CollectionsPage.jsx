@@ -3,6 +3,7 @@ import {
 } from "../stores/index.js";
 import {
   FolderOpen,
+  RefreshCw,
   PenLine,
   Plus,
   Search,
@@ -321,7 +322,8 @@ export function CollectionsPage() {
             title: virtualCollections.length ? "لا توجد مجموعات مطابقة" : "ابدأ تنظيم الأرشيف",
             description: virtualCollections.length ? "امسح البحث أو استخدم كلمة أبسط." : "أنشئ مجموعة يدوية لتجميع الفيديوهات المهمة.",
             actionLabel: virtualCollections.length ? "مسح البحث" : "إنشاء مجموعة",
-            onAction: virtualCollections.length ? () => setQuery("") : startCreate
+            onAction: virtualCollections.length ? () => setQuery("") : startCreate,
+            actionIcon: virtualCollections.length ? RefreshCw : undefined
           }) })
         ] }),
         jsx(CollectionDetails, {

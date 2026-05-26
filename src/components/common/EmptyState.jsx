@@ -7,6 +7,7 @@ import {
   Trash2,
   Video
 } from "lucide-react";
+import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 
@@ -25,18 +26,28 @@ function getDefaultIcon(type) {
   return icons[type] || icons.custom;
 }
 
+function renderActionIcon(actionIcon) {
+  if (actionIcon === null) return null; // explicitly hide
+  if (actionIcon === undefined) return jsx(CirclePlus, { className: "h-4 w-4" });
+  if (React.isValidElement(actionIcon)) return actionIcon;
+  if (typeof actionIcon === "function") return jsx(actionIcon, { className: "h-4 w-4" });
+  return jsx(CirclePlus, { className: "h-4 w-4" });
+}
+
 export function EmptyState({
   type = "custom",
   title,
   description,
   actionLabel,
   onAction,
+  actionIcon,
   secondaryActionLabel,
   onSecondaryAction,
   hintItems = [],
   icon
 }) {
   const iconElement = icon || getDefaultIcon(type);
+  const renderedActionIcon = renderActionIcon(actionIcon);
 
   return jsxs(motion.div, {
     initial: { opacity: 0, y: 16 },
@@ -76,9 +87,9 @@ export function EmptyState({
           actionLabel && onAction && jsxs("button", {
             type: "button",
             onClick: onAction,
-            className: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:from-emerald-500 hover:to-teal-500",
+            className: "va-primary-button inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white",
             children: [
-              jsx(CirclePlus, { className: "h-4 w-4" }),
+              renderedActionIcon,
               actionLabel
             ]
           }),

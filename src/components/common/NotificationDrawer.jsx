@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { jsx, jsxs } from "react/jsx-runtime";
 
 import { useAppStore } from "../../stores/index.js";
+import { useFocusTrap } from "./useFocusTrap.js";
 
 const FILTER_TABS = [
   { id: "all", label: "الكل" },
@@ -44,6 +45,8 @@ export function NotificationDrawer() {
   const prefersReducedMotion = useReducedMotion();
   const [filter, setFilter] = React.useState("all");
   const closeButtonRef = React.useRef(null);
+  const panelRef = React.useRef(null);
+  useFocusTrap(panelRef, open, { initialFocusRef: closeButtonRef });
 
   React.useEffect(() => {
     if (!open) return undefined;
@@ -99,6 +102,7 @@ export function NotificationDrawer() {
             exit: { opacity: 0 }
           }),
           jsxs(motion.aside, {
+            ref: panelRef,
             role: "dialog",
             "aria-modal": "true",
             "aria-label": "سجل التنبيهات",

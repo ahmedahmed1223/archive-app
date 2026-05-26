@@ -351,7 +351,8 @@ export function SearchPage() {
             ? "جرّب كلمة أقصر، أو امسح بعض الفلاتر، أو افتح الأرشيف لاستعراض كل العناصر."
             : "اكتب جزءاً من العنوان أو الوسم أو الملاحظة لتظهر النتائج هنا مباشرة.",
           actionLabel: activeFilterCount > 0 ? "مسح البحث" : undefined,
-          onAction: activeFilterCount > 0 ? resetSearch : undefined
+          onAction: activeFilterCount > 0 ? resetSearch : undefined,
+          actionIcon: activeFilterCount > 0 ? RefreshCw : undefined
         })
       }) : jsxs("section", {
         className: "space-y-4",

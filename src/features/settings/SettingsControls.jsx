@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
-import { SETTINGS_TABS } from "./settingsTabs.js";
+import { SETTINGS_TABS, SETTINGS_TAB_ROLE_ORDER, SETTINGS_TAB_ROLE_LABELS } from "./settingsTabs.js";
 import {
   SHORTCUT_ACTIONS,
   SHORTCUT_DISABLED,
@@ -215,26 +215,48 @@ export function ColorChoices({ value, onChange }) {
 }
 
 export function SettingsTabs({ activeTab, onTabChange }) {
+  // Group tabs by their declared role so the section dividers stay in a
+  // predictable order regardless of how SETTINGS_TABS is sorted.
+  const grouped = SETTINGS_TAB_ROLE_ORDER.map((role) => ({
+    role,
+    label: SETTINGS_TAB_ROLE_LABELS[role] || role,
+    tabs: SETTINGS_TABS.filter((tab) => (tab.role || "personal") === role)
+  })).filter((group) => group.tabs.length > 0);
+
   return jsx("nav", {
-    className: "va-tab-surface sticky top-4 h-fit rounded-2xl border border-white/10 bg-gray-900/50 p-2",
+    className: "va-tab-surface sticky top-4 h-fit rounded-2xl border p-2",
     dir: "rtl",
-    children: SETTINGS_TABS.map((tab) => {
-      const Icon = TAB_ICONS[tab.id] || CircleQuestionFallback;
-      const selected = activeTab === tab.id;
-      return jsxs("button", {
-        type: "button",
-        onClick: () => onTabChange(tab.id),
-        className: cx(
-          "relative mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-right text-sm transition-colors",
-          selected ? "text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"
-        ),
-        children: [
-          selected && jsx(motion.span, { layoutId: "settings-tab-active", className: "absolute inset-0 rounded-xl border border-emerald-500/20 bg-emerald-500/10" }),
-          jsx(Icon, { className: "relative h-4 w-4" }),
-          jsx("span", { className: "relative", children: tab.label })
-        ]
-      }, tab.id);
-    })
+    "aria-label": "تبويبات الإعدادات",
+    children: grouped.map((group, groupIndex) => jsxs("div", {
+      className: groupIndex > 0 ? "mt-2 border-t border-white/5 pt-2" : "",
+      children: [
+        jsx("p", {
+          className: "px-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500",
+          children: group.label
+        }),
+        ...group.tabs.map((tab) => {
+          const Icon = TAB_ICONS[tab.id] || CircleQuestionFallback;
+          const selected = activeTab === tab.id;
+          return jsxs("button", {
+            type: "button",
+            onClick: () => onTabChange(tab.id),
+            "aria-current": selected ? "page" : undefined,
+            className: cx(
+              "relative mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-right text-sm transition-colors",
+              selected ? "text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"
+            ),
+            children: [
+              selected && jsx(motion.span, {
+                layoutId: "settings-tab-active",
+                className: "absolute inset-0 rounded-xl border border-[color-mix(in_srgb,var(--va-action)_45%,transparent)] bg-[color-mix(in_srgb,var(--va-action)_15%,transparent)]"
+              }),
+              jsx(Icon, { className: "relative h-4 w-4" }),
+              jsx("span", { className: "relative flex-1", children: tab.label })
+            ]
+          }, tab.id);
+        })
+      ]
+    }, group.role))
   });
 }
 

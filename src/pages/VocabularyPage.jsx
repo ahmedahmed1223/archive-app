@@ -9,6 +9,7 @@ import {
   BookOpen,
   PenLine,
   Plus,
+  RefreshCw,
   Search,
   Tag,
   Trash2
@@ -359,6 +360,7 @@ export function VocabularyPage() {
             ? "غيّر الفئة أو امسح البحث لعرض المصطلحات."
             : "أضف مصطلحات موحدة ليستخدمها الفريق من خلال الاستدعاء الذكي @.",
           actionLabel: vocabulary.length ? "مسح الفلاتر" : "إضافة أول مصطلح",
+          actionIcon: vocabulary.length ? RefreshCw : undefined,
           onAction: vocabulary.length ? () => { setQuery(""); setCategory("all"); } : startCreate
         })
       }),

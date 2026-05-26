@@ -816,6 +816,30 @@ html.light .va-tool-button {
   box-shadow: 0 1px 0 var(--va-line-soft);
 }
 
+/* Skip-link — only visible on focus. Uses accent token so it follows
+ * teal/indigo instead of being locked to emerald. */
+.va-skip-link {
+  position: absolute;
+  inset-inline-start: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.va-skip-link:focus-visible {
+  position: fixed;
+  inset-inline-start: 0.75rem;
+  inset-block-start: 0.75rem;
+  z-index: 1000;
+  width: auto;
+  height: auto;
+  padding: 0.625rem 1rem;
+  border-radius: var(--va-control-radius);
+  background: var(--va-action);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: var(--va-shadow-elevated);
+}
+
 .va-context-actions button {
   white-space: nowrap;
 }
