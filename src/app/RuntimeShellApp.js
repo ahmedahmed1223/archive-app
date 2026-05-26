@@ -38,6 +38,7 @@ import {
   undoRedoManager
 } from "./shell/ShellParts.jsx";
 import { NotificationDrawer } from "../components/common/NotificationDrawer.jsx";
+import { QuickAddDialog } from "../features/videos/QuickAddDialog.jsx";
 import { KeyboardShortcutsDialog } from "../components/common/KeyboardShortcutsDialog.jsx";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import {
@@ -74,6 +75,7 @@ export function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [showShortcuts, setShowShortcuts] = React.useState(false);
   const [showCommandPalette, setShowCommandPalette] = React.useState(false);
+  const [showQuickAdd, setShowQuickAdd] = React.useState(false);
   const [showV1Tour, setShowV1Tour] = React.useState(false);
   const [showSplash, setShowSplash] = React.useState(true);
   const [startupProgress, setStartupProgress] = React.useState(() => createStartupProgressState({ progress: 1 }));
@@ -365,6 +367,11 @@ export function App() {
       setShowCommandPalette(true);
       return;
     }
+    if (shortcutAction === "quickAdd") {
+      event.preventDefault();
+      setShowQuickAdd(true);
+      return;
+    }
     if (shortcutAction === "openSearch") {
       event.preventDefault();
       setSelectedItemId(null);
@@ -586,7 +593,8 @@ export function App() {
       jsx(UndoRedoBar, {}),
       jsx(StatusBar, {}),
       jsx(KeyboardShortcutsDialog, { open: showShortcuts, onOpenChange: setShowShortcuts }),
-      jsx(CommandPalette, { open: showCommandPalette, onOpenChange: setShowCommandPalette, onOpenShortcuts: () => setShowShortcuts(true) }),
+      jsx(CommandPalette, { open: showCommandPalette, onOpenChange: setShowCommandPalette, onOpenShortcuts: () => setShowShortcuts(true), onOpenQuickAdd: () => setShowQuickAdd(true) }),
+      jsx(QuickAddDialog, { open: showQuickAdd, onOpenChange: setShowQuickAdd }),
       jsx(V1ProductTour, { open: showV1Tour, onComplete: () => completeV1Tour(false), onSkip: () => completeV1Tour(true) }),
       jsx(ForceChangePasswordDialog, {})
     ]

@@ -4,6 +4,7 @@ export const SHORTCUT_DISABLED = "disabled";
 
 export const SHORTCUT_ACTIONS = [
   { id: "openSearch", label: "فتح البحث المتقدم", category: "التنقل", defaultKeys: "Ctrl+K", options: ["Ctrl+K", "Alt+K", "disabled"] },
+  { id: "quickAdd", label: "إضافة فيديو سريع", category: "التنقل", defaultKeys: "Alt+A", options: ["Alt+A", "Ctrl+Shift+A", "disabled"] },
   { id: "showShortcuts", label: "عرض اختصارات لوحة المفاتيح", category: "التنقل", defaultKeys: "Ctrl+/", options: ["Ctrl+/", "Alt+/", "disabled"] },
   { id: "openCommandPalette", label: "فتح لوحة الأوامر", category: "التنقل", defaultKeys: "Ctrl+Shift+K", options: ["Ctrl+Shift+K", "Ctrl+P", "Alt+P", "disabled"] },
   { id: "toggleNotifications", label: "فتح مركز الإشعارات", category: "التنقل", defaultKeys: "Ctrl+Shift+M", options: ["Ctrl+Shift+M", "Alt+M", "disabled"] },
