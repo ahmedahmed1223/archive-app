@@ -550,6 +550,9 @@ export function App() {
     className: `va-app-shell flex min-h-screen text-right ${resolvedTheme === "dark" ? "bg-gray-950" : "bg-white"}`,
     "data-density": settings.ui?.visualDensity === "compact" ? "compact" : "comfortable",
     "data-accent": settings.accentColor || "teal",
+    "data-font-scale": settings.ui?.fontScale || "normal",
+    "data-motion": settings.ui?.motionLevel || "full",
+    "data-card-style": settings.ui?.cardStyle || "filled",
     children: [
       jsx("a", {
         href: "#main-content",
