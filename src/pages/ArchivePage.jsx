@@ -38,6 +38,7 @@ import {
   parseArchiveRouteParams
 } from "../features/archive/viewModel.js";
 import { FileArchiveWizard } from "../features/archive/FileArchiveWizard.jsx";
+import { ArchiveFilterChips, ArchiveSortMenu } from "../features/archive/ArchiveToolbar.jsx";
 import { BulkActionBar } from "../features/archive/BulkActionBar.jsx";
 import {
   ARCHIVE_GRID_CLASSES,
@@ -601,6 +602,14 @@ export function ArchivePage() {
               jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة" }),
               jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "المحذوفات" }),
               jsx(ToolbarButton, { active: bulkMode, onClick: () => { setBulkMode((value) => { if (value) clearSelection?.(); return !value; }); }, icon: jsx(CheckSquare, { className: "h-4 w-4" }), children: bulkMode ? "إنهاء التحديد" : "تحديد متعدد" }),
+              jsx(ArchiveSortMenu, {
+                sortField,
+                sortDirection,
+                onChange: ({ sortField: nextField, sortDirection: nextDirection }) => {
+                  setSortField(nextField);
+                  setSortDirection(nextDirection);
+                }
+              }),
               (hasFilters || showDeleted) && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح" })
             ]
           })
@@ -726,6 +735,19 @@ export function ArchivePage() {
           }),
           jsx("p", { className: "mt-2 text-xs leading-5 text-gray-500", children: "الفلاتر التفصيلية تظهر هنا عند الحاجة. الوضع السريع يحافظ على مساحة أكبر للمواد." })
         ]
+      }),
+      jsx(ArchiveFilterChips, {
+        searchQuery: localSearch,
+        filterTypeLabel: filterType !== "all" ? typeById.get(filterType)?.name || filterType : null,
+        filterSubtypeLabel: filterSubtype !== "all" ? typeById.get(filterType)?.subtypes?.find((sub) => sub.id === filterSubtype)?.name || filterSubtype : null,
+        showFavoritesOnly,
+        showDeleted,
+        onClearSearch: () => setLocalSearch(""),
+        onClearType: () => { setFilterType?.("all"); setFilterSubtype?.("all"); },
+        onClearSubtype: () => setFilterSubtype?.("all"),
+        onClearFavorites: () => setShowFavoritesOnly(false),
+        onClearDeleted: () => setShowDeleted(false),
+        onResetAll: resetFilters
       }),
       jsxs("section", {
         className: "grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]",
