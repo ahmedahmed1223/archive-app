@@ -201,6 +201,55 @@ html.light .va-app-shell {
   background: var(--va-ink-800);
   border-color: var(--va-line);
 }
+
+/* Virtualization helpers — tell the browser to skip rendering off-screen
+ * archive items so 1000+ entries don't pay the layout / paint cost up
+ * front. Each helper supplies a contain-intrinsic-size so the page
+ * still computes a stable height without a flash of zero-height items
+ * (which would defeat the scrollbar). */
+.va-virtual-grid-cell {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 260px;
+}
+.va-virtual-tile-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 88px;
+}
+.va-virtual-list-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 132px;
+}
+.va-virtual-table-row {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 56px;
+}
+
+/* Column resize handle for Details view. The handle sits on the
+ * leading edge of every <th> (RTL: right edge), only appears on
+ * hover/focus, and turns accent-colored while dragging. */
+.va-column-resize-handle {
+  position: absolute;
+  inset-inline-start: -2px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 2;
+  opacity: 0;
+  background: transparent;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+th:hover > .va-column-resize-handle,
+.va-column-resize-handle:hover,
+.va-column-resize-handle:focus-visible,
+.va-column-resize-handle[data-resizing="true"] {
+  opacity: 1;
+  background: color-mix(in srgb, var(--va-action) 55%, transparent);
+}
+.va-column-resize-handle[data-resizing="true"] {
+  background: var(--va-action);
+}
 html.light .va-surface-deep {
   background: #f4f4f5;
   border-color: var(--color-border);
