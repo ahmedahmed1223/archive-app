@@ -427,13 +427,14 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
   });
 }
 
-export function AnimatedItem({ index, children, as = "div", className = "" }) {
+export function AnimatedItem({ index, children, as = "div", className = "", itemId }) {
   const Component = motion[as] || motion.div;
   return jsx(Component, {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
     className,
+    "data-archive-item-id": itemId,
     children
   });
 }
