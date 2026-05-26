@@ -180,8 +180,8 @@ function TypeCard({ type, count, active, index, onOpen, onEdit, onArchive }) {
           ] })
         ] }),
         jsxs("div", { className: "flex shrink-0 gap-1", onClick: (event) => event.stopPropagation(), children: [
-          jsx("button", { type: "button", onClick: onEdit, className: "rounded-lg p-2 text-gray-500 hover:bg-white/5 hover:text-white", children: jsx(PenLine, { className: "h-4 w-4" }) }),
-          jsx("button", { type: "button", onClick: onArchive, className: "rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300", children: jsx(Trash2, { className: "h-4 w-4" }) })
+          jsx("button", { type: "button", onClick: onEdit, className: "rounded-lg p-2 text-gray-500 hover:bg-white/5 hover:text-white", "aria-label": `تعديل ${type.name}`, children: jsx(PenLine, { className: "h-4 w-4" }) }),
+          jsx("button", { type: "button", onClick: onArchive, className: "rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300", "aria-label": `أرشفة ${type.name}`, children: jsx(Trash2, { className: "h-4 w-4" }) })
         ] })
       ] })
     ]
