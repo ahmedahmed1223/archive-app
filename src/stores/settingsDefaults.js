@@ -1,7 +1,7 @@
 export function defaultSettings() {
   return {
-    theme: "dark",
-    accentColor: "teal",
+    theme: "system",
+    accentColor: "blue",
     numberSystem: "arabic",
     dateFormat: "gregorian",
     backupSchedule: "manual",
