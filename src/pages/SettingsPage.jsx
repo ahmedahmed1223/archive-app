@@ -231,6 +231,40 @@ export function SettingsPage() {
               columns: "sm:grid-cols-2",
               onChange: (value) => patchUi({ visualDensity: value }, "تم تحديث كثافة الواجهة")
             }),
+            jsx(SegmentedChoices, {
+              label: "حجم الخط",
+              value: settings.ui?.fontScale || "normal",
+              options: [
+                { value: "small", label: "صغير", detail: "14px" },
+                { value: "normal", label: "عادي", detail: "16px" },
+                { value: "large", label: "كبير", detail: "17px" },
+                { value: "xlarge", label: "كبير جدًا", detail: "18px" }
+              ],
+              columns: "sm:grid-cols-4",
+              onChange: (value) => patchUi({ fontScale: value }, "تم تحديث حجم الخط")
+            }),
+            jsx(SegmentedChoices, {
+              label: "مستوى الحركة",
+              value: settings.ui?.motionLevel || "full",
+              options: [
+                { value: "full", label: "كامل", detail: "حركات سلسة" },
+                { value: "reduced", label: "مخفّف", detail: "حركات أسرع" },
+                { value: "off", label: "متوقّف", detail: "بدون حركة" }
+              ],
+              columns: "sm:grid-cols-3",
+              onChange: (value) => patchUi({ motionLevel: value }, "تم تحديث مستوى الحركة")
+            }),
+            jsx(SegmentedChoices, {
+              label: "أسلوب البطاقات",
+              value: settings.ui?.cardStyle || "filled",
+              options: [
+                { value: "filled", label: "ممتلئة", detail: "خلفية ودرجة عمق" },
+                { value: "outlined", label: "مُحدّدة", detail: "إطار فقط" },
+                { value: "minimal", label: "بسيطة", detail: "بدون إطار" }
+              ],
+              columns: "sm:grid-cols-3",
+              onChange: (value) => patchUi({ cardStyle: value }, "تم تحديث أسلوب البطاقات")
+            }),
             jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/30 p-3 text-xs text-gray-500", children: `المظهر المطبّق الآن: ${isDark ? "ليلي" : "نهاري"}.` })
           ]
         })

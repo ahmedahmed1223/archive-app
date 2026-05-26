@@ -91,6 +91,73 @@ html.light .va-app-shell {
   --va-action-strong: #4f46e5;
 }
 
+.va-app-shell[data-accent="emerald"] {
+  --va-action: #10b981;
+  --va-action-strong: #047857;
+}
+
+.va-app-shell[data-accent="blue"] {
+  --va-action: #3b82f6;
+  --va-action-strong: #1d4ed8;
+}
+
+.va-app-shell[data-accent="rose"] {
+  --va-action: #f43f5e;
+  --va-action-strong: #be123c;
+}
+
+.va-app-shell[data-font-scale="small"] {
+  font-size: 14px;
+}
+
+.va-app-shell[data-font-scale="normal"] {
+  font-size: 16px;
+}
+
+.va-app-shell[data-font-scale="large"] {
+  font-size: 17px;
+}
+
+.va-app-shell[data-font-scale="xlarge"] {
+  font-size: 18px;
+}
+
+.va-app-shell[data-motion="off"] *,
+.va-app-shell[data-motion="off"] *::before,
+.va-app-shell[data-motion="off"] *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+.va-app-shell[data-motion="reduced"] *,
+.va-app-shell[data-motion="reduced"] *::before,
+.va-app-shell[data-motion="reduced"] *::after {
+  animation-duration: 0.12s !important;
+  transition-duration: 0.12s !important;
+}
+
+.va-app-shell[data-card-style="outlined"] .va-card,
+.va-app-shell[data-card-style="outlined"] .va-data-card,
+.va-app-shell[data-card-style="outlined"] .va-panel-premium,
+.va-app-shell[data-card-style="outlined"] .va-page-hero {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-color: color-mix(in srgb, var(--va-action) 22%, rgba(148, 163, 184, 0.2)) !important;
+}
+
+.va-app-shell[data-card-style="minimal"] .va-card,
+.va-app-shell[data-card-style="minimal"] .va-data-card,
+.va-app-shell[data-card-style="minimal"] .va-page-hero {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  padding-inline: 0 !important;
+}
+
 .va-app-shell[data-density="compact"] {
   --va-page-gutter: clamp(0.75rem, 1.25vw, 1.1rem);
   --va-panel-radius: 0.875rem;
