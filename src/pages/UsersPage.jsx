@@ -18,6 +18,8 @@ import { EmptyState } from "../components/common/EmptyState.jsx";
 import { PageHero } from "../components/ui/V1Primitives.jsx";
 import { reportError } from "../utils/errorReporting.js";
 import { hashPassword, validatePasswordStrength } from "../utils/passwordHash.js";
+import { useCanPerform } from "../features/users/useCanPerform.js";
+import { ACTIONS } from "../features/users/permissions.js";
 import {
   USER_ROLES,
   canDeactivateUser,
@@ -159,6 +161,7 @@ export function UsersPage() {
     showNotification
   } = useAppStore();
 
+  const canManageUsers = useCanPerform(ACTIONS.USER_MANAGE);
   const [query, setQuery] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState("all");
   const [showForm, setShowForm] = React.useState(false);
@@ -234,7 +237,7 @@ export function UsersPage() {
         icon: jsx(Users, { className: "h-6 w-6 text-emerald-400" }),
         title: "المستخدمون",
         description: "إدارة الحسابات والأدوار مع حماية آخر مدير نشط ومنع تغيير كلمات المرور من صفحة المستخدمين.",
-        actions: jsxs("button", { type: "button", onClick: () => { setEditingUser(null); setShowForm(true); }, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white", children: [jsx(Plus, { className: "h-4 w-4" }), "مستخدم جديد"] })
+        actions: canManageUsers ? jsxs("button", { type: "button", onClick: () => { setEditingUser(null); setShowForm(true); }, className: "va-primary-button inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white", children: [jsx(Plus, { className: "h-4 w-4" }), "مستخدم جديد"] }) : null
       }),
       showForm && jsx(UserForm, { user: editingUser, users, onCancel: () => { setShowForm(false); setEditingUser(null); }, onSave: saveUser }),
       jsx("section", { className: "grid gap-3 sm:grid-cols-4", children: [

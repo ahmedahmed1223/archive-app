@@ -32,6 +32,18 @@ import * as React from "react";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 
 import { getSidebarNavigationGroups } from "./viewModel.js";
+import { ACTIONS, canPerform } from "../../features/users/permissions.js";
+
+// Map sidebar page ids to the RBAC action that gates them. Missing entries
+// are treated as "always visible" (so personal pages like Dashboard, Search,
+// Archive remain available to every authenticated user).
+const SIDEBAR_PAGE_PERMISSIONS = {
+  users: ACTIONS.USER_MANAGE,
+  settings: ACTIONS.SETTINGS_EDIT,
+  backup: ACTIONS.BACKUP_CREATE,
+  reports: ACTIONS.AUDIT_VIEW,
+  history: ACTIONS.AUDIT_VIEW
+};
 
 
 const iconMap = {
@@ -118,7 +130,15 @@ export function Sidebar() {
   const isDark = resolvedTheme === "dark";
   const activeCount = videoItems.filter((item) => !item.isDeleted).length;
   const groups = getSidebarNavigationGroups()
-    .map((group) => ({ ...group, pages: group.pages.filter((page) => page.id !== "detail") }))
+    .map((group) => ({
+      ...group,
+      pages: group.pages.filter((page) => {
+        if (page.id === "detail") return false;
+        const requiredAction = SIDEBAR_PAGE_PERMISSIONS[page.id];
+        if (!requiredAction) return true;
+        return canPerform(currentUser, requiredAction);
+      })
+    }))
     .filter((group) => group.pages.length > 0);
 
   const goToPage = (pageId) => {
