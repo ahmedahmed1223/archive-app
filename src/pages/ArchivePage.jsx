@@ -40,6 +40,14 @@ import {
 import { FileArchiveWizard } from "../features/archive/FileArchiveWizard.jsx";
 import { ArchiveFilterChips, ArchiveSortMenu } from "../features/archive/ArchiveToolbar.jsx";
 import { BulkActionBar } from "../features/archive/BulkActionBar.jsx";
+import { SavedViewsBar } from "../features/archive/SavedViewsBar.jsx";
+import {
+  addSavedView,
+  captureCurrentFilters,
+  getSavedViews,
+  hasMeaningfulFilters,
+  removeSavedView
+} from "../features/archive/savedViews.js";
 import {
   ARCHIVE_GRID_CLASSES,
   ARCHIVE_ITEM_SIZE_LABELS,
@@ -338,6 +346,47 @@ export function ArchivePage() {
     setSortDirection("desc");
     setPage(1);
   };
+
+  const savedViews = React.useMemo(() => getSavedViews(settings), [settings]);
+  const currentFiltersForSave = React.useMemo(() => captureCurrentFilters({
+    searchQuery: localSearch,
+    filterType,
+    filterSubtype,
+    showFavoritesOnly,
+    showDeleted,
+    sortField,
+    sortDirection,
+    itemSize: activeItemSize,
+    viewMode: activeViewMode
+  }), [activeItemSize, activeViewMode, filterSubtype, filterType, localSearch, showDeleted, showFavoritesOnly, sortDirection, sortField]);
+
+  const applySavedView = React.useCallback((view) => {
+    if (!view?.filters) return;
+    const filters = view.filters;
+    setLocalSearch(filters.query || "");
+    setSearchQuery?.(filters.query || "");
+    setFilterType?.(filters.type || "all");
+    setFilterSubtype?.(filters.subtype || "all");
+    setShowFavoritesOnly(!!filters.favoritesOnly);
+    setShowDeleted(!!filters.showDeleted);
+    setSortField(filters.sortField || "updatedAt");
+    setSortDirection(filters.sortDirection || "desc");
+    setPage(1);
+    if (filters.itemSize && filters.itemSize !== activeItemSize) setItemSize(filters.itemSize);
+    if (filters.viewMode && filters.viewMode !== activeViewMode) setViewMode?.(filters.viewMode);
+    showToast?.(`تم تطبيق "${view.name}"`, "info");
+  }, [activeItemSize, activeViewMode, setFilterSubtype, setFilterType, setSearchQuery, setViewMode, showToast]);
+
+  const saveCurrentView = React.useCallback(async (name, filters) => {
+    const nextList = addSavedView(settings, { name, filters });
+    await updateSettings?.({ ui: { ...(settings.ui || {}), savedArchiveViews: nextList } });
+    showToast?.(`تم حفظ العرض "${name}"`, "success");
+  }, [settings, showToast, updateSettings]);
+
+  const removeView = React.useCallback(async (viewId) => {
+    const nextList = removeSavedView(settings, viewId);
+    await updateSettings?.({ ui: { ...(settings.ui || {}), savedArchiveViews: nextList } });
+  }, [settings, updateSettings]);
 
   const openAdd = () => {
     setSelectedItemId?.(null);
@@ -748,6 +797,14 @@ export function ArchivePage() {
         onClearFavorites: () => setShowFavoritesOnly(false),
         onClearDeleted: () => setShowDeleted(false),
         onResetAll: resetFilters
+      }),
+      jsx(SavedViewsBar, {
+        views: savedViews,
+        currentFilters: currentFiltersForSave,
+        canSave: hasMeaningfulFilters(currentFiltersForSave),
+        onApply: applySavedView,
+        onSave: saveCurrentView,
+        onRemove: removeView
       }),
       jsxs("section", {
         className: "grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]",
