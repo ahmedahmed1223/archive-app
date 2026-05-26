@@ -63,6 +63,10 @@ function MiniStat({ label, value, hint, icon }) {
 }
 
 function RecentItem({ item, onOpen }) {
+  const timestamp = item.lastViewedAt || item.updatedAt;
+  const label = item.lastViewedAt
+    ? `تمت المشاهدة: ${formatDateTime(item.lastViewedAt)}`
+    : timestamp ? `آخر تحديث: ${formatDateTime(timestamp)}` : "لم يتم تسجيل وقت";
   return jsxs("button", {
     type: "button",
     onClick: onOpen,
@@ -76,7 +80,7 @@ function RecentItem({ item, onOpen }) {
         className: "min-w-0 flex-1",
         children: [
           jsx("span", { className: "block truncate text-sm font-medium text-white", children: item.title || "بدون عنوان" }),
-          jsx("span", { className: "mt-1 block truncate text-xs text-gray-500", children: item.updatedAt ? formatDateTime(item.updatedAt) : "لم يتم تسجيل وقت" })
+          jsx("span", { className: "mt-1 block truncate text-xs text-gray-500", children: label })
         ]
       })
     ]
@@ -98,6 +102,7 @@ export function DashboardPage() {
     setSelectedItemId,
     updateSettings,
     runSystemHealthCheck,
+    markItemViewed,
     showToast
   } = useAppStore();
 
@@ -109,11 +114,20 @@ export function DashboardPage() {
   }), [videoItems, contentTypes, virtualCollections, hierarchicalTags]);
 
   const demoIds = React.useMemo(() => getDashboardDemoItemIds(videoItems), [videoItems]);
-  const recentItems = React.useMemo(() => videoItems
-    .filter((item) => !item.isDeleted)
-    .slice()
-    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime())
-    .slice(0, 5), [videoItems]);
+  const recentItems = React.useMemo(() => {
+    const candidates = videoItems.filter((item) => !item.isDeleted);
+    const viewed = candidates
+      .filter((item) => item.lastViewedAt)
+      .slice()
+      .sort((a, b) => new Date(b.lastViewedAt).getTime() - new Date(a.lastViewedAt).getTime());
+    if (viewed.length >= 5) return viewed.slice(0, 5);
+    const seen = new Set(viewed.map((item) => item.id));
+    const remaining = candidates
+      .filter((item) => !seen.has(item.id))
+      .slice()
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime());
+    return [...viewed, ...remaining].slice(0, 5);
+  }, [videoItems]);
   const activeUsers = users.filter((user) => user.isActive !== false).length;
   const lastBackup = settings.lastBackupAt ? formatDateTime(settings.lastBackupAt) : "لا توجد نسخة بعد";
   const lastHealth = settings.systemHealth?.lastCheckAt ? formatDateTime(settings.systemHealth.lastCheckAt) : "لم يتم الفحص";
@@ -126,6 +140,7 @@ export function DashboardPage() {
 
   const openItem = (item) => {
     setSelectedItemId(item.id);
+    markItemViewed?.(item.id);
     setCurrentPage("detail");
   };
 

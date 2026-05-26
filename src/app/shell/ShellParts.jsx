@@ -4,6 +4,8 @@ import {
   CheckCircle2,
   Database,
   Command,
+  FolderOpen,
+  History as HistoryIcon,
   Home,
   Info,
   KeyRound,
@@ -12,13 +14,14 @@ import {
   Search,
   ShieldAlert,
   Sparkles,
+  Video,
   X
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useAppStore, useAuthStore } from "../../stores/index.js";
-import { filterCommandPaletteCommands } from "../../components/common/commandPaletteViewModel.js";
+import { buildVideoItemCommands, filterCommandPaletteCommands } from "../../components/common/commandPaletteViewModel.js";
 import { undoRedoManager as sharedUndoRedoManager, SimpleUndoRedoManager } from "../../components/common/undoManager.js";
 import { InsightPanel, SkeletonBlock, WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
 
@@ -409,27 +412,95 @@ export function ToastNotification() {
 export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
   const setCurrentPage = useAppStore((state) => state.setCurrentPage);
   const setSelectedItemId = useAppStore((state) => state.setSelectedItemId);
+  const videoItems = useAppStore((state) => state.videoItems || []);
+  const settings = useAppStore((state) => state.settings || {});
+  const updateSettings = useAppStore((state) => state.updateSettings);
+  const recentCommandIds = settings.ui?.recentCommands || [];
   const [query, setQuery] = React.useState("");
-  const commands = React.useMemo(() => [
-    { id: "dashboard", label: "لوحة التحكم", detail: "العودة للبداية اليومية", icon: Home, run: () => setCurrentPage?.("dashboard") },
-    { id: "archive", label: "الأرشيف", detail: "تصفح المواد والفلاتر", icon: Search, run: () => setCurrentPage?.("archive") },
-    { id: "add", label: "إضافة فيديو", detail: "إنشاء مادة أرشيفية جديدة", icon: Sparkles, run: () => setCurrentPage?.("add") },
-    { id: "backup", label: "مركز البيانات", detail: "استيراد وتصدير ونقل", icon: Bell, run: () => setCurrentPage?.("backup") },
-    { id: "help", label: "المساعدة", detail: "فتح مركز المعرفة", icon: Info, run: () => setCurrentPage?.("help") },
-    { id: "shortcuts", label: "اختصارات لوحة المفاتيح", detail: "عرض الاختصارات الحالية", icon: Command, run: onOpenShortcuts }
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const listRef = React.useRef(null);
+
+  const openItem = React.useCallback((item) => {
+    setSelectedItemId?.(item.id);
+    setCurrentPage?.("detail");
+  }, [setCurrentPage, setSelectedItemId]);
+
+  const navigationCommands = React.useMemo(() => [
+    { id: "dashboard", label: "لوحة التحكم", detail: "العودة للبداية اليومية", icon: Home, kind: "page", run: () => setCurrentPage?.("dashboard") },
+    { id: "archive", label: "الأرشيف", detail: "تصفح المواد والفلاتر", icon: FolderOpen, kind: "page", run: () => setCurrentPage?.("archive") },
+    { id: "search", label: "البحث المتقدم", detail: "بحث لحظي مع فلاتر تفصيلية", icon: Search, kind: "page", run: () => setCurrentPage?.("search") },
+    { id: "add", label: "إضافة فيديو", detail: "إنشاء مادة أرشيفية جديدة", icon: Sparkles, kind: "page", run: () => setCurrentPage?.("add") },
+    { id: "backup", label: "مركز البيانات", detail: "استيراد وتصدير ونقل", icon: Database, kind: "page", run: () => setCurrentPage?.("backup") },
+    { id: "history", label: "سجل التغييرات", detail: "آخر العمليات على الأرشيف", icon: HistoryIcon, kind: "page", run: () => setCurrentPage?.("history") },
+    { id: "help", label: "المساعدة", detail: "فتح مركز المعرفة", icon: Info, kind: "page", run: () => setCurrentPage?.("help") },
+    { id: "shortcuts", label: "اختصارات لوحة المفاتيح", detail: "عرض الاختصارات الحالية", icon: Command, kind: "action", run: onOpenShortcuts }
   ], [onOpenShortcuts, setCurrentPage]);
-  const filtered = filterCommandPaletteCommands(commands, query);
+
+  const itemCommands = React.useMemo(
+    () => buildVideoItemCommands(videoItems, { query, limit: 6, onOpen: openItem }),
+    [openItem, query, videoItems]
+  );
+
+  const filtered = React.useMemo(() => {
+    if (!query.trim()) {
+      const byId = new Map(navigationCommands.map((command) => [command.id, command]));
+      const recents = recentCommandIds.map((id) => byId.get(id)).filter(Boolean);
+      const seen = new Set(recents.map((command) => command.id));
+      const remaining = navigationCommands.filter((command) => !seen.has(command.id));
+      return [...recents, ...remaining];
+    }
+    return [...filterCommandPaletteCommands(navigationCommands, query), ...itemCommands];
+  }, [itemCommands, navigationCommands, query, recentCommandIds]);
 
   React.useEffect(() => {
     if (!open) setQuery("");
+    setActiveIndex(0);
   }, [open]);
 
-  if (!open) return null;
-  const runCommand = (command) => {
-    setSelectedItemId?.(null);
+  React.useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const node = listRef.current?.querySelector(`[data-command-index="${activeIndex}"]`);
+    node?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex, filtered, open]);
+
+  const rememberCommand = React.useCallback((commandId) => {
+    if (!updateSettings || !commandId) return;
+    const next = [commandId, ...recentCommandIds.filter((id) => id !== commandId)].slice(0, 5);
+    updateSettings({ ui: { ...(settings.ui || {}), recentCommands: next } });
+  }, [recentCommandIds, settings.ui, updateSettings]);
+
+  const runCommand = React.useCallback((command) => {
+    if (!command) return;
+    if (command.kind !== "item") setSelectedItemId?.(null);
+    if (command.kind !== "item") rememberCommand(command.id);
     command.run?.();
     onOpenChange?.(false);
+  }, [onOpenChange, rememberCommand, setSelectedItemId]);
+
+  const handleKeyDown = (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((index) => Math.min(filtered.length - 1, index + 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((index) => Math.max(0, index - 1));
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      runCommand(filtered[activeIndex]);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      onOpenChange?.(false);
+    }
   };
+
+  if (!open) return null;
+
+  const isEmpty = !filtered.length;
+  const showRecentLabel = !query.trim() && recentCommandIds.length > 0;
 
   return createPortal(
     <div dir="rtl" className="fixed inset-0 z-[9980] bg-black/60 p-4 text-right backdrop-blur-sm" onMouseDown={() => onOpenChange?.(false)}>
@@ -437,30 +508,62 @@ export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
         initial={{ opacity: 0, y: 12, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.2 }}
-        className="mx-auto mt-16 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-[#0b1626] text-white shadow-2xl"
+        className="mx-auto mt-16 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-[var(--color-bg-surface,#0b1626)] text-white shadow-2xl"
         onMouseDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="لوحة الأوامر"
       >
         <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-          <Search className="h-5 w-5 text-emerald-300" />
-          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="اكتب أمرًا أو صفحة..." className="min-h-11 flex-1 bg-transparent text-right outline-none placeholder:text-slate-500" />
-          <button type="button" onClick={() => onOpenChange?.(false)} className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white">
+          <Search className="h-5 w-5 text-[var(--va-action)]" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="اكتب أمرًا أو صفحة، أو ابحث عن فيديو..."
+            className="min-h-11 flex-1 bg-transparent text-right outline-none placeholder:text-slate-500"
+            aria-label="بحث الأوامر"
+            aria-autocomplete="list"
+          />
+          <button type="button" onClick={() => onOpenChange?.(false)} className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white" aria-label="إغلاق">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="max-h-[420px] overflow-auto p-2">
-          {filtered.map((command) => {
-            const Icon = command.icon || Command;
+        <div ref={listRef} className="max-h-[460px] overflow-auto p-2" role="listbox">
+          {showRecentLabel && (
+            <p className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">آخر الأوامر</p>
+          )}
+          {filtered.map((command, index) => {
+            const Icon = command.icon || (command.kind === "item" ? Video : Command);
+            const active = index === activeIndex;
             return (
-              <button key={command.id} type="button" onClick={() => runCommand(command)} className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-right hover:bg-white/[0.07]">
-                <Icon className="h-5 w-5 shrink-0 text-emerald-300" />
-                <span className="min-w-0">
-                  <span className="block font-semibold">{command.label}</span>
-                  <span className="block text-xs text-slate-400">{command.detail}</span>
+              <button
+                key={command.id}
+                type="button"
+                role="option"
+                aria-selected={active}
+                data-command-index={index}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => runCommand(command)}
+                className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-right transition-colors ${active ? "bg-[color-mix(in_srgb,var(--va-action)_18%,transparent)]" : "hover:bg-white/[0.05]"}`}
+              >
+                <Icon className={`h-5 w-5 shrink-0 ${active ? "text-white" : "text-[var(--va-action)]"}`} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold">{command.label}</span>
+                  <span className="block truncate text-xs text-slate-400">{command.detail}</span>
                 </span>
+                {command.kind === "item" && (
+                  <span className="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-slate-400">فيديو</span>
+                )}
               </button>
             );
           })}
-          {!filtered.length && <p className="p-6 text-center text-sm text-slate-400">لا توجد أوامر مطابقة.</p>}
+          {isEmpty && <p className="p-6 text-center text-sm text-slate-400">لا توجد نتائج مطابقة.</p>}
+        </div>
+        <div className="flex items-center justify-between gap-2 border-t border-white/10 px-4 py-2 text-[10px] text-slate-500">
+          <span>↑ ↓ للتنقل · Enter للتنفيذ · Esc للإغلاق</span>
+          <span>{filtered.length} نتيجة</span>
         </div>
       </motion.section>
     </div>,
