@@ -137,8 +137,8 @@ function UserCard({ user, currentUser, users, index, onEdit, onToggle, onDelete 
         ] }),
         jsxs("div", { className: "flex shrink-0 gap-1", children: [
           jsx("button", { type: "button", onClick: onToggle, disabled: !canToggle, className: "rounded-lg px-3 py-2 text-xs text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: user.isActive ? "تعطيل" : "تفعيل" }),
-          jsx("button", { type: "button", onClick: onEdit, className: "rounded-lg p-2 text-gray-500 hover:bg-white/5 hover:text-white", children: jsx(PenLine, { className: "h-4 w-4" }) }),
-          jsx("button", { type: "button", onClick: onDelete, disabled: !canToggle, className: "rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40", children: jsx(Trash2, { className: "h-4 w-4" }) })
+          jsx("button", { type: "button", onClick: onEdit, className: "rounded-lg p-2 text-gray-500 hover:bg-white/5 hover:text-white", "aria-label": `تعديل ${user.displayName || user.username || "المستخدم"}`, children: jsx(PenLine, { className: "h-4 w-4" }) }),
+          jsx("button", { type: "button", onClick: onDelete, disabled: !canToggle, className: "rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40", "aria-label": `حذف ${user.displayName || user.username || "المستخدم"}`, children: jsx(Trash2, { className: "h-4 w-4" }) })
         ] })
       ] }),
       jsx("p", { className: "mt-4 text-xs leading-relaxed text-gray-600", children: role.description })
