@@ -436,6 +436,95 @@ export function AnimatedItem({ index, children, as = "div", className = "" }) {
   });
 }
 
+/**
+ * VideoTileItem — Windows-Explorer-style horizontal tile.
+ *
+ * Sits between the grid view (small icon-tile cards) and the list
+ * view (full row with notes). A compact thumbnail on one side, the
+ * key metadata stack on the other, and a single primary action.
+ * Ideal for quick visual browsing without giving up titles or tags.
+ */
+export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
+  const highlight = bulkMode ? bulkSelected : selected;
+  const handlePreview = bulkMode ? () => onBulkToggle?.() : onPreview;
+  const tagLimit = itemSize === "xs" ? 1 : itemSize === "compact" ? 2 : itemSize === "comfortable" ? 3 : 4;
+  const thumbWidth = itemSize === "xs" ? "w-20" : itemSize === "compact" ? "w-24" : itemSize === "large" || itemSize === "xl" ? "w-36" : "w-28";
+
+  return jsxs("article", {
+    className: `va-video-list-item va-video-tile ${highlight ? "va-video-list-item-selected" : ""} group relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-gray-900/45 p-2 text-right transition-colors ${
+      highlight ? "border-[color-mix(in_srgb,var(--va-action)_55%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--va-action)_30%,transparent)]" : "border-white/10 hover:border-[color-mix(in_srgb,var(--va-action)_30%,transparent)]"
+    }`,
+    dir: "rtl",
+    children: [
+      bulkMode && jsx("div", {
+        className: "absolute right-2 top-2 z-10",
+        children: jsx(BulkCheckbox, { checked: bulkSelected, onToggle: onBulkToggle, label: `تحديد ${item.title || "فيديو"}` })
+      }),
+      jsx("button", {
+        type: "button",
+        onClick: handlePreview,
+        className: `overflow-hidden rounded-lg border border-white/10 bg-gray-950 ${thumbWidth} shrink-0`,
+        "aria-label": `معاينة ${item.title || "الفيديو"}`,
+        children: jsx("div", { className: "aspect-video", children: jsx(VideoThumb, { item }) })
+      }),
+      jsxs("button", {
+        type: "button",
+        onClick: handlePreview,
+        className: "min-w-0 text-right",
+        children: [
+          jsxs("div", {
+            className: "flex flex-wrap items-center gap-1.5",
+            children: [
+              jsx("h3", { className: "line-clamp-1 text-sm font-bold leading-tight text-white", children: item.title || "بدون عنوان" }),
+              item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-200", children: "★" })
+            ]
+          }),
+          jsx("p", { className: "mt-0.5 line-clamp-1 text-[11px] text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
+          item.tags?.length > 0 && jsx("div", {
+            className: "mt-1 flex flex-wrap gap-1",
+            children: item.tags.slice(0, tagLimit).map((tag) => jsx("span", {
+              className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-1.5 py-0 text-[10px] text-gray-400",
+              children: tag
+            }, tag))
+          })
+        ]
+      }),
+      jsxs("div", {
+        className: "flex shrink-0 items-center gap-1",
+        children: [
+          jsx("button", {
+            type: "button",
+            onClick: onOpen,
+            "aria-label": `فتح ${item.title || "الفيديو"}`,
+            className: "va-primary-button rounded-md px-2.5 py-1 text-[11px] font-semibold text-white",
+            children: "فتح"
+          }),
+          !showDeleted && jsx("button", {
+            type: "button",
+            onClick: onFavorite,
+            "aria-label": item.isFavorite ? `إزالة من المفضلة` : `إضافة للمفضلة`,
+            className: "rounded-md border border-white/10 px-2 py-1 text-[11px] text-gray-300 hover:bg-white/5",
+            children: item.isFavorite ? "✦" : "☆"
+          }),
+          showDeleted ? jsx("button", {
+            type: "button",
+            onClick: onRestore,
+            "aria-label": `استعادة`,
+            className: "rounded-md border border-emerald-500/20 px-2 py-1 text-[11px] text-emerald-100 hover:bg-emerald-500/10",
+            children: jsx(RotateCcw, { className: "h-3 w-3" })
+          }) : jsx("button", {
+            type: "button",
+            onClick: onDelete,
+            "aria-label": `حذف`,
+            className: "rounded-md border border-red-500/20 px-2 py-1 text-[11px] text-red-100 hover:bg-red-500/10",
+            children: jsx(Trash2, { className: "h-3 w-3" })
+          })
+        ]
+      })
+    ]
+  });
+}
+
 export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
   const size = ARCHIVE_LIST_SIZE[itemSize] || ARCHIVE_LIST_SIZE.comfortable;
   const highlight = bulkMode ? bulkSelected : selected;
@@ -514,8 +603,99 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
   });
 }
 
-export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable", bulkMode = false, isSelected, onBulkToggle, allSelected, onSelectAll }) {
+const DEFAULT_TABLE_COLUMNS = [
+  { id: "title", visible: true, width: 280 },
+  { id: "type", visible: true, width: 160 },
+  { id: "file", visible: true, width: 200 },
+  { id: "tags", visible: true, width: 180 },
+  { id: "updated", visible: true, width: 160 },
+  { id: "actions", visible: true, width: 180 }
+];
+
+const COLUMN_LABELS = {
+  title: "العنوان",
+  type: "النوع",
+  file: "الملف",
+  tags: "الوسوم",
+  size: "الحجم",
+  created: "تاريخ الإنشاء",
+  updated: "آخر تحديث",
+  viewed: "آخر مشاهدة",
+  actions: "إجراءات"
+};
+
+function getFileSizeForItem(item) {
+  const file = normalizeLocalFileValue(item?.localFile);
+  return file?.size > 0 ? formatFileSize(file.size) : null;
+}
+
+function renderTableCell({ column, item, size, showDeleted, bulkMode, onPreview, onOpen, onFavorite, onDelete, onRestore, onBulkToggle, typeLabel, subtypeLabel }) {
+  switch (column.id) {
+    case "title":
+      return jsxs("td", {
+        className: size.cell,
+        style: { minWidth: column.width },
+        children: [
+          jsx("button", {
+            type: "button",
+            onClick: () => bulkMode ? onBulkToggle?.(item.id) : onPreview(item),
+            className: "line-clamp-2 text-right font-semibold leading-relaxed text-white hover:text-[color-mix(in_srgb,var(--va-action)_70%,#ffffff)]",
+            children: item.title || "بدون عنوان"
+          }),
+          item.isFavorite && jsx("span", { className: "mt-1 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
+        ]
+      }, column.id);
+    case "type":
+      return jsx("td", {
+        className: `${size.cell} text-gray-400`,
+        style: { minWidth: column.width },
+        children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف"
+      }, column.id);
+    case "file":
+      return jsx("td", { className: size.cell, style: { minWidth: column.width }, children: jsx(FileMetaStrip, { item, compact: true }) }, column.id);
+    case "tags":
+      return jsx("td", {
+        className: size.cell,
+        style: { minWidth: column.width },
+        children: item.tags?.length ? jsx("div", {
+          className: "flex flex-wrap gap-1.5",
+          children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
+            className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
+            children: tag
+          }, tag))
+        }) : jsx("span", { className: "text-gray-600", children: "—" })
+      }, column.id);
+    case "size": {
+      const fileSize = getFileSizeForItem(item);
+      return jsx("td", { className: `${size.cell} text-xs text-gray-500`, style: { minWidth: column.width }, children: fileSize || "—" }, column.id);
+    }
+    case "created":
+      return jsx("td", { className: `${size.cell} text-xs text-gray-500`, style: { minWidth: column.width }, children: item.createdAt ? formatDateTime(item.createdAt) : "—" }, column.id);
+    case "updated":
+      return jsx("td", { className: `${size.cell} text-xs text-gray-500`, style: { minWidth: column.width }, children: item.updatedAt ? formatDateTime(item.updatedAt) : "—" }, column.id);
+    case "viewed":
+      return jsx("td", { className: `${size.cell} text-xs text-gray-500`, style: { minWidth: column.width }, children: item.lastViewedAt ? formatDateTime(item.lastViewedAt) : "—" }, column.id);
+    case "actions":
+      return jsx("td", {
+        className: size.cell,
+        style: { minWidth: column.width },
+        children: jsxs("div", {
+          className: "flex flex-wrap gap-2",
+          children: [
+            jsx("button", { type: "button", onClick: () => onOpen(item), className: `va-primary-button rounded-lg font-semibold text-white  ${size.actionButton}`, children: "فتح" }),
+            !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: `rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 ${size.actionButton}`, children: item.isFavorite ? "إزالة" : "مفضلة" }),
+            showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: `rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10 ${size.actionButton}`, children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: `rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10 ${size.actionButton}`, children: "حذف" })
+          ]
+        })
+      }, column.id);
+    default:
+      return null;
+  }
+}
+
+export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable", bulkMode = false, isSelected, onBulkToggle, allSelected, onSelectAll, columns }) {
   const size = ARCHIVE_TABLE_SIZE[itemSize] || ARCHIVE_TABLE_SIZE.comfortable;
+  const visibleColumns = (columns && columns.length ? columns : DEFAULT_TABLE_COLUMNS).filter((column) => column.visible !== false);
 
   return jsx("div", {
     className: "va-card overflow-hidden rounded-2xl va-surface-muted border",
@@ -533,12 +713,11 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   className: `${size.cell} w-10 font-medium`,
                   children: jsx(BulkCheckbox, { checked: !!allSelected, onToggle: () => onSelectAll?.(), label: allSelected ? "إلغاء الكل" : "تحديد الكل" })
                 }),
-                jsx("th", { className: `${size.cell} font-medium`, children: "العنوان" }),
-                jsx("th", { className: `${size.cell} font-medium`, children: "النوع" }),
-                jsx("th", { className: `${size.cell} font-medium`, children: "الملف" }),
-                jsx("th", { className: `${size.cell} font-medium`, children: "الوسوم" }),
-                jsx("th", { className: `${size.cell} font-medium`, children: "آخر تحديث" }),
-                jsx("th", { className: `${size.cell} font-medium`, children: "إجراءات" })
+                ...visibleColumns.map((column) => jsx("th", {
+                  className: `${size.cell} font-medium`,
+                  style: { minWidth: column.width },
+                  children: COLUMN_LABELS[column.id] || column.id
+                }, column.id))
               ]
             })
           }),
@@ -558,43 +737,12 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                     className: size.cell,
                     children: jsx(BulkCheckbox, { checked: !!selectedRow, onToggle: () => onBulkToggle?.(item.id), label: `تحديد ${item.title || "فيديو"}` })
                   }),
-                  jsxs("td", {
-                    className: size.cell,
-                    children: [
-                      jsx("button", {
-                        type: "button",
-                        onClick: () => bulkMode ? onBulkToggle?.(item.id) : onPreview(item),
-                        className: "line-clamp-2 text-right font-semibold leading-relaxed text-white hover:text-[color-mix(in_srgb,var(--va-action)_70%,#ffffff)]",
-                        children: item.title || "بدون عنوان"
-                      }),
-                      item.isFavorite && jsx("span", { className: "mt-1 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
-                    ]
-                  }),
-                jsx("td", { className: `${size.cell} text-gray-400`, children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف" }),
-                jsx("td", { className: size.cell, children: jsx(FileMetaStrip, { item, compact: true }) }),
-                jsx("td", {
-                  className: size.cell,
-                  children: item.tags?.length ? jsx("div", {
-                    className: "flex flex-wrap gap-1.5",
-                    children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
-                      className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
-                      children: tag
-                    }, tag))
-                  }) : jsx("span", { className: "text-gray-600", children: "—" })
-                }),
-                jsx("td", { className: `${size.cell} text-xs text-gray-500`, children: item.updatedAt ? formatDateTime(item.updatedAt) : "—" }),
-                jsx("td", {
-                  className: size.cell,
-                  children: jsxs("div", {
-                    className: "flex flex-wrap gap-2",
-                    children: [
-                      jsx("button", { type: "button", onClick: () => onOpen(item), className: `va-primary-button rounded-lg font-semibold text-white  ${size.actionButton}`, children: "فتح" }),
-                      !showDeleted && jsx("button", { type: "button", onClick: () => onFavorite(item), className: `rounded-lg border border-white/10 text-gray-300 hover:bg-white/5 ${size.actionButton}`, children: item.isFavorite ? "إزالة" : "مفضلة" }),
-                      showDeleted ? jsx("button", { type: "button", onClick: () => onRestore(item), className: `rounded-lg border border-emerald-500/20 text-emerald-100 hover:bg-emerald-500/10 ${size.actionButton}`, children: "استعادة" }) : jsx("button", { type: "button", onClick: () => onDelete(item), className: `rounded-lg border border-red-500/20 text-red-100 hover:bg-red-500/10 ${size.actionButton}`, children: "حذف" })
-                    ]
-                  })
-                })
-              ]
+                  ...visibleColumns.map((column) => renderTableCell({
+                    column, item, size, showDeleted, bulkMode,
+                    onPreview, onOpen, onFavorite, onDelete, onRestore, onBulkToggle,
+                    typeLabel, subtypeLabel
+                  }))
+                ]
               }, item.id);
             })
           })
