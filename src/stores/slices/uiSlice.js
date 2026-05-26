@@ -38,7 +38,10 @@ export function createUiActions({ set, get }) {
         message: String(message || ""),
         type,
         createdAt: nowIso(),
-        persistent: !!options.persistent
+        persistent: !!options.persistent,
+        action: options.action && typeof options.action.run === "function"
+          ? { label: String(options.action.label || "إجراء"), run: options.action.run, dismissOnRun: options.action.dismissOnRun !== false }
+          : null
       };
       set((state) => ({
         toast: { message: notification.message, type },

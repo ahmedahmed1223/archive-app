@@ -16,6 +16,7 @@ import { generateId, nowIso } from "../storeCore.js";
 import { defaultSettings, mergeSettings } from "../settingsDefaults.js";
 import { normalizeChangeRecord, normalizeUser } from "../storeModels.js";
 import { persistList, persistSettings } from "../storePersistence.js";
+import { undoRedoManager } from "../../components/common/undoManager.js";
 
 export const archiveInitialState = {
   videoItems: [],
@@ -134,20 +135,39 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       await dbPut(STORES.HISTORY, record);
       return updated;
     },
-    deleteVideoItem: async (id) => {
+    deleteVideoItem: async (id, options = {}) => {
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
       const updated = { ...target, isDeleted: true, updatedAt: nowIso() };
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
+      if (!options.skipUndo) {
+        undoRedoManager.push({
+          label: `حذف ${target.title || "فيديو"}`,
+          undo: () => get().restoreVideoItem(id, { skipUndo: true }),
+          redo: () => get().deleteVideoItem(id, { skipUndo: true })
+        });
+        get().showNotification?.(`تم حذف ${target.title || "الفيديو"}`, {
+          type: "info",
+          title: "تم الحذف",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
       return true;
     },
-    restoreVideoItem: async (id) => {
+    restoreVideoItem: async (id, options = {}) => {
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
       const updated = { ...target, isDeleted: false, updatedAt: nowIso() };
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
+      if (!options.skipUndo) {
+        undoRedoManager.push({
+          label: `استعادة ${target.title || "فيديو"}`,
+          undo: () => get().deleteVideoItem(id, { skipUndo: true }),
+          redo: () => get().restoreVideoItem(id, { skipUndo: true })
+        });
+      }
       return true;
     },
     toggleFavorite: async (id) => {
@@ -187,11 +207,29 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       await dbPut(STORES.TYPES, updated);
       return updated;
     },
-    deleteContentType: async (id) => {
+    deleteContentType: async (id, options = {}) => {
+      const previous = get().contentTypes.find((item) => item.id === id);
       const updated = get().contentTypes.map((item) => item.id === id ? { ...item, status: "archived", archivedAt: nowIso(), updatedAt: nowIso() } : item);
       set({ contentTypes: updated });
       const target = updated.find((item) => item.id === id);
       if (target) await dbPut(STORES.TYPES, target);
+      if (!options.skipUndo && previous && previous.status !== "archived") {
+        const restored = { ...previous, status: previous.status || "active", archivedAt: null, updatedAt: nowIso() };
+        const label = `أرشفة نوع ${previous.name || ""}`.trim();
+        undoRedoManager.push({
+          label,
+          undo: async () => {
+            set((state) => ({ contentTypes: state.contentTypes.map((item) => item.id === id ? restored : item) }));
+            await dbPut(STORES.TYPES, restored);
+          },
+          redo: () => get().deleteContentType(id, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "info",
+          title: "تمت الأرشفة",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
       return true;
     },
     addVirtualCollection: async (collection) => {
@@ -206,9 +244,26 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       await dbPut(STORES.COLLECTIONS, updated);
       return updated;
     },
-    deleteVirtualCollection: async (id) => {
+    deleteVirtualCollection: async (id, options = {}) => {
+      const target = get().virtualCollections.find((item) => item.id === id);
+      if (!target) return false;
       set((state) => ({ virtualCollections: state.virtualCollections.filter((item) => item.id !== id) }));
       await dbDelete(STORES.COLLECTIONS, id);
+      if (!options.skipUndo) {
+        undoRedoManager.push({
+          label: `حذف مجموعة ${target.name || ""}`.trim(),
+          undo: async () => {
+            await get().addVirtualCollection(target);
+          },
+          redo: () => get().deleteVirtualCollection(id, { skipUndo: true })
+        });
+        get().showNotification?.(`تم حذف المجموعة "${target.name || ""}"`.trim(), {
+          type: "info",
+          title: "تم الحذف",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
     },
     addItemsToCollection: async (collectionId, itemIds = []) => {
       const collection = get().virtualCollections.find((item) => item.id === collectionId);
@@ -235,9 +290,26 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       await dbPut(STORES.VOCABULARY, updated);
       return updated;
     },
-    deleteVocabularyEntry: async (id) => {
+    deleteVocabularyEntry: async (id, options = {}) => {
+      const target = get().vocabulary.find((item) => item.id === id);
+      if (!target) return false;
       set((state) => ({ vocabulary: state.vocabulary.filter((item) => item.id !== id) }));
       await dbDelete(STORES.VOCABULARY, id);
+      if (!options.skipUndo) {
+        undoRedoManager.push({
+          label: `حذف مصطلح ${target.term || ""}`.trim(),
+          undo: async () => {
+            await get().addVocabularyEntry(target);
+          },
+          redo: () => get().deleteVocabularyEntry(id, { skipUndo: true })
+        });
+        get().showNotification?.(`تم حذف المصطلح "${target.term || ""}"`.trim(), {
+          type: "info",
+          title: "تم الحذف",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
     },
     addHierarchicalTag: async (tag) => {
       const value = { ...tag, id: tag.id || generateId("htag"), updatedAt: nowIso(), createdAt: tag.createdAt || nowIso() };
@@ -251,7 +323,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       await dbPut(STORES.HTAGS, updated);
       return updated;
     },
-    deleteHierarchicalTag: async (id) => {
+    deleteHierarchicalTag: async (id, options = {}) => {
       const childIds = new Set([id]);
       let changed = true;
       while (changed) {
@@ -263,8 +335,30 @@ export function createArchiveActions({ set, get, getAuthStore }) {
           }
         }
       }
+      const removed = get().hierarchicalTags.filter((item) => childIds.has(item.id));
+      const rootTag = removed.find((item) => item.id === id);
       set((state) => ({ hierarchicalTags: state.hierarchicalTags.filter((item) => !childIds.has(item.id)) }));
       for (const tagId of childIds) await dbDelete(STORES.HTAGS, tagId);
+      if (!options.skipUndo && removed.length > 0) {
+        const label = removed.length > 1
+          ? `حذف ${rootTag?.name || "وسم"} وفروعه (${removed.length})`
+          : `حذف وسم ${rootTag?.name || ""}`.trim();
+        undoRedoManager.push({
+          label,
+          undo: async () => {
+            for (const tag of removed) {
+              await get().addHierarchicalTag(tag);
+            }
+          },
+          redo: () => get().deleteHierarchicalTag(id, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "info",
+          title: "تم الحذف",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
     },
     getTagUsageCount: (tagId) => {
       const tag = get().hierarchicalTags.find((item) => item.id === tagId);
@@ -289,11 +383,28 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       if (getAuthStore().getState().currentUser?.id === updated.id) getAuthStore().setState({ currentUser: updated });
       return updated;
     },
-    deleteUser: async (id) => {
+    deleteUser: async (id, options = {}) => {
       const target = get().users.find((item) => item.id === id);
       if (!target) return false;
+      const wasActive = target.isActive !== false;
       const updated = { ...target, isActive: false, updatedAt: nowIso() };
-      return get().updateUser(updated);
+      const result = await get().updateUser(updated);
+      if (!options.skipUndo && wasActive) {
+        const label = `تعطيل ${target.displayName || target.username || "المستخدم"}`;
+        undoRedoManager.push({
+          label,
+          undo: async () => {
+            await get().updateUser({ ...target, isActive: true });
+          },
+          redo: () => get().deleteUser(id, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "info",
+          title: "تم التعطيل",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return result;
     },
     clearHistory: async () => {
       set({ changeHistory: [] });
