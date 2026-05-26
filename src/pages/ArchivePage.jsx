@@ -7,6 +7,7 @@ import {
 } from "../stores/index.js";
 import {
   Archive,
+  CheckSquare,
   FolderOpen,
   LayoutGrid,
   RefreshCw,
@@ -37,6 +38,7 @@ import {
   parseArchiveRouteParams
 } from "../features/archive/viewModel.js";
 import { FileArchiveWizard } from "../features/archive/FileArchiveWizard.jsx";
+import { BulkActionBar } from "../features/archive/BulkActionBar.jsx";
 import {
   ARCHIVE_GRID_CLASSES,
   ARCHIVE_ITEM_SIZE_LABELS,
@@ -84,6 +86,8 @@ export function ArchivePage() {
   const {
     videoItems = [],
     contentTypes = [],
+    virtualCollections = [],
+    selectedItems: storeSelectedItems = [],
     searchQuery = "",
     filterType = "all",
     filterSubtype = "all",
@@ -101,6 +105,13 @@ export function ArchivePage() {
     restoreVideoItem,
     addVideoItem,
     addRecentSearch,
+    toggleBulkSelect,
+    selectAllItems,
+    clearSelection,
+    bulkDeleteItems,
+    bulkRestoreItems,
+    bulkAddTags,
+    bulkMoveToCollection,
     showToast
   } = useAppStore();
 
@@ -119,7 +130,24 @@ export function ArchivePage() {
   const [gridColumnCount, setGridColumnCount] = React.useState(3);
   const [previewId, setPreviewId] = React.useState(null);
   const [showFileImportWizard, setShowFileImportWizard] = React.useState(initialRouteState.openImport || false);
+  const [bulkMode, setBulkMode] = React.useState(false);
   const gridContainerRef = React.useRef(null);
+
+  const selectedIdSet = React.useMemo(() => new Set(storeSelectedItems || []), [storeSelectedItems]);
+  const isItemSelected = React.useCallback((id) => selectedIdSet.has(id), [selectedIdSet]);
+  const exitBulkMode = React.useCallback(() => {
+    setBulkMode(false);
+    clearSelection?.();
+  }, [clearSelection]);
+
+  React.useEffect(() => {
+    if (!bulkMode) return undefined;
+    const handler = (event) => {
+      if (event.key === "Escape") exitBulkMode();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [bulkMode, exitBulkMode]);
   const activeViewMode = normalizeArchiveViewMode(viewMode || initialRouteState.viewMode || settings.defaultView || "grid");
   const listPageSize = normalizeArchivePageSize(pageSize);
   const activeItemSize = normalizeArchiveItemSize(itemSize);
@@ -337,6 +365,19 @@ export function ArchivePage() {
 
   const typeLabel = (item) => typeById.get(item.type)?.name || item.type || "";
   const subtypeLabel = (item) => typeById.get(item.type)?.subtypes?.find((subtype) => subtype.id === item.subtype)?.name || item.subtype || "";
+  const visibleIds = React.useMemo(() => visibleItems.map((item) => item.id), [visibleItems]);
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIdSet.has(id));
+  const toggleSelectAllVisible = React.useCallback(() => {
+    if (allVisibleSelected) {
+      clearSelection?.();
+    } else {
+      // Use selectAllItems only when no filters; otherwise add only the visible ids.
+      visibleIds.forEach((id) => {
+        if (!selectedIdSet.has(id)) toggleBulkSelect?.(id);
+      });
+    }
+  }, [allVisibleSelected, clearSelection, selectedIdSet, toggleBulkSelect, visibleIds]);
+
   const itemActions = (item) => ({
     item,
     typeLabel: typeLabel(item),
@@ -344,6 +385,9 @@ export function ArchivePage() {
     selected: previewItem?.id === item.id,
     showDeleted,
     itemSize: activeItemSize,
+    bulkMode,
+    bulkSelected: selectedIdSet.has(item.id),
+    onBulkToggle: () => toggleBulkSelect?.(item.id),
     onPreview: () => setPreviewId(item.id),
     onOpen: () => openItem(item),
     onFavorite: () => toggleFavorite?.(item.id),
@@ -369,6 +413,11 @@ export function ArchivePage() {
         subtypeLabel,
         showDeleted,
         itemSize: activeItemSize,
+        bulkMode,
+        isSelected: isItemSelected,
+        onBulkToggle: (id) => toggleBulkSelect?.(id),
+        allSelected: allVisibleSelected,
+        onSelectAll: toggleSelectAllVisible,
         onPreview: (item) => setPreviewId(item.id),
         onOpen: openItem,
         onFavorite: (item) => toggleFavorite?.(item.id),
@@ -551,6 +600,7 @@ export function ArchivePage() {
               jsx(CompactStat, { label: "المعاينة", value: formatNumber(filteredItems.filter((item) => isHtml5PreviewableVideo(item.path || item.filePath || item.url || "")).length), hint: "HTML5" }),
               jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة" }),
               jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "المحذوفات" }),
+              jsx(ToolbarButton, { active: bulkMode, onClick: () => { setBulkMode((value) => { if (value) clearSelection?.(); return !value; }); }, icon: jsx(CheckSquare, { className: "h-4 w-4" }), children: bulkMode ? "إنهاء التحديد" : "تحديد متعدد" }),
               (hasFilters || showDeleted) && jsx(ToolbarButton, { onClick: resetFilters, icon: jsx(RefreshCw, { className: "h-4 w-4" }), children: "مسح" })
             ]
           })
@@ -563,6 +613,41 @@ export function ArchivePage() {
         videoItems,
         addVideoItem,
         showToast
+      }),
+      jsx(BulkActionBar, {
+        selectedCount: storeSelectedItems.length,
+        totalVisible: visibleIds.length,
+        allSelected: allVisibleSelected,
+        showRestore: showDeleted,
+        collections: virtualCollections,
+        onSelectAll: toggleSelectAllVisible,
+        onClear: exitBulkMode,
+        onDelete: async () => {
+          if (!storeSelectedItems.length) return;
+          const confirmed = await appConfirm(`حذف ${storeSelectedItems.length} عنصر إلى سلة المحذوفات؟`, {
+            title: "حذف متعدد",
+            kind: "warning",
+            confirmLabel: "حذف"
+          });
+          if (!confirmed) return;
+          await bulkDeleteItems?.([...storeSelectedItems]);
+        },
+        onRestore: async () => {
+          if (!storeSelectedItems.length) return;
+          await bulkRestoreItems?.([...storeSelectedItems]);
+        },
+        onAddTags: async (tags) => {
+          if (!storeSelectedItems.length || !tags?.length) return;
+          await bulkAddTags?.([...storeSelectedItems], tags);
+        },
+        onMoveToCollection: async (collectionId) => {
+          if (!collectionId) {
+            showToast?.("أنشئ مجموعة أولاً من صفحة المجموعات.", "warning");
+            return;
+          }
+          if (!storeSelectedItems.length) return;
+          await bulkMoveToCollection?.([...storeSelectedItems], collectionId);
+        }
       }),
       activeTopMode === "detailed" && jsxs("section", {
         className: "va-filter-surface z-20 rounded-2xl border border-white/10 bg-gray-900/50 p-3 text-right backdrop-blur-sm xl:sticky xl:top-3",
