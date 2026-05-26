@@ -44,7 +44,7 @@ export function ArchiveSortMenu({ sortField = "updatedAt", sortDirection = "desc
         onClick: () => setOpen((current) => !current),
         "aria-haspopup": "true",
         "aria-expanded": open,
-        className: "inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-gray-950/35 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 hover:text-white",
+        className: "inline-flex min-h-9 items-center gap-1.5 va-surface-muted rounded-xl border px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 hover:text-white",
         children: [
           jsx(ArrowUpDown, { className: "h-3.5 w-3.5" }),
           jsx("span", { children: "ترتيب:" }),

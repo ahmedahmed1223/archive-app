@@ -63,7 +63,7 @@ function UserForm({ user, users, onCancel, onSave }) {
               onChange: (event) => setUsername(event.target.value),
               disabled: !!user,
               dir: "ltr",
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40 disabled:opacity-60",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40 disabled:opacity-60",
               placeholder: "username"
             }),
             usernameExists && jsx("span", { className: "text-xs text-red-300", children: "اسم المستخدم موجود بالفعل" })
@@ -73,7 +73,7 @@ function UserForm({ user, users, onCancel, onSave }) {
             jsx("input", {
               value: displayName,
               onChange: (event) => setDisplayName(event.target.value),
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "اسم المستخدم داخل الواجهة"
             })
           ] }),
@@ -84,7 +84,7 @@ function UserForm({ user, users, onCancel, onSave }) {
               onChange: (event) => setPassword(event.target.value),
               type: "password",
               dir: "ltr",
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "6 أحرف على الأقل"
             })
           ] }),
@@ -119,7 +119,7 @@ function UserCard({ user, currentUser, users, index, onEdit, onToggle, onDelete 
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
@@ -237,20 +237,20 @@ export function UsersPage() {
         ["نشط", summary.active, ShieldCheck],
         ["معطل", summary.inactive, Trash2],
         ["مدير نشط", summary.activeAdmins, Shield]
-      ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+      ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl va-surface-muted border p-4 text-right", children: [
         jsxs("div", { className: "flex items-center justify-between gap-3", children: [
           jsx("span", { className: "text-sm text-gray-500", children: label }),
           jsx(Icon, { className: "h-5 w-5 text-emerald-400" })
         ] }),
         jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: formatNumber(value, settings.numberSystem) })
       ] }, label)) }),
-      jsxs("section", { className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4", children: [
+      jsxs("section", { className: "va-filter-surface rounded-2xl va-surface-muted border p-4", children: [
         jsxs("div", { className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]", children: [
           jsxs("label", { className: "relative block", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
-            jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث بالاسم أو اسم المستخدم...", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
+            jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث بالاسم أو اسم المستخدم...", className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
           ] }),
-          jsx("select", { value: roleFilter, onChange: (event) => setRoleFilter(event.target.value), className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", children: [
+          jsx("select", { value: roleFilter, onChange: (event) => setRoleFilter(event.target.value), className: "min-h-11 va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [
             jsx("option", { value: "all", children: "كل الأدوار" }),
             ...USER_ROLES.map((role) => jsx("option", { value: role.id, children: role.label }, role.id))
           ] })

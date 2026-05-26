@@ -162,7 +162,7 @@ export function ToolbarButton({ children, onClick, active = false, danger = fals
 
 export function ArchiveMetric({ label, value, hint }) {
   return jsxs("div", {
-    className: "va-metric-card rounded-xl border border-white/5 bg-gray-950/35 p-2.5",
+    className: "va-metric-card rounded-xl va-surface-muted border p-2.5",
     children: [
       jsx("p", { className: "text-xs text-gray-500", children: label }),
       jsx("p", { className: "mt-1 text-base font-bold text-white", children: value }),
@@ -178,7 +178,7 @@ export function ArchivePagination({ currentPage, totalPages, onPageChange }) {
   const buttonBase = "inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors";
 
   return jsxs("nav", {
-    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3",
     dir: "rtl",
     "aria-label": "صفحات الأرشيف",
     children: [
@@ -253,7 +253,7 @@ function FileMetaStrip({ item, compact = false }) {
   if (!file.name && !file.path) return null;
 
   return jsxs("div", {
-    className: `rounded-xl border border-white/5 bg-gray-950/35 ${compact ? "px-2.5 py-2" : "px-3 py-2"}`,
+    className: `rounded-xl va-surface-muted border ${compact ? "px-2.5 py-2" : "px-3 py-2"}`,
     children: [
       jsxs("div", {
         className: "flex items-center gap-2 text-xs text-gray-400",
@@ -275,7 +275,7 @@ export function SegmentedControl({ label, value, options, onChange }) {
     children: [
       label && jsx("span", { className: "text-xs text-gray-500", children: label }),
       jsx("div", {
-        className: "va-control-surface inline-flex min-h-9 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+        className: "va-control-surface inline-flex min-h-9 overflow-hidden va-surface-muted rounded-xl border p-1",
         role: "group",
         "aria-label": label,
         children: options.map((option) => jsx("button", {
@@ -464,7 +464,7 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
   const size = ARCHIVE_TABLE_SIZE[itemSize] || ARCHIVE_TABLE_SIZE.comfortable;
 
   return jsx("div", {
-    className: "va-card overflow-hidden rounded-2xl border border-white/10 bg-gray-900/45",
+    className: "va-card overflow-hidden rounded-2xl va-surface-muted border",
     dir: "rtl",
     children: jsx("div", {
       className: "overflow-x-auto",
@@ -583,7 +583,7 @@ export function PreviewPanel({ item, typeLabel, subtypeLabel, onOpen }) {
       jsx("h3", { className: "mt-4 text-lg font-bold leading-relaxed text-white", children: item.title || "بدون عنوان" }),
       jsx("p", { className: "mt-1 text-sm text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
       (file.name || file.path) && jsxs("div", {
-        className: "mt-4 rounded-xl border border-white/10 bg-gray-950/35 p-3",
+        className: "mt-4 va-surface-muted rounded-xl border p-3",
         children: [
           jsxs("div", { className: "flex items-center gap-2 text-sm font-semibold text-gray-200", children: [jsx(HardDrive, { className: "h-4 w-4 text-emerald-300" }), file.name || "ملف محلي"] }),
           file.size > 0 && jsx("p", { className: "mt-1 text-xs text-gray-600", children: formatFileSize(file.size) }),

@@ -58,7 +58,7 @@ import {
 
 function HelpPanel({ title, children, icon = null, className = "" }) {
   return jsxs("section", {
-    className: `va-card rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-2xl va-surface-muted border p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children: [
       jsxs("h3", {
@@ -430,7 +430,7 @@ export function HelpPage() {
       jsx("aside", {
         className: "hidden w-56 shrink-0 lg:block",
         children: jsxs("div", {
-          className: "va-tab-surface sticky top-6 rounded-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm",
+          className: "va-tab-surface sticky top-6 rounded-2xl va-surface-muted border backdrop-blur-sm",
           children: [
             jsxs("div", {
               className: "flex items-center gap-2 border-b border-white/5 p-4 text-sm font-semibold text-white",
@@ -499,7 +499,7 @@ export function HelpPage() {
                           onChange: (event) => setHelpQuery(event.target.value),
                           placeholder: "ابحث في المساعدة، الاستيراد، النسخ الاحتياطي، الاختصارات...",
                           dir: "auto",
-                          className: "va-bidi-input w-full rounded-xl border border-white/10 bg-gray-950/45 py-3 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                          className: "va-bidi-input w-full va-surface-deep rounded-xl border py-3 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
                         })
                       ]
                     }),
@@ -527,7 +527,7 @@ export function HelpPage() {
           jsx("div", {
             className: "mb-4 lg:hidden",
             children: jsx("div", {
-              className: "va-tab-surface rounded-xl border border-white/10 bg-gray-900/50 p-3",
+              className: "va-tab-surface rounded-xl va-surface-muted border p-3",
               children: jsx("div", {
                 className: "flex flex-wrap gap-2",
                 children: filteredSections.map((section) => jsxs("button", {
@@ -546,7 +546,7 @@ export function HelpPage() {
               className: "space-y-6 pb-4",
               children: [
                 filteredSections.length === 0 && jsx("div", {
-                  className: "rounded-xl border border-white/10 bg-gray-900/50 p-6 text-center text-gray-400",
+                  className: "rounded-xl va-surface-muted border p-6 text-center text-gray-400",
                   children: "لا توجد أقسام مطابقة. جرّب كلمة أبسط أو افتح الأسئلة الشائعة."
                 }),
                 filteredSections.map((section) => jsx("div", {

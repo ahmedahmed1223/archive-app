@@ -39,7 +39,7 @@ const PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
 
 function SearchMetric({ label, value, hint }) {
   return jsxs("div", {
-    className: "va-metric-card rounded-xl border border-white/5 bg-gray-950/35 p-3 text-right",
+    className: "va-metric-card rounded-xl va-surface-muted border p-3 text-right",
     children: [
       jsx("p", { className: "text-xs text-gray-500", children: label }),
       jsx("p", { className: "mt-1 text-lg font-bold text-white", children: value }),
@@ -53,7 +53,7 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-video-list-item rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-video-list-item rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: jsxs("div", {
       className: "grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]",
@@ -94,7 +94,7 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
 function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
   return jsxs("div", {
-    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3",
     children: [
       jsx("button", {
         type: "button",
@@ -262,7 +262,7 @@ export function SearchPage() {
         ]
       }),
       jsxs("section", {
-        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/50 p-4 text-right backdrop-blur-sm",
+        className: "va-filter-surface rounded-2xl va-surface-muted border p-4 text-right backdrop-blur-sm",
         children: [
           jsxs("div", {
             className: "grid gap-3 xl:grid-cols-[minmax(260px,1fr)_220px_180px_160px]",
@@ -275,7 +275,7 @@ export function SearchPage() {
                     value: query,
                     onChange: (event) => setQuery(event.target.value),
                     placeholder: "ابحث في العنوان أو الوسوم أو الملاحظات",
-                    className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                    className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
                   })
                 ]
               }),
@@ -285,7 +285,7 @@ export function SearchPage() {
                   setType(event.target.value);
                   setSubtype("all");
                 },
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                className: "min-h-11 va-surface-deep rounded-xl border px-3 py-2 text-sm text-white",
                 children: [
                   jsx("option", { value: "all", children: "كل الأنواع" }),
                   ...contentTypes.map((item) => jsx("option", { value: item.id, children: item.name || item.id }, item.id))
@@ -295,7 +295,7 @@ export function SearchPage() {
                 value: subtype,
                 onChange: (event) => setSubtype(event.target.value),
                 disabled: !subtypes.length,
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white disabled:opacity-50",
+                className: "min-h-11 va-surface-deep rounded-xl border px-3 py-2 text-sm text-white disabled:opacity-50",
                 children: [
                   jsx("option", { value: "all", children: "كل الفروع" }),
                   ...subtypes.map((item) => jsx("option", { value: item.id, children: item.name || item.id }, item.id))
@@ -304,7 +304,7 @@ export function SearchPage() {
               jsxs("select", {
                 value: pageSize,
                 onChange: (event) => setPageSize(Number(event.target.value)),
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                className: "min-h-11 va-surface-deep rounded-xl border px-3 py-2 text-sm text-white",
                 children: PAGE_SIZE_OPTIONS.map((value) => jsx("option", { value, children: `${formatNumber(value)} نتيجة` }, value))
               })
             ]
@@ -313,14 +313,14 @@ export function SearchPage() {
             className: "mt-3 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]",
             children: [
               jsxs("label", {
-                className: "block rounded-xl border border-white/10 bg-gray-950/35 p-3",
+                className: "block va-surface-muted rounded-xl border p-3",
                 children: [
                   jsx("span", { className: "text-xs text-gray-500", children: "من تاريخ" }),
                   jsx("input", { type: "date", value: dateFrom, onChange: (event) => setDateFrom(event.target.value), className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white" })
                 ]
               }),
               jsxs("label", {
-                className: "block rounded-xl border border-white/10 bg-gray-950/35 p-3",
+                className: "block va-surface-muted rounded-xl border p-3",
                 children: [
                   jsx("span", { className: "text-xs text-gray-500", children: "إلى تاريخ" }),
                   jsx("input", { type: "date", value: dateTo, onChange: (event) => setDateTo(event.target.value), className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white" })
@@ -357,7 +357,7 @@ export function SearchPage() {
         className: "space-y-4",
         children: [
           jsxs("div", {
-            className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
+            className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3 text-sm",
             children: [
               jsx("p", { className: "font-semibold text-white", children: `عرض ${formatNumber(visibleResults.length)} من ${formatNumber(results.length)} نتيجة` }),
               jsx("p", { className: "text-xs text-gray-500", children: query ? `بحث عن: ${query}` : "كل النتائج حسب الفلاتر" })

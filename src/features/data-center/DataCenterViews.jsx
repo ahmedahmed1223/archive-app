@@ -24,7 +24,7 @@ const sourceTypeLabels = {
 
 export function PageCard({ children, className = "" }) {
   return jsx("section", {
-    className: `va-card rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-2xl va-surface-muted border p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children
   });
@@ -112,7 +112,7 @@ export function SummaryGrid({ rows }) {
   return jsx("div", {
     className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-3",
     children: rows.map((item) => jsxs("div", {
-      className: "va-card-subtle rounded-xl border border-white/5 bg-gray-950/35 p-3",
+      className: "va-card-subtle rounded-xl va-surface-muted border p-3",
       children: [
         jsx("p", { className: "text-xs text-gray-500", children: item.label }),
         jsx("p", { className: "mt-1 text-sm font-semibold text-gray-100", children: String(item.value) })
@@ -150,7 +150,7 @@ export function PreviewSummary({ preview }) {
           ["مكرر", preview.summary.totals.duplicateCount],
           ["متعارض", preview.summary.totals.conflictCount]
         ].map(([label, value]) => jsxs("div", {
-          className: "rounded-xl border border-white/5 bg-gray-950/35 p-3",
+          className: "rounded-xl va-surface-muted border p-3",
           children: [
             jsx("p", { className: "text-xs text-gray-500", children: label }),
             jsx("p", { className: "mt-1 text-xl font-bold text-white", children: formatNumber(value) })
