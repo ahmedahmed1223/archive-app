@@ -71,7 +71,7 @@ function LocalFilePicker({ value, onFileSelect }) {
 
 function EditableField({ field, value, onChange }) {
   const key = fieldKey(field);
-  const commonClass = "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40";
+  const commonClass = "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40";
   if (field.type === "textarea" || field.type === "transcript") return jsx("textarea", { value: value || "", onChange: (event) => onChange(key, event.target.value), rows: 3, className: `${commonClass} p-3` });
   if (field.type === "checkbox") return jsx("input", { type: "checkbox", checked: !!value, onChange: (event) => onChange(key, event.target.checked), className: "h-5 w-5" });
   if (field.type === "select" || field.type === "radio") return jsx("select", { value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, children: [
@@ -246,7 +246,7 @@ export function DetailPage() {
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.18, delay: index * 0.035 },
           whileHover: { y: -2 },
-          className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+          className: "va-metric-card rounded-2xl va-surface-muted border p-4 text-right",
           children: [
             jsxs("div", { className: "flex items-start justify-between gap-3", children: [
               jsxs("div", { className: "min-w-0", children: [
@@ -261,17 +261,17 @@ export function DetailPage() {
       editing && draft && jsxs("section", { className: "va-card space-y-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-right", children: [
         jsx("h2", { className: "text-lg font-bold text-white", children: "تحرير التفاصيل" }),
         jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: draft.title || "", onChange: (event) => updateDraft({ title: event.target.value }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "النوع" }), jsx("select", { value: draft.type || "", onChange: (event) => updateDraft({ type: event.target.value, subtype: "" }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الفرع" }), jsx("select", { value: draft.subtype || "", onChange: (event) => updateDraft({ subtype: event.target.value }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "المسار" }), jsx("input", { value: draft.path || "", onChange: (event) => updateDraft({ path: event.target.value }), dir: "ltr", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: draft.title || "", onChange: (event) => updateDraft({ title: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "النوع" }), jsx("select", { value: draft.type || "", onChange: (event) => updateDraft({ type: event.target.value, subtype: "" }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الفرع" }), jsx("select", { value: draft.subtype || "", onChange: (event) => updateDraft({ subtype: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "المسار" }), jsx("input", { value: draft.path || "", onChange: (event) => updateDraft({ path: event.target.value }), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
             jsx("span", { children: "ملف محلي من الجهاز" }),
             jsx(LocalFilePicker, { value: draft.metadata?.localFile, onFileSelect: applyPrimaryLocalFile })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الصورة المصغرة" }), jsx("input", { value: draft.thumbnail || "", onChange: (event) => updateDraft({ thumbnail: event.target.value }), dir: "ltr", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full rounded-xl border border-white/10 bg-gray-950/45 p-3 text-sm text-white outline-none" })] })
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الصورة المصغرة" }), jsx("input", { value: draft.thumbnail || "", onChange: (event) => updateDraft({ thumbnail: event.target.value }), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none" })] })
         ] }),
         fields.length > 0 && jsx("div", { className: "grid gap-4 lg:grid-cols-2", children: fields.map((field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "lg:col-span-2" : ""}`, children: [
           jsx("span", { children: field.label }),
@@ -283,22 +283,22 @@ export function DetailPage() {
         ] })
       ] }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]", children: [
-        jsxs("div", { className: "va-card space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
+        jsxs("div", { className: "va-card space-y-4 rounded-2xl va-surface-muted border p-5 text-right", children: [
           jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(FileText, { className: "h-5 w-5 text-emerald-400" }), "البيانات"] }),
-          item.notes && jsx("p", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3 text-sm leading-relaxed text-gray-400", children: item.notes }),
-          item.metadata?.localFile && jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3", children: [
+          item.notes && jsx("p", { className: "rounded-xl va-surface-muted border p-3 text-sm leading-relaxed text-gray-400", children: item.notes }),
+          item.metadata?.localFile && jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
             jsxs("div", { className: "flex items-center gap-2", children: [
               jsx(CheckCircle2, { className: "h-4 w-4 text-emerald-300" }),
               jsx("p", { className: "text-xs font-semibold text-emerald-100", children: "الملف المحلي" })
             ] }),
             jsx("div", { className: "mt-2 text-sm text-gray-300", children: jsx(ReadonlyField, { field: { type: "localFile" }, value: item.metadata.localFile }) })
           ] }),
-          fields.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: fields.map((field) => jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3", children: [
+          fields.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: fields.map((field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
             jsx("p", { className: "text-xs text-gray-600", children: field.label }),
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
           ] }, field.id)) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })
         ] }),
-        jsxs("aside", { className: "va-preview-panel space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-5 text-right", children: [
+        jsxs("aside", { className: "va-preview-panel space-y-4 rounded-2xl va-surface-muted border p-5 text-right", children: [
           jsxs("section", { children: [
             jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(Tags, { className: "h-5 w-5 text-emerald-400" }), "الوسوم"] }),
             item.tags?.length ? jsx("div", { className: "mt-3 flex flex-wrap gap-2", children: item.tags.map((tag) => jsx("span", { className: "rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs text-gray-300", children: tag }, tag)) }) : jsx("p", { className: "mt-3 text-sm text-gray-500", children: "لا توجد وسوم." })
@@ -311,7 +311,7 @@ export function DetailPage() {
           ] }),
           history.length > 0 && jsxs("section", { children: [
             jsx("h2", { className: "text-lg font-bold text-white", children: "آخر التغييرات" }),
-            jsx("div", { className: "mt-3 space-y-2", children: history.map((record) => jsxs("div", { className: "rounded-xl border border-white/5 bg-gray-950/35 p-3", children: [
+            jsx("div", { className: "mt-3 space-y-2", children: history.map((record) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
               jsx("p", { className: "text-sm font-semibold text-gray-300", children: record.action || "نشاط" }),
               jsx("p", { className: "mt-1 text-xs text-gray-600", children: record.timestamp ? formatDateTime(record.timestamp) : "" })
             ] }, record.id)) })

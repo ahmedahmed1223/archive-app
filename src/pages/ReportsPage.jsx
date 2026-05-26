@@ -27,7 +27,7 @@ import {
 
 function ReportPanel({ children, className = "" }) {
   return jsx("section", {
-    className: `va-card rounded-2xl border border-white/10 bg-gray-900/50 p-5 text-right backdrop-blur-sm ${className}`,
+    className: `va-card rounded-2xl va-surface-muted border p-5 text-right backdrop-blur-sm ${className}`,
     dir: "rtl",
     children
   });
@@ -245,7 +245,7 @@ export function ReportsPage() {
                   ["الأنواع", contentTypes.length],
                   ["السجلات", auditLogs.length]
                 ].map(([label, value]) => jsxs("div", {
-                  className: "rounded-xl border border-white/5 bg-gray-950/35 p-3",
+                  className: "rounded-xl va-surface-muted border p-3",
                   children: [
                     jsx("p", { className: "text-xs text-gray-500", children: label }),
                     jsx("p", { className: "mt-1 text-xl font-bold text-white", children: formatNumber(value, settings.numberSystem) })
@@ -260,7 +260,7 @@ export function ReportsPage() {
               recentLogs.length ? jsx("div", {
                 className: "space-y-2",
                 children: recentLogs.map((log) => jsxs("div", {
-                  className: "grid gap-2 rounded-xl border border-white/5 bg-gray-950/30 p-3 text-sm sm:grid-cols-[1fr_auto]",
+                  className: "grid gap-2 rounded-xl va-surface-subtle border p-3 text-sm sm:grid-cols-[1fr_auto]",
                   children: [
                     jsxs("div", {
                       className: "min-w-0",

@@ -73,7 +73,7 @@ function getGridColumnCount(width = 0, itemSize = "compact") {
 
 function CompactStat({ label, value, hint }) {
   return jsxs("span", {
-    className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-3 py-1.5 text-xs text-gray-400",
+    className: "inline-flex min-h-9 items-center gap-2 va-surface-muted rounded-xl border px-3 py-1.5 text-xs text-gray-400",
     children: [
       jsx("span", { className: "text-gray-500", children: label }),
       jsx("strong", { className: "text-sm text-white", children: value }),
@@ -447,7 +447,7 @@ export function ArchivePage() {
         actions: jsxs(React.Fragment, {
           children: [
             jsxs("div", {
-              className: "va-control-surface inline-flex min-h-9 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+              className: "va-control-surface inline-flex min-h-9 overflow-hidden va-surface-muted rounded-xl border p-1",
               role: "group",
               "aria-label": "وضع القسم العلوي",
               children: [
@@ -488,7 +488,7 @@ export function ArchivePage() {
                     value: localSearch,
                     onChange: (event) => setLocalSearch(event.target.value),
                     placeholder: "بحث لحظي بالعنوان أو الوسوم أو الملاحظات",
-                    className: "min-h-10 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                    className: "min-h-10 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
                   })
                 ]
               }),
@@ -496,7 +496,7 @@ export function ArchivePage() {
                 className: "flex flex-wrap items-center gap-2",
                 children: [
                   jsxs("div", {
-                    className: "va-control-surface inline-flex min-h-9 overflow-hidden rounded-xl border border-white/10 bg-gray-950/35 p-1",
+                    className: "va-control-surface inline-flex min-h-9 overflow-hidden va-surface-muted rounded-xl border p-1",
                     role: "group",
                     "aria-label": "وضع عرض الأرشيف",
                     children: [
@@ -539,7 +539,7 @@ export function ArchivePage() {
                         onChange: changeGridRows
                       }),
                       jsxs("label", {
-                        className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-2.5 py-1 text-xs text-gray-400",
+                        className: "inline-flex min-h-9 items-center gap-2 va-surface-muted rounded-xl border px-2.5 py-1 text-xs text-gray-400",
                         title: `اختر قيمة بين ${formatNumber(ARCHIVE_GRID_ROW_MIN)} و${formatNumber(ARCHIVE_GRID_ROW_MAX)} صفًا`,
                         children: [
                           jsx("span", { className: "text-gray-500", children: "مخصص" }),
@@ -556,7 +556,7 @@ export function ArchivePage() {
                       })
                     ]
                   }) : jsxs("label", {
-                    className: "inline-flex min-h-9 items-center gap-2 rounded-xl border border-white/10 bg-gray-950/35 px-2.5 py-1 text-xs text-gray-400",
+                    className: "inline-flex min-h-9 items-center gap-2 va-surface-muted rounded-xl border px-2.5 py-1 text-xs text-gray-400",
                     children: [
                       jsx("span", { className: "text-gray-500", children: "في الصفحة" }),
                       jsx("select", {
@@ -572,7 +572,7 @@ export function ArchivePage() {
             ]
           }),
           quickSearchMatches.length > 0 && jsxs("div", {
-            className: "mt-2 rounded-xl border border-white/10 bg-gray-950/30 p-2",
+            className: "mt-2 rounded-xl va-surface-subtle border p-2",
             children: [
               jsx("p", { className: "mb-1 text-xs font-semibold text-gray-500", children: "نتائج سريعة" }),
               jsx("div", {
@@ -583,7 +583,7 @@ export function ArchivePage() {
                     setPage(1);
                     setPreviewId(item.id);
                   },
-                  className: "va-action-card min-w-0 rounded-xl border border-white/10 bg-gray-900/35 px-3 py-2 text-right hover:border-emerald-500/25",
+                  className: "va-action-card min-w-0 rounded-xl va-surface-subtle border px-3 py-2 text-right hover:border-emerald-500/25",
                   children: [
                     jsx("span", { className: "block truncate text-xs font-semibold text-white", children: item.title || "بدون عنوان" }),
                     jsx("span", { className: "mt-0.5 block truncate text-[11px] text-gray-500", children: item.updatedAt ? `آخر تحديث: ${item.updatedAt.slice(0, 10)}` : "بدون تاريخ" })
@@ -659,7 +659,7 @@ export function ArchivePage() {
         }
       }),
       activeTopMode === "detailed" && jsxs("section", {
-        className: "va-filter-surface z-20 rounded-2xl border border-white/10 bg-gray-900/50 p-3 text-right backdrop-blur-sm xl:sticky xl:top-3",
+        className: "va-filter-surface z-20 rounded-2xl va-surface-muted border p-3 text-right backdrop-blur-sm xl:sticky xl:top-3",
         children: [
           jsxs("div", {
             className: "grid gap-2 xl:grid-cols-[minmax(260px,1fr)_220px_180px_180px]",
@@ -671,7 +671,7 @@ export function ArchivePage() {
                   setFilterType?.(event.target.value);
                   setFilterSubtype?.("all");
                 },
-                className: "min-h-10 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                className: "min-h-10 va-surface-deep rounded-xl border px-3 py-2 text-sm text-white",
                 children: [
                   jsx("option", { value: "all", children: "كل الأنواع" }),
                   ...contentTypes.map((type) => jsx("option", { value: type.id, children: type.name || type.id }, type.id))
@@ -681,7 +681,7 @@ export function ArchivePage() {
                 value: filterSubtype,
                 onChange: (event) => setFilterSubtype?.(event.target.value),
                 disabled: !subtypes.length,
-                className: "min-h-10 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white disabled:opacity-50",
+                className: "min-h-10 va-surface-deep rounded-xl border px-3 py-2 text-sm text-white disabled:opacity-50",
                 children: [
                   jsx("option", { value: "all", children: "كل الفروع" }),
                   ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name || subtype.id }, subtype.id))
@@ -694,7 +694,7 @@ export function ArchivePage() {
                   setSortField(field);
                   setSortDirection(direction);
                 },
-                className: "min-h-10 rounded-xl border border-white/10 bg-gray-950/45 px-3 py-2 text-sm text-white",
+                className: "min-h-10 va-surface-deep rounded-xl border px-3 py-2 text-sm text-white",
                 children: [
                   jsx("option", { value: "updatedAt:desc", children: "الأحدث تحديثاً" }),
                   jsx("option", { value: "createdAt:desc", children: "الأحدث إضافة" }),
@@ -771,7 +771,7 @@ export function ArchivePage() {
             className: "space-y-4",
             children: [
               jsxs("div", {
-                className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3 text-sm",
+                className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3 text-sm",
                 children: [
                   jsxs("div", {
                     className: "min-w-0",

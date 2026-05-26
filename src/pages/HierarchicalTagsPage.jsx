@@ -61,7 +61,7 @@ function TagForm({ tag, parentTag, tags, onCancel, onSave }) {
             jsx("input", {
               value: name,
               onChange: (event) => setName(event.target.value),
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "مثال: رياضة / كرة قدم"
             })
           ] }),
@@ -165,7 +165,7 @@ function FlatTagCard({ tag, tags, index, onEdit, onDelete }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
         jsxs("div", { className: "min-w-0", children: [
@@ -320,7 +320,7 @@ export function HierarchicalTagsPage() {
           ["وسوم جذر", rootCount, FolderTree],
           ["وسوم فرعية", childCount, ChevronLeft]
         ].map(([label, value, Icon]) => jsxs("div", {
-          className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+          className: "va-metric-card rounded-2xl va-surface-muted border p-4 text-right",
           children: [
             jsxs("div", { className: "flex items-center justify-between gap-3", children: [
               jsx("span", { className: "text-sm text-gray-500", children: label }),
@@ -331,7 +331,7 @@ export function HierarchicalTagsPage() {
         }, label))
       }),
       jsxs("section", {
-        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-filter-surface rounded-2xl va-surface-muted border p-4",
         children: [
           jsxs("label", { className: "relative block", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
@@ -339,7 +339,7 @@ export function HierarchicalTagsPage() {
               value: query,
               onChange: (event) => setQuery(event.target.value),
               placeholder: "بحث في أسماء الوسوم أو المسارات...",
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40"
+              className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40"
             })
           ] }),
           jsx("p", { className: "mt-3 text-xs text-gray-500", children: query.trim() ? `${formatNumber(filteredTags.length)} نتيجة بحث` : "يمكن ترتيب الوسوم أو إضافة فروع من نفس الشجرة." })
@@ -368,7 +368,7 @@ export function HierarchicalTagsPage() {
           onAction: () => setQuery("")
         })
       }) : model.roots.length ? jsx("section", {
-        className: "va-card rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-card rounded-2xl va-surface-muted border p-4",
         role: "tree",
         "aria-label": "شجرة الوسوم الهرمية",
         children: model.roots.map((tag) => jsx(TagNode, {

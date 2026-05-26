@@ -79,7 +79,7 @@ function HistoryMetric({ action, label, value, active, onClick }) {
 function Pagination({ page, totalPages, onChange }) {
   if (totalPages <= 1) return null;
   return jsxs("div", {
-    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+    className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3",
     children: [
       jsx("button", {
         type: "button",
@@ -110,7 +110,7 @@ function HistoryRecord({ record, itemTitle, index, settings }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: [
       jsxs("div", {
@@ -145,7 +145,7 @@ function HistoryRecord({ record, itemTitle, index, settings }) {
         ]
       }),
       record.action === "update" && record.field && jsxs("div", {
-        className: "mt-3 grid gap-2 rounded-xl border border-white/5 bg-gray-950/35 p-3 text-xs md:grid-cols-2",
+        className: "mt-3 grid gap-2 rounded-xl va-surface-muted border p-3 text-xs md:grid-cols-2",
         children: [
           jsxs("div", { className: "min-w-0", children: [
             jsx("p", { className: "mb-1 text-red-300", children: "القيمة السابقة" }),
@@ -274,7 +274,7 @@ export function HistoryPage() {
         ]
       }),
       jsxs("section", {
-        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-filter-surface rounded-2xl va-surface-muted border p-4",
         children: [
           jsxs("div", {
             className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]",
@@ -287,14 +287,14 @@ export function HistoryPage() {
                     value: query,
                     onChange: (event) => setQuery(event.target.value),
                     placeholder: "ابحث باسم العنصر أو الحقل أو القيمة...",
-                    className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40"
+                    className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40"
                   })
                 ]
               }),
               jsx("select", {
                 value: action,
                 onChange: (event) => setAction(event.target.value),
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none",
+                className: "min-h-11 va-surface-deep rounded-xl border px-3 text-sm text-white outline-none",
                 children: [
                   jsx("option", { value: "all", children: "كل الإجراءات" }),
                   ...HISTORY_ACTIONS.map((item) => jsx("option", { value: item.id, children: item.label }, item.id))
@@ -303,7 +303,7 @@ export function HistoryPage() {
               jsx("select", {
                 value: pageSize,
                 onChange: (event) => setPageSize(Number(event.target.value)),
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none",
+                className: "min-h-11 va-surface-deep rounded-xl border px-3 text-sm text-white outline-none",
                 children: [20, 50, 100].map((size) => jsx("option", { value: size, children: `${size} سجل` }, size))
               })
             ]

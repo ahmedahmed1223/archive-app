@@ -81,7 +81,7 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
             jsx("input", {
               value: term,
               onChange: (event) => setTerm(event.target.value),
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "مثال: القدس"
             })
           ] }),
@@ -90,7 +90,7 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
             jsx("select", {
               value: category,
               onChange: (event) => setCategory(event.target.value),
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none",
               children: VOCABULARY_CATEGORIES.map((item) => jsx("option", { value: item.id, children: item.label }, item.id))
             })
           ] }),
@@ -99,7 +99,7 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
             jsx("input", {
               value: aliases,
               onChange: (event) => setAliases(event.target.value),
-              className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "أسماء بديلة مفصولة بفاصلة"
             })
           ] }),
@@ -108,7 +108,7 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
             jsx("textarea", {
               value: description,
               onChange: (event) => setDescription(event.target.value),
-              className: "min-h-[86px] w-full rounded-xl border border-white/10 bg-gray-950/45 p-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              className: "min-h-[86px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "معلومة قصيرة تساعد فريق الأرشفة على استخدام المصطلح الصحيح"
             })
           ] })
@@ -131,7 +131,7 @@ function VocabularyCard({ entry, index, onEdit, onDelete }) {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: [
       jsxs("div", {
@@ -304,7 +304,7 @@ export function VocabularyPage() {
         onSave: saveEntry
       }),
       jsxs("section", {
-        className: "va-filter-surface rounded-2xl border border-white/10 bg-gray-900/45 p-4",
+        className: "va-filter-surface rounded-2xl va-surface-muted border p-4",
         children: [
           jsxs("div", {
             className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
@@ -317,14 +317,14 @@ export function VocabularyPage() {
                     value: query,
                     onChange: (event) => setQuery(event.target.value),
                     placeholder: "بحث في المصطلحات والأسماء المستعارة...",
-                    className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40"
+                    className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40"
                   })
                 ]
               }),
               jsx("select", {
                 value: pageSize,
                 onChange: (event) => setPageSize(Number(event.target.value)),
-                className: "min-h-11 rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none",
+                className: "min-h-11 va-surface-deep rounded-xl border px-3 text-sm text-white outline-none",
                 children: [24, 48, 96].map((size) => jsx("option", { value: size, children: `${size} مصطلح` }, size))
               })
             ]
@@ -363,7 +363,7 @@ export function VocabularyPage() {
         })
       }),
       jsx("div", {
-        className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-gray-950/35 p-3",
+        className: "flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3",
         children: [
           jsx("button", { type: "button", disabled: currentPage <= 1, onClick: () => setPage(currentPage - 1), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "السابق" }),
           jsx("p", { className: "text-sm text-gray-500", children: `الصفحة ${formatNumber(currentPage)} من ${formatNumber(totalPages)}` }),

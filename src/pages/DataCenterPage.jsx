@@ -442,7 +442,7 @@ export function DataCenterPage() {
             ]
           }),
           jsxs("label", {
-            className: "flex min-h-[66px] items-center gap-3 rounded-xl border border-white/10 bg-gray-950/35 px-3 py-2 text-sm text-gray-300",
+            className: "flex min-h-[66px] items-center gap-3 va-surface-muted rounded-xl border px-3 py-2 text-sm text-gray-300",
             children: [
               jsx("input", {
                 type: "checkbox",
@@ -625,7 +625,7 @@ export function DataCenterPage() {
         className: "mt-5 space-y-3",
         children: backups.length
           ? backups.map((backup) => jsxs("div", {
-            className: "grid gap-3 rounded-xl border border-white/5 bg-gray-950/30 p-4 sm:grid-cols-[1fr_auto]",
+            className: "grid gap-3 rounded-xl va-surface-subtle border p-4 sm:grid-cols-[1fr_auto]",
             children: [
               jsxs("div", {
                 className: "min-w-0",
@@ -703,7 +703,7 @@ export function DataCenterPage() {
         ]
       }),
       jsxs("section", {
-        className: "va-control-surface rounded-2xl border border-white/10 bg-gray-900/50 p-4",
+        className: "va-control-surface rounded-2xl va-surface-muted border p-4",
         children: [
           jsxs("div", {
             className: "mb-3 flex flex-wrap items-center justify-between gap-3",
@@ -752,7 +752,7 @@ export function DataCenterPage() {
             children: [
               activePanel,
               operationMessage && jsx("div", {
-                className: "mt-5 rounded-xl border border-white/10 bg-gray-950/45 p-3 text-sm leading-relaxed text-gray-300",
+                className: "mt-5 va-surface-deep rounded-xl border p-3 text-sm leading-relaxed text-gray-300",
                 children: operationMessage
               })
             ]

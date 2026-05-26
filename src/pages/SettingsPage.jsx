@@ -181,7 +181,7 @@ export function SettingsPage() {
           className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
           children: [
             jsxs("div", {
-              className: "rounded-xl border border-white/10 bg-gray-950/30 p-3",
+              className: "rounded-xl va-surface-subtle border p-3",
               children: [
                 jsx("p", { className: "text-sm text-gray-300", children: settings.ui?.onboardingSecurityMode === "quick" ? "الحماية مؤجلة عبر البدء السريع." : "الإعداد الآمن هو المسار الحالي." }),
                 jsx("p", { className: "mt-1 text-xs text-gray-500", children: settings.ui?.onboardingCoreUiSeenAt ? `شوهد شرح الواجهة: ${formatDateTime(settings.ui.onboardingCoreUiSeenAt)}` : "شرح الواجهة لم يسجل بعد." })
@@ -265,7 +265,7 @@ export function SettingsPage() {
               columns: "sm:grid-cols-3",
               onChange: (value) => patchUi({ cardStyle: value }, "تم تحديث أسلوب البطاقات")
             }),
-            jsx("p", { className: "rounded-xl border border-white/10 bg-gray-950/30 p-3 text-xs text-gray-500", children: `المظهر المطبّق الآن: ${isDark ? "ليلي" : "نهاري"}.` })
+            jsx("p", { className: "rounded-xl va-surface-subtle border p-3 text-xs text-gray-500", children: `المظهر المطبّق الآن: ${isDark ? "ليلي" : "نهاري"}.` })
           ]
         })
       }),
@@ -319,7 +319,7 @@ export function SettingsPage() {
           description: "يُستخدم عند فتح منتقي الأيقونات في الشاشات التي تدعمه."
         }),
         jsxs("div", {
-          className: "rounded-xl border border-white/10 bg-gray-950/30 p-3",
+          className: "rounded-xl va-surface-subtle border p-3",
           children: [
             jsx("p", { className: "text-sm font-semibold text-white", children: "إدارة الأيقونات الفعلية" }),
             jsx("p", { className: "mt-1 text-xs leading-relaxed text-gray-500", children: "انتقل إلى إدارة الأنواع لإضافة أيقونة أو غلاف لكل نوع وفرع." }),
@@ -359,7 +359,7 @@ export function SettingsPage() {
           ]
         }),
         jsxs("p", {
-          className: "rounded-xl border border-white/10 bg-gray-950/30 p-3 text-sm text-gray-400",
+          className: "rounded-xl va-surface-subtle border p-3 text-sm text-gray-400",
           children: [
             "مثال: ",
             jsx("span", { className: "font-mono text-emerald-200", dir: "ltr", children: `${settings.autocompleteTriggers?.vocabulary || "@"}م` }),
@@ -405,7 +405,7 @@ export function SettingsPage() {
           ]
         }),
         jsxs("div", {
-          className: "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-gray-950/30 p-3",
+          className: "flex flex-wrap items-center justify-between gap-3 rounded-xl va-surface-subtle border p-3",
           children: [
             jsx("p", { className: "text-sm text-gray-400", children: settings.lastBackupAt ? `آخر نسخة: ${formatDateTime(settings.lastBackupAt)}` : "لا توجد نسخة احتياطية مسجلة بعد." }),
             jsx("button", { type: "button", onClick: () => setCurrentPage?.("backup"), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "فتح مركز البيانات" })

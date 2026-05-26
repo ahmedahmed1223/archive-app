@@ -57,15 +57,15 @@ function CollectionForm({ collection, onCancel, onSave }) {
         children: [
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
             jsx("span", { children: "الرمز" }),
-            jsx("input", { value: icon, onChange: (event) => setIcon(event.target.value.slice(0, 4)), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-center text-xl text-white outline-none focus:border-emerald-500/40" })
+            jsx("input", { value: icon, onChange: (event) => setIcon(event.target.value.slice(0, 4)), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-center text-xl text-white outline-none focus:border-emerald-500/40" })
           ] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
             jsx("span", { children: "اسم المجموعة" }),
-            jsx("input", { value: name, onChange: (event) => setName(event.target.value), className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "مثال: مقابلات مهمة" })
+            jsx("input", { value: name, onChange: (event) => setName(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "مثال: مقابلات مهمة" })
           ] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
             jsx("span", { children: "الوصف" }),
-            jsx("textarea", { value: description, onChange: (event) => setDescription(event.target.value), className: "min-h-[76px] w-full rounded-xl border border-white/10 bg-gray-950/45 p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملاحظة قصيرة عن استخدام المجموعة" })
+            jsx("textarea", { value: description, onChange: (event) => setDescription(event.target.value), className: "min-h-[76px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملاحظة قصيرة عن استخدام المجموعة" })
           ] }),
           jsxs("div", { className: "space-y-1 lg:col-span-2", children: [
             jsx("span", { className: "text-sm text-gray-300", children: "اللون" }),
@@ -134,7 +134,7 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
   const canManageItems = collection.type !== "smart";
 
   return jsxs("aside", {
-    className: "va-preview-panel space-y-4 rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right",
+    className: "va-preview-panel space-y-4 rounded-2xl va-surface-muted border p-4 text-right",
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start gap-3", children: [
@@ -145,7 +145,7 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
         ] })
       ] }),
       canManageItems && availableItems.length > 0 && jsxs("div", {
-        className: "rounded-xl border border-white/10 bg-gray-950/35 p-3",
+        className: "va-surface-muted rounded-xl border p-3",
         children: [
           jsx("p", { className: "mb-2 text-sm font-semibold text-gray-300", children: "إضافة عناصر" }),
           jsx("select", {
@@ -161,7 +161,7 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
       items.length ? jsx("div", {
         className: "space-y-2",
         children: items.slice(0, 80).map((item) => jsxs("div", {
-          className: "grid gap-2 rounded-xl border border-white/5 bg-gray-950/35 p-3 sm:grid-cols-[1fr_auto]",
+          className: "grid gap-2 rounded-xl va-surface-muted border p-3 sm:grid-cols-[1fr_auto]",
           children: [
             jsxs("button", { type: "button", onClick: () => onOpenItem(item), className: "min-w-0 text-right", children: [
               jsx("p", { className: "truncate text-sm font-semibold text-white", children: item.title || "بدون عنوان" }),
@@ -291,7 +291,7 @@ export function CollectionsPage() {
           ["يدوية", summary.manual, FolderOpen],
           ["ذكية", summary.smart, Sparkles],
           ["عناصر مرتبطة", summary.linkedItems, Video]
-        ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl border border-white/10 bg-gray-900/45 p-4 text-right", children: [
+        ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl va-surface-muted border p-4 text-right", children: [
           jsxs("div", { className: "flex items-center justify-between gap-3", children: [
             jsx("span", { className: "text-sm text-gray-500", children: label }),
             jsx(Icon, { className: "h-5 w-5 text-emerald-400" })
@@ -301,9 +301,9 @@ export function CollectionsPage() {
       }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]", children: [
         jsxs("div", { className: "space-y-4", children: [
-          jsxs("label", { className: "va-filter-surface relative block rounded-2xl border border-white/10 bg-gray-900/45 p-3", children: [
+          jsxs("label", { className: "va-filter-surface relative block rounded-2xl va-surface-muted border p-3", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
-            jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث في المجموعات...", className: "min-h-11 w-full rounded-xl border border-white/10 bg-gray-950/45 py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
+            jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث في المجموعات...", className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
           ] }),
           filteredCollections.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: filteredCollections.map((collection, index) => jsx(CollectionCard, {
             collection,
