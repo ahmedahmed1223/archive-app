@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
 import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { reportError } from "../utils/errorReporting.js";
 import { hashPassword } from "../utils/passwordHash.js";
 import {
   USER_ROLES,
@@ -154,7 +155,8 @@ export function UsersPage() {
     addUser,
     updateUser,
     deleteUser,
-    showToast
+    showToast,
+    showNotification
   } = useAppStore();
 
   const [query, setQuery] = React.useState("");
@@ -190,7 +192,10 @@ export function UsersPage() {
       setShowForm(false);
       setEditingUser(null);
     } catch (error) {
-      showToast?.("تعذر حفظ المستخدم", "error");
+      reportError(showNotification, error, {
+        context: "حفظ المستخدم",
+        recovery: { run: () => saveUser(draft) }
+      });
     }
   };
 

@@ -186,11 +186,28 @@ main textarea {
   border-color: rgba(148, 163, 184, 0.14) !important;
   background-color: rgba(7, 17, 31, 0.72) !important;
   color: #ffffff !important;
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 main input::placeholder,
 main textarea::placeholder {
   color: #64748b !important;
+}
+
+main input:focus,
+main select:focus,
+main textarea:focus {
+  background-color: color-mix(in srgb, var(--va-action) 6%, rgba(7, 17, 31, 0.85)) !important;
+  border-color: color-mix(in srgb, var(--va-action) 48%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--va-action) 14%, transparent);
+}
+
+html.light main input:focus,
+html.light main select:focus,
+html.light main textarea:focus {
+  background-color: color-mix(in srgb, var(--va-action) 5%, #fffdf8) !important;
+  border-color: color-mix(in srgb, var(--va-action) 48%, transparent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--va-action) 16%, transparent);
 }
 
 main :focus-visible,
@@ -726,6 +743,12 @@ html.light .va-tool-button {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+
+  main input,
+  main select,
+  main textarea {
+    transition: none !important;
   }
 
   .va-skeleton {

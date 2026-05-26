@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { MotionPage, UXEmptyState } from "../components/ui/V1Primitives.jsx";
+import { reportError } from "../utils/errorReporting.js";
 import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
@@ -109,7 +110,9 @@ export function DetailPage() {
     deleteVideoItem,
     restoreVideoItem,
     toggleFavorite,
-    showToast
+    markItemViewed,
+    showToast,
+    showNotification
   } = useAppStore();
 
   const item = videoItems.find((video) => video.id === selectedItemId) || null;
@@ -123,7 +126,10 @@ export function DetailPage() {
       metadata: { ...(item.metadata || {}) }
     } : null);
     setEditing(false);
-  }, [item?.id]);
+    if (item?.id && !item.isDeleted) {
+      markItemViewed?.(item.id);
+    }
+  }, [item?.id, item?.isDeleted, markItemViewed]);
 
   const fields = React.useMemo(() => item ? getFieldsForSelection(contentTypes, draft?.type || item.type, draft?.subtype || item.subtype) : [], [contentTypes, draft?.subtype, draft?.type, item]);
   const selectedType = contentTypes.find((type) => type.id === (draft?.type || item?.type));
@@ -175,7 +181,10 @@ export function DetailPage() {
       showToast?.("تم حفظ التعديلات", "success");
       setEditing(false);
     } catch (error) {
-      showToast?.("تعذر حفظ التعديلات", "error");
+      reportError(showNotification, error, {
+        context: "حفظ التعديلات",
+        recovery: { run: save }
+      });
     }
   };
 
@@ -199,7 +208,11 @@ export function DetailPage() {
       await navigator.clipboard?.writeText(item.path);
       showToast?.("تم نسخ المسار", "success");
     } catch (error) {
-      showToast?.("تعذر نسخ المسار", "error");
+      reportError(showNotification, error, {
+        context: "نسخ المسار",
+        hint: "قد لا يدعم المتصفح الكتابة على الحافظة. جرّب نسخ المسار يدويًا.",
+        recovery: { run: copyPath }
+      });
     }
   };
 

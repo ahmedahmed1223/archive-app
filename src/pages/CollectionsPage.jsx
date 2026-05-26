@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
 import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { reportError } from "../utils/errorReporting.js";
 import {
   COLLECTION_COLORS,
   createVirtualCollectionValue,
@@ -193,7 +194,8 @@ export function CollectionsPage() {
     removeItemsFromCollection,
     setCurrentPage,
     setSelectedItemId,
-    showToast
+    showToast,
+    showNotification
   } = useAppStore();
 
   const [query, setQuery] = React.useState("");
@@ -231,7 +233,10 @@ export function CollectionsPage() {
       setShowForm(false);
       setEditingCollection(null);
     } catch (error) {
-      showToast?.("تعذر حفظ المجموعة", "error");
+      reportError(showNotification, error, {
+        context: "حفظ المجموعة",
+        recovery: { run: () => saveCollection(draft) }
+      });
     }
   };
 
@@ -246,7 +251,10 @@ export function CollectionsPage() {
       await deleteVirtualCollection?.(collection.id);
       if (selectedCollectionId === collection.id) setSelectedCollectionId(null);
     } catch (error) {
-      showToast?.("تعذر حذف المجموعة", "error");
+      reportError(showNotification, error, {
+        context: "حذف المجموعة",
+        recovery: { run: () => deleteCollection(collection) }
+      });
     }
   };
 
