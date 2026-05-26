@@ -1,13 +1,30 @@
+/**
+ * Role tags help group tabs by who typically owns them:
+ *   personal — every operator can change these (theme, density, smart recall)
+ *   admin    — workspace-wide settings that affect everyone (data, security, shortcuts)
+ *   owner    — irreversible/destructive system tools (maintenance, integrations)
+ *
+ * The visual separation comes from a small "role badge" rendered next to each
+ * tab in SettingsTabs. Permissions enforcement is handled separately by the
+ * auth slice; this metadata is presentational and informative.
+ */
 export const SETTINGS_TABS = [
-  { id: "general", label: "عام" },
-  { id: "interface", label: "الواجهة" },
-  { id: "icons", label: "الأيقونات والأغلفة" },
-  { id: "smart", label: "الاستدعاء الذكي" },
-  { id: "data", label: "النسخ والبيانات" },
-  { id: "security", label: "الأمان" },
-  { id: "shortcuts", label: "الاختصارات" },
-  { id: "maintenance", label: "الصيانة والربط" }
+  { id: "general", label: "عام", role: "personal", roleLabel: "شخصي" },
+  { id: "interface", label: "الواجهة", role: "personal", roleLabel: "شخصي" },
+  { id: "icons", label: "الأيقونات والأغلفة", role: "personal", roleLabel: "شخصي" },
+  { id: "smart", label: "الاستدعاء الذكي", role: "personal", roleLabel: "شخصي" },
+  { id: "data", label: "النسخ والبيانات", role: "admin", roleLabel: "مسؤول" },
+  { id: "security", label: "الأمان", role: "admin", roleLabel: "مسؤول" },
+  { id: "shortcuts", label: "الاختصارات", role: "admin", roleLabel: "مسؤول" },
+  { id: "maintenance", label: "الصيانة والربط", role: "owner", roleLabel: "مالك" }
 ];
+
+export const SETTINGS_TAB_ROLE_ORDER = ["personal", "admin", "owner"];
+export const SETTINGS_TAB_ROLE_LABELS = {
+  personal: "شخصي",
+  admin: "مسؤول",
+  owner: "مالك"
+};
 
 export const SETTINGS_TAB_IDS = SETTINGS_TABS.map((tab) => tab.id);
 

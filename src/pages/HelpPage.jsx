@@ -380,6 +380,23 @@ export function HelpPage() {
   const [activeSection, setActiveSection] = React.useState(settings.ui?.lastHelpSection || "getting-started");
   const [helpQuery, setHelpQuery] = React.useState("");
   const contentRef = React.useRef(null);
+  const searchInputRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Focus the search input when "/" is pressed (GitHub-style),
+      // unless the user is already typing in a field.
+      if (event.key !== "/") return;
+      const target = event.target;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable) return;
+      event.preventDefault();
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select?.();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
   const effectiveShortcuts = getEffectiveKeyboardShortcuts(settings);
   const keyboardShortcuts = createHelpShortcutList(SHORTCUT_ACTIONS, effectiveShortcuts, SHORTCUT_DISABLED);
   const sections = React.useMemo(() => createHelpSections(keyboardShortcuts), [settings.keyboardShortcuts]);
@@ -495,10 +512,12 @@ export function HelpPage() {
                       children: [
                         jsx(Search, { className: "absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
                         jsx("input", {
+                          ref: searchInputRef,
                           value: helpQuery,
                           onChange: (event) => setHelpQuery(event.target.value),
-                          placeholder: "ابحث في المساعدة، الاستيراد، النسخ الاحتياطي، الاختصارات...",
+                          placeholder: "ابحث في المساعدة، الاستيراد، النسخ الاحتياطي... (اضغط / للتركيز)",
                           dir: "auto",
+                          "aria-label": "بحث في المساعدة",
                           className: "va-bidi-input w-full va-surface-deep rounded-xl border py-3 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
                         })
                       ]

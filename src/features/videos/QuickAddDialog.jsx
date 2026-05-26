@@ -7,6 +7,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { useAppStore } from "../../stores/index.js";
 import { createVideoItemValue, parseVideoTags } from "./viewModel.js";
 import { reportError } from "../../utils/errorReporting.js";
+import { useFocusTrap } from "../../components/common/useFocusTrap.js";
 
 export function QuickAddDialog({ open, onOpenChange }) {
   const {
@@ -21,6 +22,8 @@ export function QuickAddDialog({ open, onOpenChange }) {
 
   const prefersReducedMotion = useReducedMotion();
   const titleRef = React.useRef(null);
+  const panelRef = React.useRef(null);
+  useFocusTrap(panelRef, open, { initialFocusRef: titleRef });
 
   const defaultType = settings.ui?.lastQuickAddType
     || contentTypes.find((type) => type.status !== "archived")?.id
@@ -95,6 +98,7 @@ export function QuickAddDialog({ open, onOpenChange }) {
         dir: "rtl",
         children: [
           jsxs(motion.section, {
+            ref: panelRef,
             key: "quick-add-panel",
             role: "dialog",
             "aria-modal": "true",

@@ -563,7 +563,7 @@ export function App() {
     children: [
       jsx("a", {
         href: "#main-content",
-        className: "sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[1000] focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-3 focus:text-white focus:shadow-lg",
+        className: "va-skip-link",
         children: "تخطي إلى المحتوى الرئيسي"
       }),
       jsx(AppSidebar, {}),
