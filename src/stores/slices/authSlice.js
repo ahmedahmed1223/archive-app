@@ -4,6 +4,7 @@ import {
   validatePasswordStrength,
   verifyPassword
 } from "../../utils/passwordHash.js";
+import { canPerform } from "../../features/users/permissions.js";
 import { generateId, nowIso } from "../storeCore.js";
 
 /**
@@ -248,7 +249,13 @@ export function createAuthStore({ createStore, useAppStore }) {
       return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
     },
 
-    hasPermission: () => true
+    /**
+     * Resolve permission for the active user against an action string
+     * from src/features/users/permissions.js#ACTIONS. Returns false
+     * when there is no logged-in user (rather than throwing) so UI
+     * code can render the read-only state for guests.
+     */
+    hasPermission: (action) => canPerform(get().currentUser, action)
   }));
 }
 

@@ -125,6 +125,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       set((state) => ({ videoItems: [value, ...state.videoItems], changeHistory: [record, ...state.changeHistory] }));
       await dbPut(STORES.ITEMS, value);
       await dbPut(STORES.HISTORY, record);
+      get().addAuditLog?.("video.create", value.id, "video", { title: value.title });
       return value;
     },
     updateVideoItem: async (item) => {
@@ -136,6 +137,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       }));
       await dbPut(STORES.ITEMS, updated);
       await dbPut(STORES.HISTORY, record);
+      get().addAuditLog?.("video.update", updated.id, "video", { title: updated.title });
       return updated;
     },
     deleteVideoItem: async (id, options = {}) => {
@@ -144,6 +146,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const updated = { ...target, isDeleted: true, updatedAt: nowIso() };
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
+      get().addAuditLog?.("video.delete", id, "video", { title: target.title });
       if (!options.skipUndo) {
         undoRedoManager.push({
           label: `حذف ${target.title || "فيديو"}`,
@@ -164,6 +167,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const updated = { ...target, isDeleted: false, updatedAt: nowIso() };
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
+      get().addAuditLog?.("video.restore", id, "video", { title: target.title });
       if (!options.skipUndo) {
         undoRedoManager.push({
           label: `استعادة ${target.title || "فيديو"}`,
@@ -199,6 +203,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const updated = get().videoItems.map((item) => idSet.has(item.id) ? { ...item, isDeleted: true, updatedAt: nowIso() } : item);
       set({ videoItems: updated, selectedItems: [] });
       await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
+      get().addAuditLog?.("video.bulkDelete", null, "video", { count: previous.length, ids });
       if (!options.skipUndo) {
         const label = `حذف ${previous.length} فيديو`;
         undoRedoManager.push({
@@ -307,6 +312,9 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const deleted = get().videoItems.filter((item) => item.isDeleted);
       set((state) => ({ videoItems: state.videoItems.filter((item) => !item.isDeleted) }));
       for (const item of deleted) await dbDelete(STORES.ITEMS, item.id);
+      if (deleted.length > 0) {
+        get().addAuditLog?.("video.emptyTrash", null, "video", { count: deleted.length });
+      }
     },
     addContentType: async (type) => {
       const value = createContentTypeValue(type);
@@ -326,6 +334,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       set({ contentTypes: updated });
       const target = updated.find((item) => item.id === id);
       if (target) await dbPut(STORES.TYPES, target);
+      get().addAuditLog?.("type.archive", id, "type", { name: previous?.name });
       if (!options.skipUndo && previous && previous.status !== "archived") {
         const restored = { ...previous, status: previous.status || "active", archivedAt: null, updatedAt: nowIso() };
         const label = `أرشفة نوع ${previous.name || ""}`.trim();
@@ -362,6 +371,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       if (!target) return false;
       set((state) => ({ virtualCollections: state.virtualCollections.filter((item) => item.id !== id) }));
       await dbDelete(STORES.COLLECTIONS, id);
+      get().addAuditLog?.("collection.delete", id, "collection", { name: target.name });
       if (!options.skipUndo) {
         undoRedoManager.push({
           label: `حذف مجموعة ${target.name || ""}`.trim(),
@@ -408,6 +418,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       if (!target) return false;
       set((state) => ({ vocabulary: state.vocabulary.filter((item) => item.id !== id) }));
       await dbDelete(STORES.VOCABULARY, id);
+      get().addAuditLog?.("vocabulary.delete", id, "vocabulary", { term: target.term });
       if (!options.skipUndo) {
         undoRedoManager.push({
           label: `حذف مصطلح ${target.term || ""}`.trim(),
@@ -452,6 +463,9 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const rootTag = removed.find((item) => item.id === id);
       set((state) => ({ hierarchicalTags: state.hierarchicalTags.filter((item) => !childIds.has(item.id)) }));
       for (const tagId of childIds) await dbDelete(STORES.HTAGS, tagId);
+      if (removed.length > 0) {
+        get().addAuditLog?.("htag.delete", id, "htag", { name: rootTag?.name, count: removed.length });
+      }
       if (!options.skipUndo && removed.length > 0) {
         const label = removed.length > 1
           ? `حذف ${rootTag?.name || "وسم"} وفروعه (${removed.length})`
@@ -484,6 +498,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       if (get().users.some((item) => item.username.toLowerCase() === value.username.toLowerCase())) return false;
       set((state) => ({ users: [...state.users, value] }));
       await dbPut(STORES.USERS, value);
+      get().addAuditLog?.("user.create", value.id, "user", { username: value.username, role: value.role });
       return value;
     },
     updateUser: async (user) => {
@@ -502,6 +517,9 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const wasActive = target.isActive !== false;
       const updated = { ...target, isActive: false, updatedAt: nowIso() };
       const result = await get().updateUser(updated);
+      if (wasActive) {
+        get().addAuditLog?.("user.deactivate", id, "user", { username: target.username });
+      }
       if (!options.skipUndo && wasActive) {
         const label = `تعطيل ${target.displayName || target.username || "المستخدم"}`;
         undoRedoManager.push({
