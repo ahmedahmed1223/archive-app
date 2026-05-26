@@ -44,6 +44,9 @@ import { ArchiveFilterChips, ArchiveSortMenu } from "../features/archive/Archive
 import { getGridStyleForColumns } from "../features/archive/ArchiveViews.jsx";
 import { ColumnManagerMenu } from "../features/archive/ColumnManagerMenu.jsx";
 import { getVisibleColumns, normalizeArchiveTableColumns, setColumnWidth } from "../features/archive/tableColumns.js";
+import { ContextMenu } from "../components/common/ContextMenu.jsx";
+import { useTypeToJump } from "../features/archive/useTypeToJump.js";
+import { Copy, Eye, FolderInput, PenLine, RotateCcw, Star } from "lucide-react";
 import { BulkActionBar } from "../features/archive/BulkActionBar.jsx";
 import { SavedViewsBar } from "../features/archive/SavedViewsBar.jsx";
 import {
@@ -146,6 +149,37 @@ export function ArchivePage() {
   const [gridColumnCount, setGridColumnCount] = React.useState(3);
   const [tableColumns, setTableColumns] = React.useState(() => normalizeArchiveTableColumns(settings.ui?.archiveTableColumns));
   const visibleTableColumns = React.useMemo(() => getVisibleColumns(tableColumns), [tableColumns]);
+  const [contextMenu, setContextMenu] = React.useState(null);
+
+  const buildItemContextMenu = React.useCallback((item, event) => {
+    const items = [];
+    items.push({ id: "preview", label: "معاينة", icon: Eye, onSelect: () => setPreviewId(item.id) });
+    items.push({ id: "open", label: "فتح التفاصيل", icon: FolderOpen, kbd: "Enter", onSelect: () => openItem(item) });
+    if (!showDeleted) {
+      items.push({ type: "separator" });
+      items.push({ id: "favorite", label: item.isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة", icon: Star, onSelect: () => toggleFavorite?.(item.id) });
+      items.push({ id: "edit", label: "تعديل", icon: PenLine, onSelect: () => openItem(item) });
+    }
+    if (item.path) {
+      items.push({ id: "copy-path", label: "نسخ المسار", icon: Copy, onSelect: async () => {
+        try { await navigator.clipboard?.writeText(item.path); showToast?.("تم نسخ المسار", "success"); }
+        catch (error) { showToast?.(error?.message || "تعذر النسخ", "error"); }
+      }});
+    }
+    items.push({ type: "separator" });
+    if (showDeleted) {
+      items.push({ id: "restore", label: "استعادة", icon: RotateCcw, onSelect: () => restoreVideoItem?.(item.id) });
+    } else {
+      items.push({ id: "delete", label: "نقل لسلة المحذوفات", icon: Trash2, danger: true, kbd: "Del", onSelect: () => confirmDelete(item) });
+    }
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      heading: item.title || "بدون عنوان",
+      title: `إجراءات: ${item.title || "العنصر"}`,
+      items
+    });
+  }, [confirmDelete, openItem, restoreVideoItem, setPreviewId, showDeleted, showToast, toggleFavorite]);
 
   const changeTableColumns = React.useCallback(async (next) => {
     const normalized = normalizeArchiveTableColumns(next);
@@ -484,7 +518,24 @@ export function ArchivePage() {
     onOpen: () => openItem(item),
     onFavorite: () => toggleFavorite?.(item.id),
     onDelete: () => confirmDelete(item),
-    onRestore: () => restoreVideoItem?.(item.id)
+    onRestore: () => restoreVideoItem?.(item.id),
+    onContextMenu: (event) => {
+      event.preventDefault();
+      buildItemContextMenu(item, event);
+    }
+  });
+
+  // Type-to-jump — Windows Explorer-style. Find the first visible item
+  // whose normalized title starts with what the user types.
+  useTypeToJump({
+    items: visibleItems,
+    enabled: !bulkMode && !contextMenu,
+    onMatch: (item) => {
+      setPreviewId(item.id);
+      // Scroll the matched card/row into view via its DOM id pattern.
+      const node = typeof document !== "undefined" ? document.querySelector(`[data-archive-item-id="${item.id}"]`) : null;
+      node?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
   });
 
   const renderArchiveItems = () => {
@@ -493,6 +544,7 @@ export function ArchivePage() {
         className: "grid gap-2 sm:grid-cols-2 xl:grid-cols-3",
         children: visibleItems.map((item, index) => jsx(AnimatedItem, {
           index,
+          itemId: item.id,
           children: jsx(VideoTileItem, itemActions(item))
         }, item.id))
       });
@@ -502,6 +554,7 @@ export function ArchivePage() {
         className: "space-y-3",
         children: visibleItems.map((item, index) => jsx(AnimatedItem, {
           index,
+          itemId: item.id,
           children: jsx(VideoListItem, itemActions(item))
         }, item.id))
       });
@@ -537,6 +590,7 @@ export function ArchivePage() {
       style: explicitColumnsStyle,
       children: visibleItems.map((item, index) => jsx(AnimatedItem, {
         index,
+        itemId: item.id,
         children: jsx(VideoCard, itemActions(item))
       }, item.id))
     });
@@ -760,6 +814,7 @@ export function ArchivePage() {
         addVideoItem,
         showToast
       }),
+      jsx(ContextMenu, { menu: contextMenu, onClose: () => setContextMenu(null) }),
       jsx(BulkActionBar, {
         selectedCount: storeSelectedItems.length,
         totalVisible: visibleIds.length,
