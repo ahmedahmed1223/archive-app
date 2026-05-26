@@ -856,8 +856,8 @@ run("router helpers", () => {
 });
 
 run("theme accent tokens", () => {
-  assert.deepEqual(getAccentColorTokens("indigo"), { accent: "#6366f1", strong: "#4f46e5", soft: "#27275f" });
-  assert.equal(getAccentColorTokens("missing").accent, "#14b8a6");
+  assert.deepEqual(getAccentColorTokens("indigo"), { accent: "#5b5fc7", strong: "#4338ca", soft: "#27275f" });
+  assert.equal(getAccentColorTokens("missing").accent, "#2563eb");
 
   const writes = [];
   const tokens = applyAccentColor("rose", {
@@ -865,8 +865,8 @@ run("theme accent tokens", () => {
       setProperty: (key, value) => writes.push([key, value])
     }
   });
-  assert.equal(tokens.accent, "#f43f5e");
-  assert.deepEqual(writes[0], ["--app-accent", "#f43f5e"]);
+  assert.equal(tokens.accent, "#e11d48");
+  assert.deepEqual(writes[0], ["--app-accent", "#e11d48"]);
 });
 
 function createRequest(result) {

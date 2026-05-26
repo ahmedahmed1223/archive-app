@@ -1,7 +1,6 @@
-import bcrypt from "bcryptjs";
 import { SHORTCUT_ACTIONS, SHORTCUT_DISABLED } from "../../features/settings/keyboardShortcuts.js";
 import { STORES, dbPut } from "../../services/storage/index.js";
-import { hashPassword } from "../../utils/passwordHash.js";
+import { hashPassword, validatePasswordStrength, verifyPassword } from "../../utils/passwordHash.js";
 import { nowIso } from "../storeCore.js";
 import { defaultSettings, mergeSettings } from "../settingsDefaults.js";
 import { normalizeUser } from "../storeModels.js";
@@ -34,8 +33,14 @@ export function createSettingsActions({ set, get }) {
       return settings;
     },
     setMasterPassword: async (password) => {
-      const passwordHashValue = await bcrypt.hash(password, 10);
-      const settings = mergeSettings(get().settings, { masterPasswordHash: hashPassword(password), onboardingRequired: false, initialAdminPassword: null });
+      const policyErrors = validatePasswordStrength(password);
+      if (policyErrors.length > 0) {
+        get().showToast?.(policyErrors[0], "error");
+        return false;
+      }
+      const passwordHashValue = await hashPassword(password);
+      // Both stores get the same bcrypt hash so verifyPassword works against either.
+      const settings = mergeSettings(get().settings, { masterPasswordHash: passwordHashValue, onboardingRequired: false, initialAdminPassword: null });
       let users = get().users;
       let admin = users.find((user) => user.username === "admin");
       if (admin) {
@@ -51,19 +56,30 @@ export function createSettingsActions({ set, get }) {
       return true;
     },
     skipPasswordSetup: async () => {
+      // Quick mode is retained for first-run demo but the admin is flagged
+      // mustChangePassword=true and given an empty passwordHash. Login is
+      // blocked for empty hashes (see authSlice.login), so the user can
+      // browse the app while logged-in via initAuth from a fresh session
+      // but cannot sign in again until they set a real password. This
+      // preserves the workflow while removing the auth bypass.
       const settings = mergeSettings(get().settings, { ui: { onboardingSecurityMode: "quick", v1OnboardingCompleted: true }, onboardingRequired: false });
       let users = get().users;
       if (!users.some((user) => user.username === "admin")) {
-        users = [normalizeUser({ username: "admin", displayName: "المدير", role: "admin", passwordHash: "", isActive: true }), ...users];
+        users = [normalizeUser({ username: "admin", displayName: "المدير", role: "admin", passwordHash: "", isActive: true, mustChangePassword: true }), ...users];
         await dbPut(STORES.USERS, users[0]);
       }
       set({ settings, users, isPasswordSet: false, isLocked: false });
       await persistSettings(settings);
       return true;
     },
-    unlockApp: (password) => {
+    unlockApp: async (password) => {
       const masterHash = get().settings.masterPasswordHash;
-      const ok = !masterHash || hashPassword(password) === masterHash;
+      // No master password set → unlock is a no-op success (covers fresh quick-mode installs).
+      if (!masterHash) {
+        set({ isLocked: false });
+        return true;
+      }
+      const ok = await verifyPassword(password, masterHash);
       if (ok) set({ isLocked: false });
       return ok;
     },
