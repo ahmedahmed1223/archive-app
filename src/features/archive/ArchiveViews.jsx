@@ -1,9 +1,11 @@
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   HardDrive,
   MoreHorizontal,
   RotateCcw,
+  Square,
   Trash2,
   Video
 } from "lucide-react";
@@ -20,6 +22,24 @@ import {
   formatNumber
 } from "../../utils/formatting.js";
 import { normalizeLocalFileValue } from "../videos/viewModel.js";
+
+function BulkCheckbox({ checked, onToggle, label }) {
+  return jsx("button", {
+    type: "button",
+    role: "checkbox",
+    "aria-checked": checked,
+    "aria-label": label || (checked ? "إلغاء التحديد" : "تحديد"),
+    onClick: (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      onToggle?.(event);
+    },
+    className: `inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-colors ${checked
+      ? "border-[color-mix(in_srgb,var(--va-action)_60%,transparent)] bg-[color-mix(in_srgb,var(--va-action)_25%,transparent)] text-white"
+      : "border-white/20 bg-white/[0.04] text-gray-300 hover:bg-white/[0.08]"}`,
+    children: checked ? jsx(Check, { className: "h-3.5 w-3.5" }) : jsx(Square, { className: "h-3.5 w-3.5 opacity-40" })
+  });
+}
 
 export const ARCHIVE_ITEM_SIZE_OPTIONS = [
   { value: "compact", label: "صغير" },
@@ -270,17 +290,23 @@ export function SegmentedControl({ label, value, options, onChange }) {
   });
 }
 
-export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable" }) {
+export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
   const size = ARCHIVE_CARD_SIZE[itemSize] || ARCHIVE_CARD_SIZE.comfortable;
+  const highlight = bulkMode ? bulkSelected : selected;
+  const handleCardClick = bulkMode ? () => onBulkToggle?.() : onPreview;
   return jsxs("article", {
-    className: `va-video-card ${selected ? "va-video-card-selected" : ""} group overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
-      selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
+    className: `va-video-card ${highlight ? "va-video-card-selected" : ""} group relative overflow-hidden rounded-2xl border bg-gray-900/45 text-right transition-colors ${
+      highlight ? "border-[color-mix(in_srgb,var(--va-action)_55%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--va-action)_30%,transparent)]" : "border-white/10 hover:border-[color-mix(in_srgb,var(--va-action)_30%,transparent)]"
     }`,
     dir: "rtl",
     children: [
+      bulkMode && jsx("div", {
+        className: "absolute right-2 top-2 z-10",
+        children: jsx(BulkCheckbox, { checked: bulkSelected, onToggle: onBulkToggle, label: `تحديد ${item.title || "فيديو"}` })
+      }),
       jsxs("button", {
         type: "button",
-        onClick: onPreview,
+        onClick: handleCardClick,
         className: "block w-full text-right",
         children: [
           jsx("div", { className: "aspect-video overflow-hidden border-b border-white/5 bg-gray-950", children: jsx(VideoThumb, { item }) }),
@@ -356,24 +382,30 @@ export function AnimatedItem({ index, children, as = "div", className = "" }) {
   });
 }
 
-export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable" }) {
+export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle }) {
   const size = ARCHIVE_LIST_SIZE[itemSize] || ARCHIVE_LIST_SIZE.comfortable;
+  const highlight = bulkMode ? bulkSelected : selected;
+  const handlePreview = bulkMode ? () => onBulkToggle?.() : onPreview;
 
   return jsxs("article", {
-    className: `va-video-list-item ${selected ? "va-video-list-item-selected" : ""} group grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
-      selected ? "border-emerald-500/45 ring-1 ring-emerald-500/20" : "border-white/10 hover:border-emerald-500/25"
+    className: `va-video-list-item ${highlight ? "va-video-list-item-selected" : ""} group relative grid rounded-2xl border bg-gray-900/45 text-right transition-colors ${size.article} ${
+      highlight ? "border-[color-mix(in_srgb,var(--va-action)_55%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--va-action)_30%,transparent)]" : "border-white/10 hover:border-[color-mix(in_srgb,var(--va-action)_30%,transparent)]"
     }`,
     dir: "rtl",
     children: [
+      bulkMode && jsx("div", {
+        className: "absolute right-3 top-3 z-10",
+        children: jsx(BulkCheckbox, { checked: bulkSelected, onToggle: onBulkToggle, label: `تحديد ${item.title || "فيديو"}` })
+      }),
       jsx("button", {
         type: "button",
-        onClick: onPreview,
+        onClick: handlePreview,
         className: "overflow-hidden rounded-xl border border-white/10 bg-gray-950 text-right",
         children: jsx("div", { className: "aspect-video", children: jsx(VideoThumb, { item }) })
       }),
       jsxs("button", {
         type: "button",
-        onClick: onPreview,
+        onClick: handlePreview,
         className: "min-w-0 text-right",
         children: [
           jsxs("div", {
@@ -428,7 +460,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
   });
 }
 
-export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable" }) {
+export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, showDeleted, onPreview, onOpen, onFavorite, onDelete, onRestore, itemSize = "comfortable", bulkMode = false, isSelected, onBulkToggle, allSelected, onSelectAll }) {
   const size = ARCHIVE_TABLE_SIZE[itemSize] || ARCHIVE_TABLE_SIZE.comfortable;
 
   return jsx("div", {
@@ -443,6 +475,10 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
             className: "border-b border-white/10 bg-gray-950/45 text-xs text-gray-500",
             children: jsxs("tr", {
               children: [
+                bulkMode && jsx("th", {
+                  className: `${size.cell} w-10 font-medium`,
+                  children: jsx(BulkCheckbox, { checked: !!allSelected, onToggle: () => onSelectAll?.(), label: allSelected ? "إلغاء الكل" : "تحديد الكل" })
+                }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "العنوان" }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "النوع" }),
                 jsx("th", { className: `${size.cell} font-medium`, children: "الملف" }),
@@ -454,24 +490,32 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
           }),
           jsx("tbody", {
             className: "divide-y divide-white/5",
-            children: items.map((item, index) => jsx(motion.tr, {
-              initial: { opacity: 0, y: 6 },
-              animate: { opacity: 1, y: 0 },
-              transition: { duration: 0.16, delay: Math.min(index, 10) * 0.02 },
-              className: previewItem?.id === item.id ? "bg-emerald-500/10" : "hover:bg-white/[0.03]",
-              children: [
-                jsxs("td", {
-                  className: size.cell,
-                  children: [
-                    jsx("button", {
-                      type: "button",
-                      onClick: () => onPreview(item),
-                      className: "line-clamp-2 text-right font-semibold leading-relaxed text-white hover:text-emerald-300",
-                      children: item.title || "بدون عنوان"
-                    }),
-                    item.isFavorite && jsx("span", { className: "mt-1 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
-                  ]
-                }),
+            children: items.map((item, index) => {
+              const selectedRow = bulkMode && isSelected?.(item.id);
+              return jsxs(motion.tr, {
+                initial: { opacity: 0, y: 6 },
+                animate: { opacity: 1, y: 0 },
+                transition: { duration: 0.16, delay: Math.min(index, 10) * 0.02 },
+                className: selectedRow
+                  ? "bg-[color-mix(in_srgb,var(--va-action)_14%,transparent)]"
+                  : previewItem?.id === item.id ? "bg-emerald-500/10" : "hover:bg-white/[0.03]",
+                children: [
+                  bulkMode && jsx("td", {
+                    className: size.cell,
+                    children: jsx(BulkCheckbox, { checked: !!selectedRow, onToggle: () => onBulkToggle?.(item.id), label: `تحديد ${item.title || "فيديو"}` })
+                  }),
+                  jsxs("td", {
+                    className: size.cell,
+                    children: [
+                      jsx("button", {
+                        type: "button",
+                        onClick: () => bulkMode ? onBulkToggle?.(item.id) : onPreview(item),
+                        className: "line-clamp-2 text-right font-semibold leading-relaxed text-white hover:text-[color-mix(in_srgb,var(--va-action)_70%,#ffffff)]",
+                        children: item.title || "بدون عنوان"
+                      }),
+                      item.isFavorite && jsx("span", { className: "mt-1 inline-flex rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
+                    ]
+                  }),
                 jsx("td", { className: `${size.cell} text-gray-400`, children: [typeLabel(item), subtypeLabel(item)].filter(Boolean).join(" / ") || "غير مصنف" }),
                 jsx("td", { className: size.cell, children: jsx(FileMetaStrip, { item, compact: true }) }),
                 jsx("td", {
@@ -497,7 +541,8 @@ export function VideoTableView({ items, previewItem, typeLabel, subtypeLabel, sh
                   })
                 })
               ]
-            }, item.id))
+              }, item.id);
+            })
           })
         ]
       })

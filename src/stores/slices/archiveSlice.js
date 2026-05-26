@@ -46,6 +46,8 @@ export const archiveActionKeys = [
   "markItemViewed",
   "bulkDeleteItems",
   "bulkRestoreItems",
+  "bulkAddTags",
+  "bulkMoveToCollection",
   "emptyTrash",
   "setSearchQuery",
   "setFilterType",
@@ -190,17 +192,116 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       await dbPut(STORES.ITEMS, updated).catch(() => {});
       return true;
     },
-    bulkDeleteItems: async (ids = []) => {
+    bulkDeleteItems: async (ids = [], options = {}) => {
       const idSet = new Set(ids);
+      const previous = get().videoItems.filter((item) => idSet.has(item.id)).map((item) => ({ ...item }));
+      if (!previous.length) return false;
       const updated = get().videoItems.map((item) => idSet.has(item.id) ? { ...item, isDeleted: true, updatedAt: nowIso() } : item);
       set({ videoItems: updated, selectedItems: [] });
       await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
+      if (!options.skipUndo) {
+        const label = `حذف ${previous.length} فيديو`;
+        undoRedoManager.push({
+          label,
+          undo: async () => {
+            const restored = get().videoItems.map((item) => idSet.has(item.id) ? { ...item, isDeleted: false } : item);
+            set({ videoItems: restored });
+            await persistList(STORES.ITEMS, restored.filter((item) => idSet.has(item.id)));
+          },
+          redo: () => get().bulkDeleteItems(ids, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "info",
+          title: "تم الحذف",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
     },
-    bulkRestoreItems: async (ids = []) => {
+    bulkRestoreItems: async (ids = [], options = {}) => {
       const idSet = new Set(ids);
+      const previous = get().videoItems.filter((item) => idSet.has(item.id) && item.isDeleted).map((item) => ({ ...item }));
+      if (!previous.length) return false;
       const updated = get().videoItems.map((item) => idSet.has(item.id) ? { ...item, isDeleted: false, updatedAt: nowIso() } : item);
       set({ videoItems: updated, selectedItems: [] });
       await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
+      if (!options.skipUndo) {
+        const label = `استعادة ${previous.length} فيديو`;
+        undoRedoManager.push({
+          label,
+          undo: () => get().bulkDeleteItems(ids, { skipUndo: true }),
+          redo: () => get().bulkRestoreItems(ids, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "info",
+          title: "تمت الاستعادة",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
+    },
+    bulkAddTags: async (ids = [], tags = [], options = {}) => {
+      if (!ids.length || !tags.length) return false;
+      const idSet = new Set(ids);
+      const tagSet = new Set(tags.map((value) => String(value || "").trim()).filter(Boolean));
+      if (!tagSet.size) return false;
+      const previous = get().videoItems.filter((item) => idSet.has(item.id)).map((item) => ({ id: item.id, tags: [...(item.tags || [])] }));
+      const updated = get().videoItems.map((item) => {
+        if (!idSet.has(item.id)) return item;
+        const merged = Array.from(new Set([...(item.tags || []), ...tagSet]));
+        return { ...item, tags: merged, updatedAt: nowIso() };
+      });
+      set({ videoItems: updated });
+      await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
+      if (!options.skipUndo) {
+        const label = `إضافة ${tagSet.size} وسم لـ ${previous.length} فيديو`;
+        undoRedoManager.push({
+          label,
+          undo: async () => {
+            const reverted = get().videoItems.map((item) => {
+              const original = previous.find((entry) => entry.id === item.id);
+              return original ? { ...item, tags: original.tags, updatedAt: nowIso() } : item;
+            });
+            set({ videoItems: reverted });
+            await persistList(STORES.ITEMS, reverted.filter((item) => idSet.has(item.id)));
+          },
+          redo: () => get().bulkAddTags(ids, tags, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "success",
+          title: "تمت إضافة الوسوم",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
+    },
+    bulkMoveToCollection: async (ids = [], collectionId, options = {}) => {
+      if (!ids.length || !collectionId) return false;
+      const collection = get().virtualCollections.find((item) => item.id === collectionId);
+      if (!collection) return false;
+      const previousIds = [...(collection.itemIds || [])];
+      const merged = Array.from(new Set([...previousIds, ...ids]));
+      const updated = { ...collection, itemIds: merged, updatedAt: nowIso() };
+      set((state) => ({ virtualCollections: state.virtualCollections.map((item) => item.id === collectionId ? updated : item) }));
+      await dbPut(STORES.COLLECTIONS, updated);
+      if (!options.skipUndo) {
+        const label = `نقل ${ids.length} فيديو إلى ${collection.name}`;
+        undoRedoManager.push({
+          label,
+          undo: async () => {
+            const reverted = { ...updated, itemIds: previousIds, updatedAt: nowIso() };
+            set((state) => ({ virtualCollections: state.virtualCollections.map((item) => item.id === collectionId ? reverted : item) }));
+            await dbPut(STORES.COLLECTIONS, reverted);
+          },
+          redo: () => get().bulkMoveToCollection(ids, collectionId, { skipUndo: true })
+        });
+        get().showNotification?.(label, {
+          type: "success",
+          title: "تم النقل",
+          action: { label: "تراجع", run: () => undoRedoManager.undo() }
+        });
+      }
+      return true;
     },
     emptyTrash: async () => {
       const deleted = get().videoItems.filter((item) => item.isDeleted);
@@ -433,8 +534,6 @@ export function createArchiveActions({ set, get, getAuthStore }) {
     refreshData: async () => get().loadAllData(),
     getVideoItemById: (id) => get().videoItems.find((item) => item.id === id),
     getSmartSuggestions: () => [],
-    bulkAddTags: async () => false,
-    bulkMoveItems: async () => false,
     bulkExportItems: async () => false
   };
 }
