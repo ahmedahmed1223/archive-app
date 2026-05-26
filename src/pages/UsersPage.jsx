@@ -17,7 +17,7 @@ import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
 import { PageHero } from "../components/ui/V1Primitives.jsx";
 import { reportError } from "../utils/errorReporting.js";
-import { hashPassword } from "../utils/passwordHash.js";
+import { hashPassword, validatePasswordStrength } from "../utils/passwordHash.js";
 import {
   USER_ROLES,
   canDeactivateUser,
@@ -178,7 +178,12 @@ export function UsersPage() {
         }));
         showToast?.("تم تحديث المستخدم", "success");
       } else {
-        const passwordHash = hashPassword(draft.password);
+        const policyErrors = validatePasswordStrength(draft.password);
+        if (policyErrors.length > 0) {
+          showToast?.(policyErrors[0], "error");
+          return;
+        }
+        const passwordHash = await hashPassword(draft.password);
         await addUser?.(createUserValue({
           username: draft.username,
           displayName: draft.displayName,

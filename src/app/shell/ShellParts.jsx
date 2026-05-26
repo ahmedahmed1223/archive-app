@@ -256,14 +256,21 @@ export function LockScreen() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
 
-  const submit = (event) => {
+  const [busy, setBusy] = React.useState(false);
+  const submit = async (event) => {
     event.preventDefault();
-    const ok = unlockApp?.(password);
-    if (!ok) {
-      setError("كلمة المرور غير صحيحة.");
-      return;
+    if (busy) return;
+    setBusy(true);
+    try {
+      const ok = await unlockApp?.(password);
+      if (!ok) {
+        setError("كلمة المرور غير صحيحة.");
+        return;
+      }
+      showToast?.("تم فتح التطبيق", "success");
+    } finally {
+      setBusy(false);
     }
-    showToast?.("تم فتح التطبيق", "success");
   };
 
   return (

@@ -128,19 +128,17 @@ export function SettingsPage() {
         setPasswordError("أدخل كلمة المرور الحالية أولاً.");
         return;
       }
-      if (!unlockApp?.(oldPassword)) {
+      const oldOk = await unlockApp?.(oldPassword);
+      if (!oldOk) {
         setPasswordError("كلمة المرور الحالية غير صحيحة.");
         return;
       }
-    }
-    if (newPassword.length < 6) {
-      setPasswordError("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
-      return;
     }
     if (newPassword !== confirmPassword) {
       setPasswordError("كلمة المرور وتأكيدها غير متطابقين.");
       return;
     }
+    // Policy validation happens inside setMasterPassword; surface its toast in addition.
     try {
       await passwordSave.run(async () => {
         await setMasterPassword?.(newPassword);
