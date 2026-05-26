@@ -43,6 +43,7 @@ export const archiveActionKeys = [
   "deleteVideoItem",
   "restoreVideoItem",
   "toggleFavorite",
+  "markItemViewed",
   "bulkDeleteItems",
   "bulkRestoreItems",
   "emptyTrash",
@@ -176,6 +177,17 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const updated = { ...target, isFavorite: !target.isFavorite, updatedAt: nowIso() };
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
+      return true;
+    },
+    markItemViewed: async (id) => {
+      const target = get().videoItems.find((item) => item.id === id);
+      if (!target) return false;
+      const stamp = nowIso();
+      if (target.lastViewedAt === stamp) return true;
+      const updated = { ...target, lastViewedAt: stamp };
+      set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
+      // Persist quietly without touching updatedAt so the "آخر التحديث" timestamp stays meaningful.
+      await dbPut(STORES.ITEMS, updated).catch(() => {});
       return true;
     },
     bulkDeleteItems: async (ids = []) => {
