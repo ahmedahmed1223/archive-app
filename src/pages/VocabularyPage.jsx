@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
 import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { reportError } from "../utils/errorReporting.js";
 import {
   VOCABULARY_CATEGORIES,
   createVocabularyEntryValue,
@@ -178,7 +179,8 @@ export function VocabularyPage() {
     addVocabularyEntry,
     updateVocabularyEntry,
     deleteVocabularyEntry,
-    showToast
+    showToast,
+    showNotification
   } = useAppStore();
 
   const initialRouteState = React.useMemo(() => parseVocabularyRouteParams(parseAppRoute().params), []);
@@ -254,7 +256,10 @@ export function VocabularyPage() {
       setShowForm(false);
       setEditingEntry(null);
     } catch (error) {
-      showToast?.("تعذر حفظ المصطلح", "error");
+      reportError(showNotification, error, {
+        context: "حفظ المصطلح",
+        recovery: { run: () => saveEntry(draft) }
+      });
     }
   };
 
@@ -267,9 +272,12 @@ export function VocabularyPage() {
     if (!confirmed) return;
     try {
       await deleteVocabularyEntry?.(entry.id);
-      showToast?.("تم حذف المصطلح", "info");
+      // Slice now emits its own toast with an "تراجع" action.
     } catch (error) {
-      showToast?.("تعذر حذف المصطلح", "error");
+      reportError(showNotification, error, {
+        context: "حذف المصطلح",
+        recovery: { run: () => deleteEntry(entry) }
+      });
     }
   };
 
