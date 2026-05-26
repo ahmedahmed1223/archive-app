@@ -409,7 +409,7 @@ export function ToastNotification() {
   );
 }
 
-export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
+export function CommandPalette({ open, onOpenChange, onOpenShortcuts, onOpenQuickAdd }) {
   const setCurrentPage = useAppStore((state) => state.setCurrentPage);
   const setSelectedItemId = useAppStore((state) => state.setSelectedItemId);
   const videoItems = useAppStore((state) => state.videoItems || []);
@@ -429,7 +429,8 @@ export function CommandPalette({ open, onOpenChange, onOpenShortcuts }) {
     { id: "dashboard", label: "لوحة التحكم", detail: "العودة للبداية اليومية", icon: Home, kind: "page", run: () => setCurrentPage?.("dashboard") },
     { id: "archive", label: "الأرشيف", detail: "تصفح المواد والفلاتر", icon: FolderOpen, kind: "page", run: () => setCurrentPage?.("archive") },
     { id: "search", label: "البحث المتقدم", detail: "بحث لحظي مع فلاتر تفصيلية", icon: Search, kind: "page", run: () => setCurrentPage?.("search") },
-    { id: "add", label: "إضافة فيديو", detail: "إنشاء مادة أرشيفية جديدة", icon: Sparkles, kind: "page", run: () => setCurrentPage?.("add") },
+    { id: "quick-add", label: "إضافة فيديو سريع", detail: "نافذة صغيرة لإدخال العنوان فقط (Alt+A)", icon: Sparkles, kind: "action", run: () => onOpenQuickAdd?.() },
+    { id: "add", label: "إضافة فيديو (نموذج كامل)", detail: "إنشاء مادة أرشيفية جديدة", icon: Sparkles, kind: "page", run: () => setCurrentPage?.("add") },
     { id: "backup", label: "مركز البيانات", detail: "استيراد وتصدير ونقل", icon: Database, kind: "page", run: () => setCurrentPage?.("backup") },
     { id: "history", label: "سجل التغييرات", detail: "آخر العمليات على الأرشيف", icon: HistoryIcon, kind: "page", run: () => setCurrentPage?.("history") },
     { id: "help", label: "المساعدة", detail: "فتح مركز المعرفة", icon: Info, kind: "page", run: () => setCurrentPage?.("help") },
