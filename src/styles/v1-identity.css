@@ -1,41 +1,43 @@
 :root {
-  /* True-neutral ink scale (Vercel / Linear inspired).
-   * Older blue-tinted values were retained as aliases for backwards
-   * compatibility but the rendered tone is now neutral zinc. */
-  --va-ink-950: #08080a;
-  --va-ink-925: #0c0c0f;
-  --va-ink-900: #101013;
-  --va-ink-850: #16161a;
-  --va-ink-800: #1c1c20;
-  --va-ink-700: #27272a;
-  --va-ink-600: #3f3f46;
-  --va-ink-500: #52525b;
+  /* Workspace neutrals — slate-stone scale with subtle warmth.
+   * Tuned so the canvas sits a clear step BELOW surfaces, giving cards
+   * real hierarchy instead of dissolving into the page (Office /
+   * Outlook / Notion vibe rather than coder cave). */
+  --va-ink-950: #131418;   /* canvas (was #08080a, too dark for daily work) */
+  --va-ink-925: #181a1f;   /* sidebar / context bar */
+  --va-ink-900: #1d1f24;   /* primary surface (cards, hero) */
+  --va-ink-850: #232529;   /* secondary surface (sub-cards) */
+  --va-ink-800: #2a2c31;   /* tertiary / elevated */
+  --va-ink-700: #393b41;   /* hover lift */
+  --va-ink-600: #50525a;
+  --va-ink-500: #6a6c75;
 
-  /* Borders. Soft layer for default chrome, default for emphasis, strong for selected. */
-  --va-line-soft: rgba(255, 255, 255, 0.06);
-  --va-line: rgba(255, 255, 255, 0.10);
-  --va-line-strong: rgba(255, 255, 255, 0.16);
+  /* Borders. Bumped from 0.06 to 0.10 so cards have visible edges
+   * (the previous value disappeared in bright office lighting). */
+  --va-line-soft: rgba(255, 255, 255, 0.10);
+  --va-line: rgba(255, 255, 255, 0.16);
+  --va-line-strong: rgba(255, 255, 255, 0.24);
 
-  /* Text. Refined zinc tones, no blue cast. */
-  --va-text-strong: #fafafa;
-  --va-text: #d4d4d8;
-  --va-text-soft: #a1a1aa;
-  --va-text-faint: #71717a;
+  /* Text. Slightly higher contrast for readability across all-day use. */
+  --va-text-strong: #f5f5f7;
+  --va-text: #d1d2d8;
+  --va-text-soft: #9a9ca5;
+  --va-text-faint: #6f7079;
 
-  /* Accent. Keep teal but refine the strong stop. */
+  /* Accent. Default teal kept; the strong stop is refined. */
   --va-action: var(--va-v1-accent, #14b8a6);
   --va-action-strong: var(--va-v1-accent-strong, #0d9488);
   --va-action-soft: color-mix(in srgb, var(--va-action) 12%, transparent);
 
-  /* Radius. Tighter, more confident corners. */
-  --va-panel-radius: 0.875rem;
-  --va-card-radius: 0.625rem;
-  --va-control-radius: 0.5rem;
+  /* Radius. Office-software-style — small, confident. */
+  --va-panel-radius: 0.75rem;
+  --va-card-radius: 0.5rem;
+  --va-control-radius: 0.375rem;
 
-  /* Shadows. Layered, subtle. Cheap to render. */
-  --va-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --va-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px -4px rgba(0, 0, 0, 0.45);
-  --va-shadow-elevated: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 20px 40px -8px rgba(0, 0, 0, 0.45);
+  /* Shadows. Lighter for an "elevated paper" feel, not "cinematic float". */
+  --va-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.30), 0 1px 1px rgba(0, 0, 0, 0.18);
+  --va-shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.35), 0 4px 12px -2px rgba(0, 0, 0, 0.30);
+  --va-shadow-elevated: 0 4px 8px -2px rgba(0, 0, 0, 0.40), 0 16px 32px -8px rgba(0, 0, 0, 0.40);
 
   --va-page-gutter: clamp(1rem, 1.5vw, 1.5rem);
   --va-control-height: 2.25rem;
@@ -55,15 +57,16 @@ html.dark {
 }
 
 html.light {
-  /* Refined light mode. Pure neutral whites instead of the cream/sienna
-   * scheme that read as dated. Borders use zinc-200 family. */
-  --color-bg-primary: #fafafa;
-  --color-bg-surface: #ffffff;
-  --color-bg-elevated: #ffffff;
-  --color-text-primary: #18181b;
-  --color-text-secondary: #3f3f46;
-  --color-text-muted: #71717a;
-  --color-border: #e4e4e7;
+  /* Light mode tuned for daily Office-style work — canvas sits below
+   * surfaces so cards have clear, paper-like elevation. Borders
+   * darker than zinc-200 so edges are readable in bright daylight. */
+  --color-bg-primary: #f4f5f7;     /* canvas — soft slate */
+  --color-bg-surface: #ffffff;     /* cards, panels */
+  --color-bg-elevated: #ffffff;    /* modals, drawers */
+  --color-text-primary: #15181f;
+  --color-text-secondary: #3a3e47;
+  --color-text-muted: #6a6e78;
+  --color-border: #d4d6dc;
 }
 
 body {
@@ -104,28 +107,41 @@ html.light .va-app-shell {
   color: #172033;
 }
 
+/* Accent presets — refined for professional daily-work use.
+ * Each preset balances saturation so the accent reads as
+ * "intentional action" rather than "decorative glow". */
 .va-app-shell[data-accent="teal"] {
-  --va-action: #14b8a6;
+  --va-action: #0d9488;       /* refined teal — was #14b8a6 (more saturated) */
   --va-action-strong: #0f766e;
 }
 
 .va-app-shell[data-accent="indigo"] {
-  --va-action: #6366f1;
-  --va-action-strong: #4f46e5;
+  --va-action: #5b5fc7;       /* refined indigo — Linear-like, less neon */
+  --va-action-strong: #4338ca;
 }
 
 .va-app-shell[data-accent="emerald"] {
-  --va-action: #10b981;
+  --va-action: #059669;       /* deeper emerald, more office-friendly */
   --va-action-strong: #047857;
 }
 
 .va-app-shell[data-accent="blue"] {
-  --va-action: #3b82f6;
+  --va-action: #2563eb;       /* Office-365 / Microsoft blue */
   --va-action-strong: #1d4ed8;
 }
 
+.va-app-shell[data-accent="slate"] {
+  --va-action: #475569;       /* monochrome / quiet accent — Notion-like */
+  --va-action-strong: #334155;
+}
+
+.va-app-shell[data-accent="amber"] {
+  --va-action: #b45309;       /* warm professional amber */
+  --va-action-strong: #92400e;
+}
+
 .va-app-shell[data-accent="rose"] {
-  --va-action: #f43f5e;
+  --va-action: #e11d48;       /* refined rose — was #f43f5e */
   --va-action-strong: #be123c;
 }
 

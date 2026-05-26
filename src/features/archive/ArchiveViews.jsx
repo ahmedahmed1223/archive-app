@@ -42,20 +42,44 @@ function BulkCheckbox({ checked, onToggle, label }) {
 }
 
 export const ARCHIVE_ITEM_SIZE_OPTIONS = [
+  { value: "xs", label: "أصغر" },
   { value: "compact", label: "صغير" },
   { value: "comfortable", label: "متوسط" },
-  { value: "large", label: "كبير" }
+  { value: "large", label: "كبير" },
+  { value: "xl", label: "أكبر" }
 ];
 
 export const ARCHIVE_PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
 
+/**
+ * Default grid classes used when "auto" columns is chosen (responsive
+ * fallback). When an explicit `gridColumns` value is provided, the
+ * container instead receives an inline `grid-template-columns` style.
+ */
 export const ARCHIVE_GRID_CLASSES = {
+  xs: "grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8",
   compact: "grid gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5",
   comfortable: "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
-  large: "grid gap-4 lg:grid-cols-2 2xl:grid-cols-3"
+  large: "grid gap-4 lg:grid-cols-2 2xl:grid-cols-3",
+  xl: "grid gap-4 lg:grid-cols-2"
 };
 
+export function getGridStyleForColumns(gridColumns) {
+  if (gridColumns === "auto" || gridColumns == null) return undefined;
+  const cols = Number(gridColumns);
+  if (!Number.isFinite(cols) || cols < 1) return undefined;
+  return { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` };
+}
+
 const ARCHIVE_CARD_SIZE = {
+  xs: {
+    body: "space-y-1 p-1.5",
+    footer: "gap-1 p-1.5",
+    title: "line-clamp-2 text-[11px] leading-tight",
+    meta: "text-[10px]",
+    button: "min-h-6 px-1.5 py-0.5 text-[10px]",
+    tags: 1
+  },
   compact: {
     body: "space-y-1.5 p-2.5",
     footer: "gap-1.5 p-2",
@@ -79,10 +103,27 @@ const ARCHIVE_CARD_SIZE = {
     meta: "text-sm",
     button: "min-h-10 px-4 py-2 text-sm",
     tags: 6
+  },
+  xl: {
+    body: "space-y-4 p-6",
+    footer: "gap-3 p-5",
+    title: "line-clamp-2 text-lg leading-snug",
+    meta: "text-sm",
+    button: "min-h-10 px-4 py-2 text-sm",
+    tags: 8
   }
 };
 
 const ARCHIVE_LIST_SIZE = {
+  xs: {
+    article: "gap-2 p-2 sm:grid-cols-[100px_minmax(0,1fr)_auto]",
+    title: "text-[13px]",
+    meta: "text-[11px]",
+    notes: "mt-1 line-clamp-1 text-[11px] leading-relaxed",
+    tags: 2,
+    actionColumn: "sm:w-24",
+    actionButton: "min-h-7 px-2 py-0.5 text-[11px]"
+  },
   compact: {
     article: "gap-2 p-2.5 sm:grid-cols-[132px_minmax(0,1fr)_auto]",
     title: "text-sm",
@@ -109,19 +150,32 @@ const ARCHIVE_LIST_SIZE = {
     tags: 8,
     actionColumn: "sm:w-36",
     actionButton: "min-h-10 px-4 py-2 text-sm"
+  },
+  xl: {
+    article: "gap-5 p-5 sm:grid-cols-[260px_minmax(0,1fr)_auto]",
+    title: "text-xl",
+    meta: "text-sm",
+    notes: "mt-3 line-clamp-4 text-sm leading-relaxed",
+    tags: 10,
+    actionColumn: "sm:w-40",
+    actionButton: "min-h-10 px-4 py-2 text-sm"
   }
 };
 
 const ARCHIVE_TABLE_SIZE = {
+  xs: { table: "min-w-[760px]", cell: "px-2 py-1.5", actionButton: "px-2 py-0.5 text-[10px]", tags: 2 },
   compact: { table: "min-w-[860px]", cell: "px-3 py-2", actionButton: "px-2.5 py-1 text-[11px]", tags: 3 },
   comfortable: { table: "min-w-[940px]", cell: "px-4 py-3", actionButton: "px-3 py-1.5 text-xs", tags: 4 },
-  large: { table: "min-w-[1040px]", cell: "px-5 py-4", actionButton: "px-4 py-2 text-sm", tags: 6 }
+  large: { table: "min-w-[1040px]", cell: "px-5 py-4", actionButton: "px-4 py-2 text-sm", tags: 6 },
+  xl: { table: "min-w-[1160px]", cell: "px-6 py-5", actionButton: "px-4 py-2 text-sm", tags: 8 }
 };
 
 export const ARCHIVE_ITEM_SIZE_LABELS = {
+  xs: "أصغر",
   compact: "صغير",
   comfortable: "متوسط",
-  large: "كبير"
+  large: "كبير",
+  xl: "أكبر"
 };
 
 function getArchivePaginationSlots(currentPage, totalPages) {

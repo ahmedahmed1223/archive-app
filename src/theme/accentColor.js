@@ -1,15 +1,16 @@
 export const ACCENT_COLOR_TOKENS = {
-  teal: { accent: "#14b8a6", strong: "#0f766e", soft: "#0f3f3b" },
-  indigo: { accent: "#6366f1", strong: "#4f46e5", soft: "#27275f" },
-  emerald: { accent: "#10b981", strong: "#047857", soft: "#063b32" },
-  blue: { accent: "#3b82f6", strong: "#2563eb", soft: "#172554" },
-  purple: { accent: "#8b5cf6", strong: "#7c3aed", soft: "#2e1065" },
-  amber: { accent: "#f59e0b", strong: "#b45309", soft: "#451a03" },
-  rose: { accent: "#f43f5e", strong: "#be123c", soft: "#4c0519" }
+  teal: { accent: "#0d9488", strong: "#0f766e", soft: "#0f3f3b" },
+  indigo: { accent: "#5b5fc7", strong: "#4338ca", soft: "#27275f" },
+  emerald: { accent: "#059669", strong: "#047857", soft: "#063b32" },
+  blue: { accent: "#2563eb", strong: "#1d4ed8", soft: "#172554" },
+  slate: { accent: "#475569", strong: "#334155", soft: "#1e293b" },
+  purple: { accent: "#7c3aed", strong: "#6d28d9", soft: "#2e1065" },
+  amber: { accent: "#b45309", strong: "#92400e", soft: "#451a03" },
+  rose: { accent: "#e11d48", strong: "#be123c", soft: "#4c0519" }
 };
 
-export function getAccentColorTokens(accentColor = "teal") {
-  return ACCENT_COLOR_TOKENS[accentColor] || ACCENT_COLOR_TOKENS.teal;
+export function getAccentColorTokens(accentColor = "blue") {
+  return ACCENT_COLOR_TOKENS[accentColor] || ACCENT_COLOR_TOKENS.blue;
 }
 
 export function applyAccentColor(accentColor = "teal", root = typeof document !== "undefined" ? document.documentElement : null) {

@@ -29,11 +29,13 @@ export const THEME_OPTIONS = [
 ];
 
 export const ACCENT_OPTIONS = [
-  { value: "teal", label: "فيروزي هادئ", color: "#14b8a6" },
-  { value: "indigo", label: "نيلي هادئ", color: "#6366f1" },
-  { value: "emerald", label: "زمردي", color: "#10b981" },
-  { value: "blue", label: "أزرق", color: "#3b82f6" },
-  { value: "rose", label: "وردي", color: "#f43f5e" }
+  { value: "blue", label: "أزرق Office", color: "#2563eb", hint: "للعمل اليومي" },
+  { value: "slate", label: "رمادي صامت", color: "#475569", hint: "monochrome مهني" },
+  { value: "teal", label: "فيروزي", color: "#0d9488" },
+  { value: "indigo", label: "نيلي", color: "#5b5fc7" },
+  { value: "emerald", label: "زمردي", color: "#059669" },
+  { value: "amber", label: "كهرماني", color: "#b45309" },
+  { value: "rose", label: "وردي", color: "#e11d48" }
 ];
 
 const TAB_ICONS = {

@@ -29,6 +29,7 @@ import {
   getArchiveResultRangeText,
   getFilteredArchiveItems,
   hasArchiveContentFilters,
+  normalizeArchiveGridColumns,
   normalizeArchiveGridRows,
   normalizeArchiveItemSize,
   normalizeArchivePage,
@@ -39,6 +40,7 @@ import {
 } from "../features/archive/viewModel.js";
 import { FileArchiveWizard } from "../features/archive/FileArchiveWizard.jsx";
 import { ArchiveFilterChips, ArchiveSortMenu } from "../features/archive/ArchiveToolbar.jsx";
+import { getGridStyleForColumns } from "../features/archive/ArchiveViews.jsx";
 import { BulkActionBar } from "../features/archive/BulkActionBar.jsx";
 import { SavedViewsBar } from "../features/archive/SavedViewsBar.jsx";
 import {
@@ -136,6 +138,7 @@ export function ArchivePage() {
   const [itemSize, setItemSize] = React.useState(initialRouteParams.has("size") ? initialRouteState.itemSize : settings.ui?.archiveItemSize || "compact");
   const [topMode, setTopMode] = React.useState(initialRouteParams.has("top") ? initialRouteState.topMode : settings.ui?.archiveTopMode || "quick");
   const [gridRows, setGridRows] = React.useState(initialRouteParams.has("rows") ? initialRouteState.gridRows : settings.ui?.archiveGridRows || 3);
+  const [gridColumns, setGridColumnsState] = React.useState(initialRouteParams.has("cols") ? initialRouteState.gridColumns : settings.ui?.archiveGridColumns || "auto");
   const [gridColumnCount, setGridColumnCount] = React.useState(3);
   const [previewId, setPreviewId] = React.useState(null);
   const [showFileImportWizard, setShowFileImportWizard] = React.useState(initialRouteState.openImport || false);
@@ -336,6 +339,13 @@ export function ArchivePage() {
     updateArchiveUiPreference({ archiveGridRows: normalized });
   };
 
+  const changeGridColumns = (nextColumns) => {
+    const normalized = normalizeArchiveGridColumns(nextColumns);
+    setGridColumnsState(normalized);
+    setPage(1);
+    updateArchiveUiPreference({ archiveGridColumns: normalized });
+  };
+
   const resetFilters = () => {
     setLocalSearch("");
     setFilterType?.("all");
@@ -475,9 +485,13 @@ export function ArchivePage() {
         onRestore: (item) => restoreVideoItem?.(item.id)
       });
     }
+    const explicitColumnsStyle = getGridStyleForColumns(gridColumns);
     return jsx("div", {
       ref: gridContainerRef,
-      className: ARCHIVE_GRID_CLASSES[activeItemSize] || ARCHIVE_GRID_CLASSES.comfortable,
+      className: explicitColumnsStyle
+        ? "grid gap-3"
+        : (ARCHIVE_GRID_CLASSES[activeItemSize] || ARCHIVE_GRID_CLASSES.comfortable),
+      style: explicitColumnsStyle,
       children: visibleItems.map((item, index) => jsx(AnimatedItem, {
         index,
         children: jsx(VideoCard, itemActions(item))
@@ -582,26 +596,41 @@ export function ArchivePage() {
                     className: "inline-flex flex-wrap items-center gap-2",
                     children: [
                       jsx(SegmentedControl, {
-                        label: "الصفوف",
-                        value: activeGridRows,
-                        options: ARCHIVE_GRID_ROW_OPTIONS.map((value) => ({ value, label: `${formatNumber(value)} صفوف` })),
-                        onChange: changeGridRows
+                        label: "الأعمدة",
+                        value: gridColumns,
+                        options: [
+                          { value: "auto", label: "تلقائي" },
+                          { value: 2, label: "٢" },
+                          { value: 3, label: "٣" },
+                          { value: 4, label: "٤" },
+                          { value: 5, label: "٥" },
+                          { value: 6, label: "٦" },
+                          { value: 8, label: "٨" }
+                        ],
+                        onChange: changeGridColumns
                       }),
                       jsxs("label", {
                         className: "inline-flex min-h-9 items-center gap-2 va-surface-muted rounded-xl border px-2.5 py-1 text-xs text-gray-400",
-                        title: `اختر قيمة بين ${formatNumber(ARCHIVE_GRID_ROW_MIN)} و${formatNumber(ARCHIVE_GRID_ROW_MAX)} صفًا`,
+                        title: `اختر بين 1 و8 أعمدة، أو اتركه تلقائيًا`,
                         children: [
-                          jsx("span", { className: "text-gray-500", children: "مخصص" }),
+                          jsx("span", { className: "text-gray-500", children: "أعمدة" }),
                           jsx("input", {
                             type: "number",
-                            min: ARCHIVE_GRID_ROW_MIN,
-                            max: ARCHIVE_GRID_ROW_MAX,
-                            value: activeGridRows,
-                            onChange: (event) => changeGridRows(event.target.value),
-                            "aria-label": "عدد صفوف مخصص",
-                            className: "min-h-7 w-14 rounded-lg border border-white/10 bg-gray-950/55 px-2 text-center text-xs font-semibold text-white outline-none focus:border-emerald-500/50"
+                            min: 1,
+                            max: 8,
+                            value: gridColumns === "auto" ? "" : gridColumns,
+                            placeholder: "تلقائي",
+                            onChange: (event) => changeGridColumns(event.target.value === "" ? "auto" : event.target.value),
+                            "aria-label": "عدد الأعمدة المخصص",
+                            className: "min-h-7 w-16 rounded-lg border border-white/10 bg-gray-950/55 px-2 text-center text-xs font-semibold text-white outline-none focus:border-emerald-500/50"
                           })
                         ]
+                      }),
+                      jsx(SegmentedControl, {
+                        label: "الصفوف",
+                        value: activeGridRows,
+                        options: ARCHIVE_GRID_ROW_OPTIONS.map((value) => ({ value, label: `${formatNumber(value)}` })),
+                        onChange: changeGridRows
                       })
                     ]
                   }) : jsxs("label", {

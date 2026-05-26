@@ -1,12 +1,14 @@
 import { normalizeArabicSearchText } from "../../utils/formatting.js";
 
 const ARCHIVE_SORT_FIELDS = new Set(["title", "createdAt", "updatedAt"]);
-const ARCHIVE_VIEW_MODES = new Set(["grid", "list", "table"]);
-const ARCHIVE_ITEM_SIZES = new Set(["compact", "comfortable", "large"]);
+const ARCHIVE_VIEW_MODES = new Set(["grid", "tiles", "list", "table"]);
+const ARCHIVE_ITEM_SIZES = new Set(["xs", "compact", "comfortable", "large", "xl"]);
 const ARCHIVE_PAGE_SIZES = new Set([12, 24, 48, 96]);
 const ARCHIVE_TOP_MODES = new Set(["quick", "detailed"]);
 const ARCHIVE_GRID_ROW_MIN = 1;
 const ARCHIVE_GRID_ROW_MAX = 12;
+export const ARCHIVE_GRID_COLUMN_MIN = 1;
+export const ARCHIVE_GRID_COLUMN_MAX = 8;
 
 export function normalizeArchiveViewMode(viewMode = "grid") {
   return ARCHIVE_VIEW_MODES.has(viewMode) ? viewMode : "grid";
@@ -35,6 +37,16 @@ export function normalizeArchiveGridRows(rows = 3) {
   if (!Number.isFinite(value)) return 3;
   const normalized = Math.floor(value);
   return normalized >= ARCHIVE_GRID_ROW_MIN && normalized <= ARCHIVE_GRID_ROW_MAX ? normalized : 3;
+}
+
+export function normalizeArchiveGridColumns(columns) {
+  if (columns === "auto" || columns == null) return "auto";
+  const value = Number(columns);
+  if (!Number.isFinite(value)) return "auto";
+  const normalized = Math.floor(value);
+  if (normalized < ARCHIVE_GRID_COLUMN_MIN) return ARCHIVE_GRID_COLUMN_MIN;
+  if (normalized > ARCHIVE_GRID_COLUMN_MAX) return ARCHIVE_GRID_COLUMN_MAX;
+  return normalized;
 }
 
 function flattenSearchValues(value, depth = 0) {
@@ -135,7 +147,8 @@ export function createArchiveRouteParams({
   page = 1,
   pageSize = 24,
   itemSize = "compact",
-  gridRows = 3
+  gridRows = 3,
+  gridColumns = "auto"
 } = {}) {
   const params = new URLSearchParams();
   if (searchQuery.trim()) params.set("q", searchQuery.trim());
@@ -157,6 +170,8 @@ export function createArchiveRouteParams({
   if (normalizedItemSize !== "compact") params.set("size", normalizedItemSize);
   const normalizedGridRows = normalizeArchiveGridRows(gridRows);
   if (normalizedGridRows !== 3) params.set("rows", String(normalizedGridRows));
+  const normalizedGridColumns = normalizeArchiveGridColumns(gridColumns);
+  if (normalizedGridColumns !== "auto") params.set("cols", String(normalizedGridColumns));
   if (openImport) params.set("import", "1");
   return params;
 }
@@ -177,6 +192,7 @@ export function parseArchiveRouteParams(params = new URLSearchParams()) {
     page: normalizeArchivePage(params.get("page") || 1),
     pageSize: normalizeArchivePageSize(params.get("per") || 24),
     itemSize: normalizeArchiveItemSize(params.get("size") || "compact"),
-    gridRows: normalizeArchiveGridRows(params.get("rows") || 3)
+    gridRows: normalizeArchiveGridRows(params.get("rows") || 3),
+    gridColumns: normalizeArchiveGridColumns(params.get("cols") || "auto")
   };
 }
