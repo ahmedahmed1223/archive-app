@@ -58,7 +58,7 @@ function CollectionForm({ collection, onCancel, onSave }) {
     children: [
       jsx("h2", { className: "text-base font-bold text-white", children: collection ? "تعديل مجموعة" : "مجموعة يدوية جديدة" }),
       jsxs("div", {
-        className: "mt-4 grid gap-3 lg:grid-cols-[0.7fr_1fr]",
+        className: "mt-4 grid gap-3 md:grid-cols-[5rem_minmax(0,1fr)]",
         children: [
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
             jsx("label", { htmlFor: iconId, className: "block", children: "الرمز" }),
@@ -68,13 +68,13 @@ function CollectionForm({ collection, onCancel, onSave }) {
             jsx("label", { htmlFor: nameId, className: "block", children: "اسم المجموعة" }),
             jsx("input", { id: nameId, value: name, onChange: (event) => setName(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "مثال: مقابلات مهمة" })
           ] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [
             jsx("label", { htmlFor: descriptionId, className: "block", children: "الوصف" }),
             jsx("textarea", { id: descriptionId, value: description, onChange: (event) => setDescription(event.target.value), className: "min-h-[76px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملاحظة قصيرة عن استخدام المجموعة" })
           ] }),
-          jsxs("div", { className: "space-y-1 lg:col-span-2", children: [
+          jsxs("div", { className: "space-y-1 md:col-span-2", children: [
             jsx("span", { id: colorGroupId, className: "text-sm text-gray-300", children: "اللون" }),
-            jsx("div", { role: "radiogroup", "aria-labelledby": colorGroupId, className: "flex flex-wrap gap-2", children: COLLECTION_COLORS.map((item) => jsx("button", { type: "button", role: "radio", "aria-checked": color === item, onClick: () => setColor(item), className: `h-8 w-8 rounded-full border ${color === item ? "scale-110 border-white ring-2 ring-white/25" : "border-white/10"}`, style: { backgroundColor: item }, "aria-label": `اختيار لون ${item}` }, item)) })
+            jsx("div", { role: "radiogroup", "aria-labelledby": colorGroupId, className: "flex flex-wrap gap-2", children: COLLECTION_COLORS.map((item) => jsx("button", { type: "button", role: "radio", "aria-checked": color === item, onClick: () => setColor(item), className: `h-8 w-8 rounded-full border transition-transform ${color === item ? "scale-110 border-white ring-2 ring-white/25" : "border-white/10 hover:scale-105"}`, style: { backgroundColor: item }, "aria-label": `اختيار لون ${item}` }, item)) })
           ] })
         ]
       }),
