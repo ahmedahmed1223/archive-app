@@ -1,16 +1,13 @@
+import * as React from "react";
 import {
   AddVideoPage,
   ArchivePage,
   CollectionsPage,
   DashboardPage,
-  DataCenterPage,
   DetailPage,
-  HelpPage,
   HierarchicalTagsPage,
   HistoryPage,
-  ReportsPage,
   SearchPage,
-  SettingsPage,
   TypesPage,
   UsersPage,
   VocabularyPage
@@ -20,6 +17,24 @@ import {
   PAGE_GROUPS
 } from "./pageManifest.js";
 
+// Heavy pages are split via React.lazy + dynamic import so they don't
+// inflate the initial render tree. In the single-file production build
+// (vite-plugin-singlefile) the chunks are still inlined, but the
+// component bodies are deferred until the user first navigates to them
+// — which keeps the initial parse + first-paint faster.
+const SettingsPageLazy = React.lazy(() =>
+  import("../pages/SettingsPage.jsx").then((mod) => ({ default: mod.SettingsPage }))
+);
+const HelpPageLazy = React.lazy(() =>
+  import("../pages/HelpPage.jsx").then((mod) => ({ default: mod.HelpPage }))
+);
+const DataCenterPageLazy = React.lazy(() =>
+  import("../pages/DataCenterPage.jsx").then((mod) => ({ default: mod.DataCenterPage }))
+);
+const ReportsPageLazy = React.lazy(() =>
+  import("../pages/ReportsPage.jsx").then((mod) => ({ default: mod.ReportsPage }))
+);
+
 export const PAGE_COMPONENTS = {
   dashboard: DashboardPage,
   archive: ArchivePage,
@@ -27,15 +42,15 @@ export const PAGE_COMPONENTS = {
   detail: DetailPage,
   types: TypesPage,
   search: SearchPage,
-  settings: SettingsPage,
-  backup: DataCenterPage,
+  settings: SettingsPageLazy,
+  backup: DataCenterPageLazy,
   history: HistoryPage,
   collections: CollectionsPage,
   vocabulary: VocabularyPage,
   htags: HierarchicalTagsPage,
-  reports: ReportsPage,
+  reports: ReportsPageLazy,
   users: UsersPage,
-  help: HelpPage
+  help: HelpPageLazy
 };
 
 export { HEAVY_PAGE_IDS, PAGE_GROUPS };
