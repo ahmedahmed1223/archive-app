@@ -57,6 +57,10 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
   const [category, setCategory] = React.useState(entry?.category || (activeCategory === "all" ? "other" : activeCategory));
   const [description, setDescription] = React.useState(entry?.description || "");
   const [aliases, setAliases] = React.useState((entry?.aliases || []).join("، "));
+  const termId = React.useId();
+  const categoryId = React.useId();
+  const aliasesId = React.useId();
+  const descriptionId = React.useId();
 
   const save = () => {
     if (!term.trim()) return;
@@ -77,36 +81,40 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
       jsxs("div", {
         className: "mt-4 grid gap-3 lg:grid-cols-2",
         children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "المصطلح" }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: termId, className: "block", children: "المصطلح" }),
             jsx("input", {
+              id: termId,
               value: term,
               onChange: (event) => setTerm(event.target.value),
               className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "مثال: القدس"
             })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "الفئة" }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: categoryId, className: "block", children: "الفئة" }),
             jsx("select", {
+              id: categoryId,
               value: category,
               onChange: (event) => setCategory(event.target.value),
               className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none",
               children: VOCABULARY_CATEGORIES.map((item) => jsx("option", { value: item.id, children: item.label }, item.id))
             })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
-            jsx("span", { children: "الأسماء المستعارة" }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+            jsx("label", { htmlFor: aliasesId, className: "block", children: "الأسماء المستعارة" }),
             jsx("input", {
+              id: aliasesId,
               value: aliases,
               onChange: (event) => setAliases(event.target.value),
               className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "أسماء بديلة مفصولة بفاصلة"
             })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
-            jsx("span", { children: "الوصف" }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+            jsx("label", { htmlFor: descriptionId, className: "block", children: "الوصف" }),
             jsx("textarea", {
+              id: descriptionId,
               value: description,
               onChange: (event) => setDescription(event.target.value),
               className: "min-h-[86px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40",

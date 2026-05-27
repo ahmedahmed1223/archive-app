@@ -710,3 +710,26 @@
     background: rgba(16, 185, 129, 0.22);
     color: inherit;
   }
+
+  /* ── WCAG AA contrast lift for muted text on dark surfaces ──
+   * Tailwind defaults give ratios on #07111f (--va-v1-bg):
+   *   gray-400 (#9ca3af) → 9.5:1   AAA ✓
+   *   gray-500 (#6b7280) → 5.2:1   AA body ✓
+   *   gray-600 (#4b5563) → 2.8:1   FAILS AA ✗
+   *   gray-700 (#374151) → 1.6:1   FAILS AA ✗
+   * We bump 500/600/700 up one stop in dark mode so existing markup
+   * keeps the visual hierarchy but clears WCAG 1.4.3.
+   * Light mode (no html.dark) is unaffected — the original values
+   * already pass contrast over #f7f4ee. */
+  html.dark .text-gray-700 { color: #9ca3af; }
+  html.dark .text-gray-600 { color: #9ca3af; }
+  html.dark .text-gray-500 { color: #b3bbc8; }
+  /* Same lift for hover variants so contrast survives interaction. */
+  html.dark .hover\:text-gray-700:hover,
+  html.dark .hover\:text-gray-600:hover { color: #b3bbc8; }
+  html.dark .hover\:text-gray-500:hover { color: #c8cfd8; }
+  /* Placeholder text follows the same rule. */
+  html.dark .placeholder\:text-gray-500::placeholder,
+  html.dark .placeholder-gray-500::placeholder { color: #9ca3af; }
+  html.dark .placeholder\:text-gray-600::placeholder,
+  html.dark .placeholder-gray-600::placeholder { color: #9ca3af; }

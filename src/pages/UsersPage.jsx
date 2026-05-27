@@ -40,6 +40,10 @@ function UserForm({ user, users, onCancel, onSave }) {
   const [displayName, setDisplayName] = React.useState(user?.displayName || "");
   const [role, setRole] = React.useState(normalizeUserRole(user?.role || "viewer"));
   const [password, setPassword] = React.useState("");
+  const usernameId = React.useId();
+  const displayNameId = React.useId();
+  const passwordId = React.useId();
+  const roleGroupId = React.useId();
 
   const usernameExists = !user && users.some((item) => item.username.trim().toLowerCase() === username.trim().toLowerCase());
   const canSave = username.trim() && displayName.trim() && !usernameExists && (user || password.length >= 6);
@@ -58,9 +62,10 @@ function UserForm({ user, users, onCancel, onSave }) {
       jsxs("div", {
         className: "mt-4 grid gap-3 lg:grid-cols-2",
         children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "اسم المستخدم" }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: usernameId, className: "block", children: "اسم المستخدم" }),
             jsx("input", {
+              id: usernameId,
               value: username,
               onChange: (event) => setUsername(event.target.value),
               disabled: !!user,
@@ -70,18 +75,20 @@ function UserForm({ user, users, onCancel, onSave }) {
             }),
             usernameExists && jsx("span", { className: "text-xs text-red-300", children: "اسم المستخدم موجود بالفعل" })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "الاسم المعروض" }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: displayNameId, className: "block", children: "الاسم المعروض" }),
             jsx("input", {
+              id: displayNameId,
               value: displayName,
               onChange: (event) => setDisplayName(event.target.value),
               className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "اسم المستخدم داخل الواجهة"
             })
           ] }),
-          !user && jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "كلمة المرور الأولية" }),
+          !user && jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: passwordId, className: "block", children: "كلمة المرور الأولية" }),
             jsx("input", {
+              id: passwordId,
               value: password,
               onChange: (event) => setPassword(event.target.value),
               type: "password",
@@ -91,9 +98,11 @@ function UserForm({ user, users, onCancel, onSave }) {
             })
           ] }),
           jsxs("div", { className: `space-y-2 ${user ? "lg:col-span-2" : ""}`, children: [
-            jsx("span", { className: "text-sm text-gray-300", children: "الدور" }),
-            jsx("div", { className: "flex flex-wrap gap-2", children: USER_ROLES.map((item) => jsxs("button", {
+            jsx("span", { id: roleGroupId, className: "text-sm text-gray-300", children: "الدور" }),
+            jsx("div", { role: "radiogroup", "aria-labelledby": roleGroupId, className: "flex flex-wrap gap-2", children: USER_ROLES.map((item) => jsxs("button", {
               type: "button",
+              role: "radio",
+              "aria-checked": role === item.id,
               onClick: () => setRole(item.id),
               className: `rounded-xl border px-3 py-2 text-sm transition-colors ${role === item.id ? "text-white" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5"}`,
               style: role === item.id ? { borderColor: `${item.color}55`, backgroundColor: `${item.color}18` } : undefined,

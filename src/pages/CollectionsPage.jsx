@@ -35,6 +35,10 @@ function CollectionForm({ collection, onCancel, onSave }) {
   const [description, setDescription] = React.useState(collection?.description || "");
   const [icon, setIcon] = React.useState(collection?.icon || "📁");
   const [color, setColor] = React.useState(collection?.color || "#10b981");
+  const iconId = React.useId();
+  const nameId = React.useId();
+  const descriptionId = React.useId();
+  const colorGroupId = React.useId();
 
   const save = () => {
     if (!name.trim()) return;
@@ -56,21 +60,21 @@ function CollectionForm({ collection, onCancel, onSave }) {
       jsxs("div", {
         className: "mt-4 grid gap-3 lg:grid-cols-[0.7fr_1fr]",
         children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "الرمز" }),
-            jsx("input", { value: icon, onChange: (event) => setIcon(event.target.value.slice(0, 4)), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-center text-xl text-white outline-none focus:border-emerald-500/40" })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: iconId, className: "block", children: "الرمز" }),
+            jsx("input", { id: iconId, value: icon, onChange: (event) => setIcon(event.target.value.slice(0, 4)), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-center text-xl text-white outline-none focus:border-emerald-500/40" })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
-            jsx("span", { children: "اسم المجموعة" }),
-            jsx("input", { value: name, onChange: (event) => setName(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "مثال: مقابلات مهمة" })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: nameId, className: "block", children: "اسم المجموعة" }),
+            jsx("input", { id: nameId, value: name, onChange: (event) => setName(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "مثال: مقابلات مهمة" })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
-            jsx("span", { children: "الوصف" }),
-            jsx("textarea", { value: description, onChange: (event) => setDescription(event.target.value), className: "min-h-[76px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملاحظة قصيرة عن استخدام المجموعة" })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+            jsx("label", { htmlFor: descriptionId, className: "block", children: "الوصف" }),
+            jsx("textarea", { id: descriptionId, value: description, onChange: (event) => setDescription(event.target.value), className: "min-h-[76px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملاحظة قصيرة عن استخدام المجموعة" })
           ] }),
           jsxs("div", { className: "space-y-1 lg:col-span-2", children: [
-            jsx("span", { className: "text-sm text-gray-300", children: "اللون" }),
-            jsx("div", { className: "flex flex-wrap gap-2", children: COLLECTION_COLORS.map((item) => jsx("button", { type: "button", onClick: () => setColor(item), className: `h-8 w-8 rounded-full border ${color === item ? "scale-110 border-white ring-2 ring-white/25" : "border-white/10"}`, style: { backgroundColor: item }, "aria-label": `اختيار لون ${item}` }, item)) })
+            jsx("span", { id: colorGroupId, className: "text-sm text-gray-300", children: "اللون" }),
+            jsx("div", { role: "radiogroup", "aria-labelledby": colorGroupId, className: "flex flex-wrap gap-2", children: COLLECTION_COLORS.map((item) => jsx("button", { type: "button", role: "radio", "aria-checked": color === item, onClick: () => setColor(item), className: `h-8 w-8 rounded-full border ${color === item ? "scale-110 border-white ring-2 ring-white/25" : "border-white/10"}`, style: { backgroundColor: item }, "aria-label": `اختيار لون ${item}` }, item)) })
           ] })
         ]
       }),
