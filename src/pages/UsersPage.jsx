@@ -2,6 +2,7 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  Activity,
   PenLine,
   Plus,
   Search,
@@ -122,7 +123,7 @@ function UserForm({ user, users, onCancel, onSave }) {
   });
 }
 
-function UserCard({ user, currentUser, users, index, onEdit, onToggle, onDelete }) {
+function UserCard({ user, currentUser, users, index, recentOpsCount = 0, onEdit, onToggle, onDelete }) {
   const role = getRole(user.role);
   const isCurrent = currentUser?.id === user.id;
   const canToggle = canDeactivateUser(user, users) && !isCurrent;
@@ -150,7 +151,16 @@ function UserCard({ user, currentUser, users, index, onEdit, onToggle, onDelete 
               isCurrent && jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-200", children: "الحالي" })
             ] }),
             jsx("p", { className: "mt-1 truncate text-xs text-gray-500 font-mono", dir: "ltr", children: `@${user.username}` }),
-            user.lastLoginAt && jsx("p", { className: "mt-2 text-xs text-gray-600", children: `آخر دخول: ${formatDateTime(user.lastLoginAt)}` })
+            user.lastLoginAt && jsx("p", { className: "mt-2 text-xs text-gray-600", children: `آخر دخول: ${formatDateTime(user.lastLoginAt)}` }),
+            jsxs("p", {
+              className: "mt-1 flex items-center gap-1.5 text-xs text-gray-500",
+              children: [
+                jsx(Activity, { className: "h-3.5 w-3.5 text-emerald-300/80" }),
+                recentOpsCount > 0
+                  ? `${formatNumber(recentOpsCount)} عملية خلال آخر 7 أيام`
+                  : "لا توجد عمليات في آخر 7 أيام"
+              ]
+            })
           ] })
         ] }),
         jsxs("div", { className: "flex shrink-0 gap-1", children: [
@@ -169,12 +179,28 @@ export function UsersPage() {
     users = [],
     currentUser,
     settings = {},
+    auditLogs = [],
     addUser,
     updateUser,
     deleteUser,
     showToast,
     showNotification
   } = useAppStore();
+
+  // Count CUD-style audit events per user over the last 7 days so the
+  // user cards can surface a quick activity signal alongside role and
+  // last-login info. The audit log already truncates to the most recent
+  // 1000 entries, so this stays O(n) on a small n.
+  const recentOpsByUserId = React.useMemo(() => {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const counts = new Map();
+    for (const log of auditLogs) {
+      if (!log?.userId || !log?.timestamp) continue;
+      if (new Date(log.timestamp).getTime() < cutoff) continue;
+      counts.set(log.userId, (counts.get(log.userId) || 0) + 1);
+    }
+    return counts;
+  }, [auditLogs]);
 
   const canManageUsers = useCanPerform(ACTIONS.USER_MANAGE);
   const [query, setQuery] = React.useState("");
@@ -289,6 +315,7 @@ export function UsersPage() {
         users,
         currentUser,
         index,
+        recentOpsCount: recentOpsByUserId.get(user.id) || 0,
         onEdit: () => { setEditingUser(user); setShowForm(true); },
         onToggle: () => toggleUser(user),
         onDelete: () => disableUser(user)

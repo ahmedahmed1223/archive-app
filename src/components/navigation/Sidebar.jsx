@@ -33,6 +33,11 @@ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 
 import { getSidebarNavigationGroups } from "./viewModel.js";
 import { ACTIONS, canPerform } from "../../features/users/permissions.js";
+import { USER_ROLES } from "../../features/users/viewModel.js";
+
+function getRoleMeta(roleId) {
+  return USER_ROLES.find((role) => role.id === roleId) || USER_ROLES[USER_ROLES.length - 1];
+}
 
 // Map sidebar page ids to the RBAC action that gates them. Missing entries
 // are treated as "always visible" (so personal pages like Dashboard, Search,
@@ -231,19 +236,46 @@ export function Sidebar() {
               !collapsed && "قفل التطبيق"
             ]
           }),
-          currentUser && !collapsed && jsxs("div", {
-            className: "rounded-xl border border-white/10 bg-white/[0.03] p-3",
-            children: [
-              jsx("p", { className: "truncate text-sm font-medium text-gray-200", children: currentUser.name || currentUser.username || "مستخدم" }),
-              jsx("p", { className: "mt-1 truncate text-xs text-gray-500", children: currentUser.role || "user" }),
-              jsx("button", {
-                type: "button",
-                onClick: logout,
-                className: "mt-3 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 hover:text-white",
-                children: "تسجيل الخروج"
-              })
-            ]
-          })
+          currentUser && !collapsed && (() => {
+            const roleMeta = getRoleMeta(currentUser.role);
+            return jsxs("div", {
+              className: "rounded-xl border border-white/10 bg-white/[0.03] p-3",
+              children: [
+                jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                  jsx("p", { className: "truncate text-sm font-medium text-gray-200", children: currentUser.displayName || currentUser.name || currentUser.username || "مستخدم" }),
+                  jsx("span", {
+                    className: "shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium",
+                    style: { borderColor: `${roleMeta.color}55`, backgroundColor: `${roleMeta.color}18`, color: roleMeta.color },
+                    title: roleMeta.description,
+                    children: roleMeta.label
+                  })
+                ] }),
+                currentUser.username && jsx("p", {
+                  className: "mt-1 truncate text-xs text-gray-500 font-mono",
+                  dir: "ltr",
+                  children: `@${currentUser.username}`
+                }),
+                jsxs("div", {
+                  className: "mt-3 flex flex-wrap gap-2",
+                  children: [
+                    isPasswordSet && jsx("button", {
+                      type: "button",
+                      onClick: lockApp,
+                      className: "flex-1 min-w-0 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-100 hover:bg-emerald-500/15",
+                      title: "ارجع إلى شاشة الدخول للتبديل لحساب آخر",
+                      children: "تبديل المستخدم"
+                    }),
+                    jsx("button", {
+                      type: "button",
+                      onClick: logout,
+                      className: "flex-1 min-w-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 hover:text-white",
+                      children: "تسجيل الخروج"
+                    })
+                  ]
+                })
+              ]
+            });
+          })()
         ]
       })
     ]
