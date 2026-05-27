@@ -43,7 +43,7 @@ function fieldKey(field) {
   return field.storageKey || field.name || field.id;
 }
 
-function LocalFilePicker({ value, onFileSelect }) {
+function LocalFilePicker({ value, onFileSelect, inputId }) {
   const file = normalizeLocalFileValue(value);
   const inputRef = React.useRef(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -77,6 +77,7 @@ function LocalFilePicker({ value, onFileSelect }) {
       (file.relativePath || file.path) && jsx("p", { dir: "ltr", className: "truncate text-left", children: file.relativePath || file.path })
     ] }),
     jsx("input", {
+      id: inputId,
       ref: inputRef,
       type: "file",
       onChange: (event) => {
@@ -88,31 +89,49 @@ function LocalFilePicker({ value, onFileSelect }) {
   ] });
 }
 
-function FieldInput({ field, value, onChange }) {
+function FieldInput({ field, value, onChange, inputId }) {
   const key = fieldKey(field);
   const commonClass = "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40";
   if (field.type === "textarea" || field.type === "transcript") {
-    return jsx("textarea", { value: value || "", onChange: (event) => onChange(key, event.target.value), rows: 3, className: `${commonClass} p-3`, placeholder: field.placeholder || field.label });
+    return jsx("textarea", { id: inputId, value: value || "", onChange: (event) => onChange(key, event.target.value), rows: 3, className: `${commonClass} p-3`, placeholder: field.placeholder || field.label });
   }
   if (field.type === "checkbox") {
-    return jsx("label", { className: "inline-flex min-h-11 items-center gap-2 va-surface-muted rounded-xl border px-3 text-sm text-gray-300", children: [
-      jsx("input", { type: "checkbox", checked: !!value, onChange: (event) => onChange(key, event.target.checked) }),
+    return jsxs("label", { className: "inline-flex min-h-11 items-center gap-2 va-surface-muted rounded-xl border px-3 text-sm text-gray-300", children: [
+      jsx("input", { id: inputId, type: "checkbox", checked: !!value, onChange: (event) => onChange(key, event.target.checked) }),
       "نعم"
     ] });
   }
   if (field.type === "select" || field.type === "radio") {
-    return jsx("select", { value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, children: [
+    return jsxs("select", { id: inputId, value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, children: [
       jsx("option", { value: "", children: "اختر..." }),
       ...(field.options || []).map((option) => jsx("option", { value: option, children: option }, option))
     ] });
   }
   if (field.type === "tags" || field.type === "multiselect") {
-    return jsx("input", { value: Array.isArray(value) ? value.join("، ") : value || "", onChange: (event) => onChange(key, parseVideoTags(event.target.value)), className: commonClass, placeholder: "قيم مفصولة بفاصلة" });
+    return jsx("input", { id: inputId, value: Array.isArray(value) ? value.join("، ") : value || "", onChange: (event) => onChange(key, parseVideoTags(event.target.value)), className: commonClass, placeholder: "قيم مفصولة بفاصلة" });
   }
   if (field.type === "localFile") {
     return jsx(LocalFilePicker, { value, onFileSelect: (file) => onChange(key, createLocalFileValue(file)) });
   }
-  return jsx("input", { type: field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text", value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, placeholder: field.placeholder || field.label });
+  return jsx("input", { id: inputId, type: field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text", value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, placeholder: field.placeholder || field.label });
+}
+
+// Renders a custom-type field row with an explicit htmlFor/id binding so
+// screen readers announce each control by its visible Arabic label.
+function FieldRow({ field, value, onChange }) {
+  const inputId = React.useId();
+  const isWide = field.type === "textarea" || field.type === "localFile";
+  return jsxs("div", {
+    className: `space-y-1 text-sm text-gray-300 ${isWide ? "lg:col-span-2" : ""}`,
+    children: [
+      jsxs("label", { htmlFor: inputId, className: "block", children: [
+        field.label,
+        field.required && jsx("span", { className: "text-red-300", children: " *" })
+      ] }),
+      jsx(FieldInput, { field, value, onChange, inputId }),
+      field.description && jsx("span", { className: "text-xs text-gray-400", children: field.description })
+    ]
+  }, field.id);
 }
 
 export function AddVideoPage() {
@@ -134,6 +153,17 @@ export function AddVideoPage() {
   const [typeId, setTypeId] = React.useState(firstType?.id || "");
   const [subtypeId, setSubtypeId] = React.useState("");
   const [metadata, setMetadata] = React.useState({});
+
+  // Explicit ids for each visible control so screen readers can
+  // announce label+input pairs even when the layout splits them.
+  const titleId = React.useId();
+  const pathId = React.useId();
+  const localFileId = React.useId();
+  const thumbnailId = React.useId();
+  const notesId = React.useId();
+  const typeSelectId = React.useId();
+  const subtypeSelectId = React.useId();
+  const tagsId = React.useId();
 
   const selectedType = contentTypes.find((type) => type.id === typeId);
   const subtypes = selectedType?.subtypes || [];
@@ -254,25 +284,21 @@ export function AddVideoPage() {
       jsxs("section", { className: "va-card rounded-2xl va-surface-muted border p-5 text-right", children: [
         jsx("h2", { className: "mb-4 text-lg font-bold text-white", children: currentStep.label }),
         currentStep.id === "basic" && jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الرابط أو المسار" }), jsx("input", { value: path, onChange: (event) => setPath(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "https:// أو D:\\..." })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("label", { htmlFor: titleId, className: "block", children: "العنوان" }), jsx("input", { id: titleId, value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: pathId, className: "block", children: "الرابط أو المسار" }), jsx("input", { id: pathId, value: path, onChange: (event) => setPath(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "https:// أو D:\\..." })] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
-            jsx("span", { children: "ملف محلي من الجهاز" }),
-            jsx(LocalFilePicker, { value: metadata.localFile, onFileSelect: applyPrimaryLocalFile })
+            jsx("label", { htmlFor: localFileId, className: "block", children: "ملف محلي من الجهاز" }),
+            jsx(LocalFilePicker, { value: metadata.localFile, onFileSelect: applyPrimaryLocalFile, inputId: localFileId })
           ] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الصورة المصغرة" }), jsx("input", { value: thumbnail, onChange: (event) => setThumbnail(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "رابط صورة اختياري" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: notes, onChange: (event) => setNotes(event.target.value), className: "min-h-[100px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملخص أو ملاحظات أرشيفية" })] })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: thumbnailId, className: "block", children: "الصورة المصغرة" }), jsx("input", { id: thumbnailId, value: thumbnail, onChange: (event) => setThumbnail(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "رابط صورة اختياري" })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("label", { htmlFor: notesId, className: "block", children: "ملاحظات" }), jsx("textarea", { id: notesId, value: notes, onChange: (event) => setNotes(event.target.value), className: "min-h-[100px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملخص أو ملاحظات أرشيفية" })] })
         ] }),
         currentStep.id === "classify" && jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "نوع المحتوى" }), jsx("select", { value: typeId, onChange: (event) => setTypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الفرع" }), jsx("select", { value: subtypeId, onChange: (event) => setSubtypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: tags, onChange: (event) => setTags(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "وسوم مفصولة بفاصلة، ويمكن استخدام مسارات الوسوم الهرمية" })] })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: typeSelectId, className: "block", children: "نوع المحتوى" }), jsxs("select", { id: typeSelectId, value: typeId, onChange: (event) => setTypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: subtypeSelectId, className: "block", children: "الفرع" }), jsxs("select", { id: subtypeSelectId, value: subtypeId, onChange: (event) => setSubtypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("label", { htmlFor: tagsId, className: "block", children: "الوسوم" }), jsx("input", { id: tagsId, value: tags, onChange: (event) => setTags(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "وسوم مفصولة بفاصلة، ويمكن استخدام مسارات الوسوم الهرمية" })] })
         ] }),
-        currentStep.id === "fields" && (fields.length ? jsx("div", { className: "grid gap-4 lg:grid-cols-2", children: fields.map((field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "lg:col-span-2" : ""}`, children: [
-          jsxs("span", { children: [field.label, field.required && jsx("span", { className: "text-red-300", children: " *" })] }),
-          jsx(FieldInput, { field, value: metadata[fieldKey(field)], onChange: updateMetadata }),
-          field.description && jsx("span", { className: "text-xs text-gray-600", children: field.description })
-        ] }, field.id)) }) : jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا النوع." })),
+        currentStep.id === "fields" && (fields.length ? jsx("div", { className: "grid gap-4 lg:grid-cols-2", children: fields.map((field) => jsx(FieldRow, { field, value: metadata[fieldKey(field)], onChange: updateMetadata }, field.id)) }) : jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-400", children: "لا توجد حقول مخصصة لهذا النوع." })),
         currentStep.id === "review" && jsxs("div", { className: "grid gap-3 lg:grid-cols-2", children: [
           jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `العنوان: ${title || "غير محدد"}` }),
           jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `النوع: ${selectedType?.name || "غير محدد"}` }),
