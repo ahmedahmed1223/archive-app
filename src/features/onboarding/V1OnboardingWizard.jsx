@@ -11,8 +11,12 @@ import {
 import {
   Archive,
   Database,
+  FileDown,
+  FileUp,
   HardDrive,
+  Keyboard,
   LayoutGrid,
+  ScrollText,
   Shield,
   ShieldCheck,
   Sparkles,
@@ -26,6 +30,8 @@ import { motion } from "framer-motion";
 import {
   CORE_UI_TOUR_ITEMS,
   ONBOARDING_ACCENT_OPTIONS,
+  ONBOARDING_DATA_TOPICS,
+  ONBOARDING_SHORTCUTS,
   ONBOARDING_STEPS,
   ONBOARDING_THEME_OPTIONS
 } from "./flow.js";
@@ -368,6 +374,57 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
       ] });
     }
 
+    if (activeStep.id === "shortcuts") {
+      return jsxs("div", { className: "space-y-4", children: [
+        jsxs("div", { className: "flex items-start gap-3", children: [
+          jsx("div", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-300", children: jsx(Keyboard, { className: "h-6 w-6" }) }),
+          jsxs("div", { children: [
+            jsx("h2", { className: "text-xl font-bold text-white", children: "اختصارات أساسية" }),
+            jsx("p", { className: "mt-1 text-sm leading-7 text-gray-400", children: "تعلّم 4 اختصارات تكفي لتسريع 80% من العمل اليومي. تظهر بقية القائمة بضغطة \"؟\"." })
+          ] })
+        ] }),
+        jsx("div", { className: "grid gap-3 sm:grid-cols-2", children: ONBOARDING_SHORTCUTS.map((item) => jsxs("div", {
+          className: "rounded-2xl border border-white/10 bg-white/[0.035] p-4",
+          children: [
+            jsx("div", { className: "flex flex-wrap items-center gap-1.5", dir: "ltr", children: item.keys.map((key, index) => jsx("kbd", {
+              className: "va-mixed-token rounded-md border border-white/15 bg-white/10 px-2 py-1 text-xs font-mono font-semibold text-emerald-200",
+              children: key
+            }, `${item.label}-${index}`)) }),
+            jsx("p", { className: "mt-3 font-semibold text-white", children: item.label }),
+            jsx("p", { className: "mt-1 text-xs leading-6 text-gray-400", children: item.detail })
+          ]
+        }, item.label)) })
+      ] });
+    }
+
+    if (activeStep.id === "data") {
+      const icons = { backup: FileDown, import: FileUp, transfer: HardDrive, audit: ScrollText };
+      return jsxs("div", { className: "space-y-4", children: [
+        jsxs("div", { className: "flex items-start gap-3", children: [
+          jsx("div", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-300", children: jsx(Database, { className: "h-6 w-6" }) }),
+          jsxs("div", { children: [
+            jsx("h2", { className: "text-xl font-bold text-white", children: "حماية البيانات والنقل" }),
+            jsx("p", { className: "mt-1 text-sm leading-7 text-gray-400", children: "كل بياناتك محلية. يمكنك نسخها واستيرادها ونقلها لجهاز آخر من مركز البيانات." })
+          ] })
+        ] }),
+        jsx("div", { className: "grid gap-3 sm:grid-cols-2", children: ONBOARDING_DATA_TOPICS.map((topic) => {
+          const Icon = icons[topic.id] || Database;
+          return jsxs("div", {
+            className: "rounded-2xl border border-white/10 bg-white/[0.035] p-4",
+            children: [
+              jsx(Icon, { className: "mb-3 h-5 w-5 text-emerald-300" }),
+              jsx("p", { className: "font-semibold text-white", children: topic.label }),
+              jsx("p", { className: "mt-2 text-xs leading-6 text-gray-400", children: topic.detail })
+            ]
+          }, topic.id);
+        }) }),
+        jsxs("p", { className: "rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs leading-6 text-emerald-100", children: [
+          jsx(Sparkles, { className: "ml-1 inline h-3.5 w-3.5" }),
+          "نصيحة: اعمل نسخة احتياطية أسبوعية حتى لا تخسر تعديلاتك في حال تلف الجهاز."
+        ] })
+      ] });
+    }
+
     return jsxs("div", { className: "space-y-5", children: [
       jsx("h2", { className: "text-xl font-bold text-white", children: "أين تريد أن تبدأ؟" }),
       jsx("div", { className: "grid gap-3 sm:grid-cols-2", children: FIRST_TASK_OPTIONS.map((option) => {
@@ -402,7 +459,7 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
           steps,
           activeStepId: activeStep.id,
           completedStepIds: steps.slice(0, activeStepIndex).map((step) => step.id),
-          className: "rounded-3xl border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-3 lg:grid-cols-6",
+          className: "rounded-3xl border border-white/10 bg-white/[0.035] p-3 sm:grid-cols-4 lg:grid-cols-8",
           compact: true
         })
       ] }),
