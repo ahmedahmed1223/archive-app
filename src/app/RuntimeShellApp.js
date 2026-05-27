@@ -583,7 +583,10 @@ export function App() {
             children: [
               jsx("h1", { className: "sr-only", children: currentPageTitle }),
               jsx(AppPageContextBar, { currentPage, currentPageTitle }),
-              jsx(PageComponent, {})
+              jsx(React.Suspense, {
+                fallback: jsx(DashboardSkeleton, { compact: true }),
+                children: jsx(PageComponent, {})
+              })
             ]
           }, currentPage)
         })
