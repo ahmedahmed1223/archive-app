@@ -14,6 +14,13 @@ export function createVideoItemValue(partial = {}) {
     isFavorite: !!partial.isFavorite,
     isDeleted: !!partial.isDeleted,
     version: partial.version || 1,
+    // Sync metadata is owned by stampSyncMetadata in the slice — we
+    // only seed safe defaults here so brand-new items have at least
+    // an empty trail before they reach the slice's stamp call.
+    syncVersion: typeof partial.syncVersion === "number" ? partial.syncVersion : 0,
+    lastModifiedBy: partial.lastModifiedBy && typeof partial.lastModifiedBy === "object"
+      ? partial.lastModifiedBy
+      : null,
     createdAt: partial.createdAt || now,
     updatedAt: now
   };

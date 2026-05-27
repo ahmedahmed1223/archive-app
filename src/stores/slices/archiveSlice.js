@@ -19,6 +19,14 @@ import { persistList, persistSettings } from "../storePersistence.js";
 import { undoRedoManager } from "../../components/common/undoManager.js";
 import { ACTIONS, PermissionError, requirePermission } from "../../features/users/permissions.js";
 import { ensureDeviceIdentity } from "../../utils/deviceIdentity.js";
+import { stampSyncMetadata } from "../../features/sync/syncMetadata.js";
+
+// Read the active deviceId from settings on every stamp call so a
+// rename or rare regeneration is reflected without having to thread
+// the value through every mutation signature.
+function getActiveDeviceId(get) {
+  return get().settings?.ui?.deviceId || null;
+}
 
 /**
  * Slice-level permission guard. Reads currentUser from the auth store
@@ -159,7 +167,8 @@ export function createArchiveActions({ set, get, getAuthStore }) {
     },
     addVideoItem: async (item) => {
       checkPermission(get, getAuthStore, ACTIONS.VIDEO_CREATE);
-      const value = createVideoItemValue(item);
+      const deviceId = getActiveDeviceId(get);
+      const value = stampSyncMetadata(createVideoItemValue(item), { deviceId });
       const record = normalizeChangeRecord({ itemId: value.id, action: "create", title: value.title, timestamp: nowIso() });
       set((state) => ({ videoItems: [value, ...state.videoItems], changeHistory: [record, ...state.changeHistory] }));
       await dbPut(STORES.ITEMS, value);
@@ -169,7 +178,12 @@ export function createArchiveActions({ set, get, getAuthStore }) {
     },
     updateVideoItem: async (item) => {
       checkPermission(get, getAuthStore, ACTIONS.VIDEO_UPDATE);
-      const updated = createVideoItemValue({ ...item, updatedAt: nowIso(), id: item.id });
+      const deviceId = getActiveDeviceId(get);
+      const previous = get().videoItems.find((current) => current.id === item.id) || null;
+      const updated = stampSyncMetadata(
+        createVideoItemValue({ ...item, updatedAt: nowIso(), id: item.id }),
+        { deviceId, previous }
+      );
       const record = normalizeChangeRecord({ itemId: updated.id, action: "update", title: updated.title, timestamp: nowIso() });
       set((state) => ({
         videoItems: state.videoItems.map((current) => current.id === updated.id ? updated : current),
@@ -184,7 +198,8 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.VIDEO_DELETE);
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
-      const updated = { ...target, isDeleted: true, updatedAt: nowIso() };
+      const deviceId = getActiveDeviceId(get);
+      const updated = stampSyncMetadata({ ...target, isDeleted: true, updatedAt: nowIso() }, { deviceId, previous: target });
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
       get().addAuditLog?.("video.delete", id, "video", { title: target.title });
@@ -206,7 +221,8 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.VIDEO_RESTORE);
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
-      const updated = { ...target, isDeleted: false, updatedAt: nowIso() };
+      const deviceId = getActiveDeviceId(get);
+      const updated = stampSyncMetadata({ ...target, isDeleted: false, updatedAt: nowIso() }, { deviceId, previous: target });
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
       get().addAuditLog?.("video.restore", id, "video", { title: target.title });
@@ -222,7 +238,8 @@ export function createArchiveActions({ set, get, getAuthStore }) {
     toggleFavorite: async (id) => {
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
-      const updated = { ...target, isFavorite: !target.isFavorite, updatedAt: nowIso() };
+      const deviceId = getActiveDeviceId(get);
+      const updated = stampSyncMetadata({ ...target, isFavorite: !target.isFavorite, updatedAt: nowIso() }, { deviceId, previous: target });
       set((state) => ({ videoItems: state.videoItems.map((item) => item.id === id ? updated : item) }));
       await dbPut(STORES.ITEMS, updated);
       return true;
@@ -243,7 +260,10 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const idSet = new Set(ids);
       const previous = get().videoItems.filter((item) => idSet.has(item.id)).map((item) => ({ ...item }));
       if (!previous.length) return false;
-      const updated = get().videoItems.map((item) => idSet.has(item.id) ? { ...item, isDeleted: true, updatedAt: nowIso() } : item);
+      const deviceId = getActiveDeviceId(get);
+      const updated = get().videoItems.map((item) => idSet.has(item.id)
+        ? stampSyncMetadata({ ...item, isDeleted: true, updatedAt: nowIso() }, { deviceId, previous: item })
+        : item);
       set({ videoItems: updated, selectedItems: [] });
       await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
       get().addAuditLog?.("video.bulkDelete", null, "video", { count: previous.length, ids });
@@ -270,7 +290,10 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const idSet = new Set(ids);
       const previous = get().videoItems.filter((item) => idSet.has(item.id) && item.isDeleted).map((item) => ({ ...item }));
       if (!previous.length) return false;
-      const updated = get().videoItems.map((item) => idSet.has(item.id) ? { ...item, isDeleted: false, updatedAt: nowIso() } : item);
+      const deviceId = getActiveDeviceId(get);
+      const updated = get().videoItems.map((item) => idSet.has(item.id)
+        ? stampSyncMetadata({ ...item, isDeleted: false, updatedAt: nowIso() }, { deviceId, previous: item })
+        : item);
       set({ videoItems: updated, selectedItems: [] });
       await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
       if (!options.skipUndo) {
@@ -294,10 +317,11 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       const tagSet = new Set(tags.map((value) => String(value || "").trim()).filter(Boolean));
       if (!tagSet.size) return false;
       const previous = get().videoItems.filter((item) => idSet.has(item.id)).map((item) => ({ id: item.id, tags: [...(item.tags || [])] }));
+      const deviceId = getActiveDeviceId(get);
       const updated = get().videoItems.map((item) => {
         if (!idSet.has(item.id)) return item;
         const merged = Array.from(new Set([...(item.tags || []), ...tagSet]));
-        return { ...item, tags: merged, updatedAt: nowIso() };
+        return stampSyncMetadata({ ...item, tags: merged, updatedAt: nowIso() }, { deviceId, previous: item });
       });
       set({ videoItems: updated });
       await persistList(STORES.ITEMS, updated.filter((item) => idSet.has(item.id)));
