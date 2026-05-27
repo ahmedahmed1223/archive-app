@@ -7,13 +7,15 @@ import {
   Database,
   HardDrive,
   LayoutGrid,
+  PlayCircle,
   Search,
   Shield,
   Sparkles,
   Tags,
   Upload,
   Users,
-  Video
+  Video,
+  X
 } from "lucide-react";
 import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
@@ -116,6 +118,14 @@ export function DashboardPage() {
   }), [videoItems, contentTypes, virtualCollections, hierarchicalTags]);
 
   const demoIds = React.useMemo(() => getDashboardDemoItemIds(videoItems), [videoItems]);
+  const dismissedBanners = settings.ui?.dismissedBanners || [];
+  const demoBannerDismissed = dismissedBanners.includes("demo");
+  const isFirstTimeUser = stats.total === 0 && demoIds.length === 0;
+
+  const dismissBanner = (bannerId) => {
+    const next = Array.from(new Set([...dismissedBanners, bannerId]));
+    updateSettings?.({ ui: { ...(settings.ui || {}), dismissedBanners: next } });
+  };
   const recentItems = React.useMemo(() => {
     const candidates = videoItems.filter((item) => !item.isDeleted);
     const viewed = candidates
@@ -171,9 +181,27 @@ export function DashboardPage() {
           children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
         }),
         children: [
-          demoIds.length > 0 && jsx("div", {
-            className: "mt-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-100",
-            children: `توجد ${demoIds.length} عناصر تجريبية. راجع الأرشيف أو الإعدادات قبل الاستخدام الفعلي.`
+          demoIds.length > 0 && !demoBannerDismissed && jsxs("div", {
+            className: "mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-100",
+            children: [
+              jsx("span", { children: `توجد ${demoIds.length} عناصر تجريبية. راجع الأرشيف أو الإعدادات قبل الاستخدام الفعلي.` }),
+              jsxs("div", { className: "flex items-center gap-2", children: [
+                jsx("button", {
+                  type: "button",
+                  onClick: () => goTo("archive"),
+                  className: "rounded-lg border border-amber-300/25 px-3 py-1.5 text-xs font-semibold text-amber-50 hover:bg-amber-500/10",
+                  children: "فتح الأرشيف"
+                }),
+                jsx("button", {
+                  type: "button",
+                  onClick: () => dismissBanner("demo"),
+                  className: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300/25 text-amber-50 hover:bg-amber-500/10",
+                  "aria-label": "إخفاء التنبيه",
+                  title: "إخفاء التنبيه",
+                  children: jsx(X, { className: "h-4 w-4" })
+                })
+              ] })
+            ]
           }, "demo-banner"),
           settings.ui?.onboardingSecurityMode === "quick" && !isPasswordSet && jsxs("div", {
             className: "mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-100",
@@ -192,6 +220,28 @@ export function DashboardPage() {
           }, "security-banner")
         ]
       }),
+      isFirstTimeUser && jsxs("section", {
+        className: "va-card rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 via-cyan-500/5 to-transparent p-6 sm:p-8 text-right",
+        "aria-labelledby": "dashboard-empty-title",
+        children: [
+          jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
+            jsxs("div", { className: "flex items-start gap-4", children: [
+              jsx("div", {
+                className: "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+                children: jsx(PlayCircle, { className: "h-7 w-7" })
+              }),
+              jsxs("div", { children: [
+                jsx("h2", { id: "dashboard-empty-title", className: "text-xl font-bold text-white", children: "ابدأ أرشيفك خلال دقيقة" }),
+                jsx("p", { className: "mt-2 max-w-xl text-sm leading-relaxed text-gray-300", children: "لا توجد فيديوهات بعد. أضف أول مادة لتظهر الإحصائيات والقوائم، أو استورد ملف نقل من جهاز سابق لاستعادة كامل الأرشيف." })
+              ] })
+            ] }),
+            jsxs("div", { className: "flex flex-wrap gap-2", children: [
+              jsxs("button", { type: "button", onClick: () => goTo("add"), className: "va-primary-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white", children: [jsx(Video, { className: "h-4 w-4" }), "إضافة أول فيديو"] }),
+              jsxs("button", { type: "button", onClick: () => openDataTab("import"), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/5", children: [jsx(Upload, { className: "h-4 w-4" }), "استيراد ملف نقل"] })
+            ] })
+          ] })
+        ]
+      }, "first-time-hero"),
       jsx("section", {
         className: "grid gap-4 sm:grid-cols-2 xl:grid-cols-4",
         children: [
