@@ -79,7 +79,7 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
     children: [
       jsx("h2", { className: "text-base font-bold text-white", children: entry ? "تعديل مصطلح" : "مصطلح جديد" }),
       jsxs("div", {
-        className: "mt-4 grid gap-3 lg:grid-cols-2",
+        className: "mt-4 grid gap-3 md:grid-cols-2",
         children: [
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
             jsx("label", { htmlFor: termId, className: "block", children: "المصطلح" }),
@@ -97,11 +97,11 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
               id: categoryId,
               value: category,
               onChange: (event) => setCategory(event.target.value),
-              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               children: VOCABULARY_CATEGORIES.map((item) => jsx("option", { value: item.id, children: item.label }, item.id))
             })
           ] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [
             jsx("label", { htmlFor: aliasesId, className: "block", children: "الأسماء المستعارة" }),
             jsx("input", {
               id: aliasesId,
@@ -111,7 +111,7 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
               placeholder: "أسماء بديلة مفصولة بفاصلة"
             })
           ] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [
             jsx("label", { htmlFor: descriptionId, className: "block", children: "الوصف" }),
             jsx("textarea", {
               id: descriptionId,

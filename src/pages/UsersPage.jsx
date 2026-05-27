@@ -61,7 +61,7 @@ function UserForm({ user, users, onCancel, onSave }) {
       jsx("h2", { className: "text-base font-bold text-white", children: user ? "تعديل مستخدم" : "مستخدم جديد" }),
       jsx("p", { className: "mt-1 text-xs leading-relaxed text-gray-500", children: user ? "لا يتم تغيير كلمة المرور من هنا؛ استخدم تبويب الأمان عند الحاجة." : "سيتم إنشاء كلمة مرور أولية لهذا المستخدم دون تغيير المستخدم الحالي." }),
       jsxs("div", {
-        className: "mt-4 grid gap-3 lg:grid-cols-2",
+        className: "mt-4 grid gap-3 md:grid-cols-2",
         children: [
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
             jsx("label", { htmlFor: usernameId, className: "block", children: "اسم المستخدم" }),
@@ -98,17 +98,17 @@ function UserForm({ user, users, onCancel, onSave }) {
               placeholder: "6 أحرف على الأقل"
             })
           ] }),
-          jsxs("div", { className: `space-y-2 ${user ? "lg:col-span-2" : ""}`, children: [
+          jsxs("div", { className: `space-y-2 ${user ? "md:col-span-2" : ""}`, children: [
             jsx("span", { id: roleGroupId, className: "text-sm text-gray-300", children: "الدور" }),
             jsx("div", { role: "radiogroup", "aria-labelledby": roleGroupId, className: "flex flex-wrap gap-2", children: USER_ROLES.map((item) => jsxs("button", {
               type: "button",
               role: "radio",
               "aria-checked": role === item.id,
               onClick: () => setRole(item.id),
-              className: `rounded-xl border px-3 py-2 text-sm transition-colors ${role === item.id ? "text-white" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5"}`,
+              className: `inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${role === item.id ? "text-white" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5"}`,
               style: role === item.id ? { borderColor: `${item.color}55`, backgroundColor: `${item.color}18` } : undefined,
               children: [
-                jsx("span", { className: "inline-block h-2.5 w-2.5 rounded-full", style: { backgroundColor: item.color } }),
+                jsx("span", { className: "inline-block h-2.5 w-2.5 shrink-0 rounded-full", style: { backgroundColor: item.color } }),
                 item.label
               ]
             }, item.id)) })
