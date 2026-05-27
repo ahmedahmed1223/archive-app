@@ -64,6 +64,12 @@ import {
   rowsToCsv
 } from "../services/data-portability/index.js";
 import {
+  buildSyncFloorFromItems,
+  filterDeltaVideoItems,
+  mergeSyncFloors,
+  summarizeDeltaPlan
+} from "../features/sync/deltaExport.js";
+import {
   formatDateTime,
   formatFileSize,
   formatNumber
@@ -127,6 +133,22 @@ export function DataCenterPage() {
   const [backups, setBackups] = React.useState([]);
   const [backupError, setBackupError] = React.useState("");
   const importInputRef = React.useRef(null);
+
+  // Sync peers — every device we've ever exported a delta to is
+  // remembered here. The dropdown below lets the user pick which
+  // peer the next delta is for, defaulting to the most recent.
+  const syncPeers = settings.syncPeers || {};
+  const syncPeerList = React.useMemo(
+    () => Object.values(syncPeers).sort((a, b) => (new Date(b.lastSentAt || 0).getTime()) - (new Date(a.lastSentAt || 0).getTime())),
+    [syncPeers]
+  );
+  const [deltaTargetId, setDeltaTargetId] = React.useState("");
+  const [deltaNewDeviceName, setDeltaNewDeviceName] = React.useState("");
+  const targetPeer = deltaTargetId ? syncPeers[deltaTargetId] : null;
+  const deltaPlan = React.useMemo(
+    () => summarizeDeltaPlan(videoItems, targetPeer?.lastSentSyncFloor || {}),
+    [targetPeer, videoItems]
+  );
 
   const exportOptions = React.useMemo(() => createDataCenterExportFilters({
     typeFilter,
@@ -261,6 +283,55 @@ export function DataCenterPage() {
         }, { deviceId, deviceName: sourceDeviceName.trim() || "هذا الجهاز" });
         downloadArchiveBlob(new Blob([JSON.stringify(transferPackage, null, 2)], { type: "application/json;charset=utf-8" }), makeFileName("video-archive-transfer", "json"));
         setOperationMessage(`تم إنشاء ملف نقل آمن. checksum ${transferPackage.checksum}`);
+      } else if (kind === "delta") {
+        commitDeviceName();
+        const trimmedNewName = deltaNewDeviceName.trim();
+        // Either targeting a known peer or creating a brand-new one.
+        const target = targetPeer || (trimmedNewName ? {
+          deviceId: `peer_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+          deviceName: trimmedNewName,
+          lastSentSyncFloor: {}
+        } : null);
+        if (!target) {
+          throw new Error("اختر جهازاً معروفاً أو أدخل اسماً جديداً قبل تصدير الـ delta.");
+        }
+        const peerFloor = target.lastSentSyncFloor || {};
+        const deltaItems = filterDeltaVideoItems(videoItems, peerFloor);
+        if (!deltaItems.length) {
+          setOperationMessage("لا توجد تغييرات منذ آخر مزامنة مع هذا الجهاز.");
+          showToast?.("لا تغييرات للإرسال", "info");
+          return;
+        }
+        const deltaPayload = {
+          ...exportPayload,
+          videoItems: deltaItems
+        };
+        const transferPackage = createTransferPackage(deltaPayload, {
+          deviceId,
+          deviceName: sourceDeviceName.trim() || "هذا الجهاز"
+        }, {
+          mode: "delta",
+          targetDeviceId: target.deviceId,
+          baseSyncFloor: peerFloor
+        });
+        downloadArchiveBlob(
+          new Blob([JSON.stringify(transferPackage, null, 2)], { type: "application/json;charset=utf-8" }),
+          makeFileName(`video-archive-delta-${target.deviceName.replace(/[^\w؀-ۿ]+/g, "_")}`, "json")
+        );
+        // Record what we just sent so the next delta only includes
+        // newer changes.
+        const newFloor = mergeSyncFloors(peerFloor, buildSyncFloorFromItems(deltaItems));
+        const nextPeer = {
+          ...target,
+          lastSentAt: new Date().toISOString(),
+          lastSentSyncFloor: newFloor
+        };
+        await updateSettings?.({
+          syncPeers: { [target.deviceId]: nextPeer }
+        });
+        setDeltaTargetId(target.deviceId);
+        setDeltaNewDeviceName("");
+        setOperationMessage(`تم تصدير ${deltaItems.length} عنصراً كـ delta إلى "${target.deviceName}".`);
       }
 
       showToast?.("اكتمل التصدير", "success");
@@ -619,6 +690,58 @@ export function DataCenterPage() {
               })
             ]
           })
+        ]
+      }),
+      jsxs("div", {
+        className: "mt-5 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] p-4",
+        children: [
+          jsxs("div", { className: "flex flex-wrap items-start justify-between gap-3", children: [
+            jsxs("div", { children: [
+              jsx("h4", { className: "text-sm font-semibold text-white", children: "تصدير تغييرات فقط (Delta)" }),
+              jsx("p", { className: "mt-1 max-w-xl text-xs leading-relaxed text-gray-400", children: "يصدّر فقط العناصر التي تغيّرت منذ آخر مزامنة مع جهاز محدد. مفيد عند العمل بين جهازين بشكل دوري — أصغر بكثير من النقل الكامل." })
+            ] }),
+            jsx(ActionButton, {
+              onClick: () => handleExport("delta"),
+              disabled: isWorking || (!targetPeer && !deltaNewDeviceName.trim()),
+              icon: jsx(HardDrive, { className: "h-4 w-4" }),
+              children: "إنشاء ملف delta"
+            })
+          ] }),
+          jsxs("div", {
+            className: "mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]",
+            children: [
+              jsxs("label", { className: "block text-xs text-gray-400", children: [
+                jsx("span", { className: "block mb-1", children: "اختر جهاز معروف" }),
+                jsxs("select", {
+                  value: deltaTargetId,
+                  onChange: (event) => setDeltaTargetId(event.target.value),
+                  className: "min-h-10 w-full rounded-xl border border-white/10 bg-gray-950/50 px-3 text-sm text-white",
+                  children: [
+                    jsx("option", { value: "", children: "— جديد —" }),
+                    ...syncPeerList.map((peer) => jsx("option", { value: peer.deviceId, children: `${peer.deviceName}${peer.lastSentAt ? ` (آخر مزامنة: ${formatDateTime(peer.lastSentAt)})` : ""}` }, peer.deviceId))
+                  ]
+                })
+              ] }),
+              !deltaTargetId && jsxs("label", { className: "block text-xs text-gray-400", children: [
+                jsx("span", { className: "block mb-1", children: "أو أدخل اسم جهاز جديد" }),
+                jsx("input", {
+                  value: deltaNewDeviceName,
+                  onChange: (event) => setDeltaNewDeviceName(event.target.value),
+                  placeholder: "مثال: لابتوب الميدان",
+                  className: "min-h-10 w-full rounded-xl border border-white/10 bg-gray-950/50 px-3 text-sm text-white"
+                })
+              ] }),
+              deltaTargetId && jsx("div", { className: "flex items-end" }, "spacer"),
+              jsxs("div", { className: "flex flex-col items-end justify-end text-right text-xs text-gray-400", children: [
+                jsxs("span", { className: "rounded-full border border-white/10 bg-gray-950/45 px-2.5 py-1", children: [
+                  "تغييرات معلّقة: ",
+                  jsx("strong", { className: "text-emerald-200", children: formatNumber(deltaPlan.total) })
+                ] }),
+                deltaPlan.total > 0 && jsx("span", { className: "mt-1 text-[11px] text-gray-500", children: `${formatNumber(deltaPlan.newCount)} جديد + ${formatNumber(deltaPlan.updatedCount)} محدّث` })
+              ] })
+            ]
+          }),
+          syncPeerList.length === 0 && jsx("p", { className: "mt-3 text-[11px] leading-5 text-gray-500", children: "لا توجد أجهزة محفوظة بعد. أنشئ delta لأول مرة وسيتم حفظ هذا الجهاز كنقطة مرجعية." })
         ]
       })
     ]
