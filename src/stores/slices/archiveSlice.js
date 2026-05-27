@@ -18,6 +18,7 @@ import { normalizeChangeRecord, normalizeUser } from "../storeModels.js";
 import { persistList, persistSettings } from "../storePersistence.js";
 import { undoRedoManager } from "../../components/common/undoManager.js";
 import { ACTIONS, PermissionError, requirePermission } from "../../features/users/permissions.js";
+import { ensureDeviceIdentity } from "../../utils/deviceIdentity.js";
 
 /**
  * Slice-level permission guard. Reads currentUser from the auth store
@@ -89,7 +90,20 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       set({ isLoading: true });
       try {
         const settingsDoc = await dbGet(STORES.SETTINGS, "app_settings").catch(() => null);
-        const settings = mergeSettings(defaultSettings(), settingsDoc || {});
+        let settings = mergeSettings(defaultSettings(), settingsDoc || {});
+        // Resolve (or generate) this device's stable identity. The
+        // identity lives primarily in localStorage; we mirror it
+        // into settings.ui so transfer packages can read it without
+        // an extra fetch, and so a settings reset doesn't accidentally
+        // change deviceId.
+        const identity = ensureDeviceIdentity({
+          deviceId: settings.ui?.deviceId || null,
+          deviceName: settings.ui?.deviceName || null
+        });
+        if (identity.deviceId !== settings.ui?.deviceId || identity.deviceName !== settings.ui?.deviceName) {
+          settings = mergeSettings(settings, { ui: { deviceId: identity.deviceId, deviceName: identity.deviceName } });
+          await persistSettings(settings).catch(() => {});
+        }
         const users = (await dbGetAll(STORES.USERS).catch(() => [])).map(normalizeUser);
         const storedContentTypes = await dbGetAll(STORES.TYPES).catch(() => []);
         const missingDefaultTypes = getMissingDefaultArchiveContentTypes(storedContentTypes);
