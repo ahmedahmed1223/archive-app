@@ -16,7 +16,7 @@ const KNOWN_ERROR_PATTERNS = [
     hint: "يبدو أن الاتصال انقطع. تأكد من الشبكة ثم أعد المحاولة."
   },
   {
-    test: (message) => /permission|denied|forbidden|unauthorized/i.test(message),
+    test: (message) => /permission|denied|forbidden|unauthorized|صلاحية|مرفوض/i.test(message),
     hint: "لا تملك صلاحية لهذا الإجراء. تواصل مع المدير لرفع الصلاحيات."
   }
 ];

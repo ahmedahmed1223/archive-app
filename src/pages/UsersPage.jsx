@@ -117,34 +117,40 @@ function UserCard({ user, currentUser, users, index, onEdit, onToggle, onDelete 
   const role = getRole(user.role);
   const isCurrent = currentUser?.id === user.id;
   const canToggle = canDeactivateUser(user, users) && !isCurrent;
+  const accentColor = user.isActive ? (role.color || "#10b981") : "#6b7280";
   return jsxs(motion.article, {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-all hover:border-white/20",
+    style: { boxShadow: `inset -3px 0 0 0 ${accentColor}44` },
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
         jsxs("div", { className: "flex min-w-0 items-start gap-3", children: [
-          jsx("span", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl", style: { backgroundColor: `${role.color}22`, color: role.color }, children: user.role === "admin" ? jsx(ShieldCheck, { className: "h-5 w-5" }) : jsx(Users, { className: "h-5 w-5" }) }),
+          jsx("span", {
+            className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
+            style: { backgroundColor: `${accentColor}22`, color: accentColor, boxShadow: `0 0 0 1px ${accentColor}30` },
+            children: user.role === "admin" ? jsx(ShieldCheck, { className: "h-5 w-5" }) : jsx(Users, { className: "h-5 w-5" })
+          }),
           jsxs("div", { className: "min-w-0", children: [
             jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
               jsx("h3", { className: "truncate text-base font-bold text-white", children: user.displayName || user.username }),
-              jsx("span", { className: "rounded-full border px-2 py-0.5 text-xs", style: { borderColor: `${role.color}55`, backgroundColor: `${role.color}18`, color: role.color }, children: role.label }),
+              jsx("span", { className: "rounded-full border px-2 py-0.5 text-xs font-medium", style: { borderColor: `${accentColor}45`, backgroundColor: `${accentColor}18`, color: accentColor }, children: role.label }),
               !user.isActive && jsx("span", { className: "rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-xs text-red-200", children: "معطل" }),
               isCurrent && jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-200", children: "الحالي" })
             ] }),
-            jsx("p", { className: "mt-1 truncate text-sm text-gray-500", dir: "ltr", children: `@${user.username}` }),
+            jsx("p", { className: "mt-1 truncate text-xs text-gray-500 font-mono", dir: "ltr", children: `@${user.username}` }),
             user.lastLoginAt && jsx("p", { className: "mt-2 text-xs text-gray-600", children: `آخر دخول: ${formatDateTime(user.lastLoginAt)}` })
           ] })
         ] }),
         jsxs("div", { className: "flex shrink-0 gap-1", children: [
-          jsx("button", { type: "button", onClick: onToggle, disabled: !canToggle, className: "rounded-lg px-3 py-2 text-xs text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: user.isActive ? "تعطيل" : "تفعيل" }),
+          jsx("button", { type: "button", onClick: onToggle, disabled: !canToggle, className: `rounded-lg px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${user.isActive ? "text-gray-300 hover:bg-white/5" : "text-emerald-300 hover:bg-emerald-500/10"}`, children: user.isActive ? "تعطيل" : "تفعيل" }),
           jsx("button", { type: "button", onClick: onEdit, className: "rounded-lg p-2 text-gray-500 hover:bg-white/5 hover:text-white", "aria-label": `تعديل ${user.displayName || user.username || "المستخدم"}`, children: jsx(PenLine, { className: "h-4 w-4" }) }),
           jsx("button", { type: "button", onClick: onDelete, disabled: !canToggle, className: "rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40", "aria-label": `حذف ${user.displayName || user.username || "المستخدم"}`, children: jsx(Trash2, { className: "h-4 w-4" }) })
         ] })
       ] }),
-      jsx("p", { className: "mt-4 text-xs leading-relaxed text-gray-600", children: role.description })
+      jsx("p", { className: "mt-3 text-xs leading-relaxed text-gray-600", children: role.description })
     ]
   }, user.id);
 }

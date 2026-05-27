@@ -163,16 +163,22 @@ function TypeEditor({ type, onCancel, onSave }) {
 }
 
 function TypeCard({ type, count, active, index, onOpen, onEdit, onArchive }) {
+  const accentColor = type.color || "#6366f1";
   return jsxs(motion.article, {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
     onClick: onOpen,
-    className: `va-entity-card cursor-pointer rounded-2xl border p-4 text-right transition-colors ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-emerald-500/25"}`,
+    className: `va-entity-card cursor-pointer rounded-2xl border p-4 text-right transition-all ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-white/20"}`,
+    style: { boxShadow: `inset -3px 0 0 0 ${accentColor}${active ? "88" : "44"}` },
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
         jsxs("div", { className: "flex min-w-0 items-start gap-3", children: [
-          jsx("span", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl", style: { backgroundColor: `${type.color || "#6366f1"}22`, color: type.color || "#6366f1" }, children: type.icon || "📁" }),
+          jsx("span", {
+            className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl",
+            style: { backgroundColor: `${accentColor}22`, color: accentColor, boxShadow: `0 0 0 1px ${accentColor}30` },
+            children: type.icon || "📁"
+          }),
           jsxs("div", { className: "min-w-0", children: [
             jsx("h3", { className: "truncate text-base font-bold text-white", children: type.name || "نوع بدون اسم" }),
             jsx("p", { className: "mt-1 text-xs text-gray-600", children: `${formatNumber(count)} عنصر، ${formatNumber(type.subtypes?.length || 0)} فرع، ${formatNumber(type.fields?.length || 0)} حقل` }),

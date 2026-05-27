@@ -128,34 +128,42 @@ function VocabularyForm({ entry, activeCategory, onCancel, onSave }) {
 
 function VocabularyCard({ entry, index, onEdit, onDelete }) {
   const category = getCategoryInfo(entry.category);
+  const accentColor = category.color || "#10b981";
   return jsxs(motion.article, {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-all hover:border-white/20",
+    style: { boxShadow: `inset -3px 0 0 0 ${accentColor}44` },
     dir: "rtl",
     children: [
       jsxs("div", {
         className: "flex items-start justify-between gap-3",
         children: [
           jsxs("div", {
-            className: "min-w-0",
+            className: "min-w-0 flex-1",
             children: [
               jsxs("div", {
                 className: "flex flex-wrap items-center gap-2",
                 children: [
-                  jsx("span", { className: "h-2.5 w-2.5 rounded-full", style: { backgroundColor: category.color } }),
                   jsx("h3", { className: "truncate text-base font-bold text-white", children: entry.term || "مصطلح بدون اسم" }),
-                  jsx("span", { className: "rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-gray-400", children: category.label })
+                  jsx("span", {
+                    className: "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+                    style: { borderColor: `${accentColor}35`, backgroundColor: `${accentColor}14`, color: accentColor },
+                    children: [jsx("span", { className: "h-1.5 w-1.5 rounded-full", style: { backgroundColor: accentColor } }), category.label]
+                  })
                 ]
               }),
               entry.description && jsx("p", { className: "mt-2 line-clamp-2 text-sm leading-relaxed text-gray-400", children: entry.description }),
-              entry.aliases?.length > 0 && jsx("div", {
-                className: "mt-3 flex flex-wrap gap-1.5",
-                children: entry.aliases.map((alias) => jsx("span", {
-                  className: "rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
-                  children: alias
-                }, alias))
+              entry.aliases?.length > 0 && jsxs("div", {
+                className: "mt-3 flex flex-wrap items-center gap-1.5",
+                children: [
+                  jsx(Tag, { className: "h-3 w-3 shrink-0 text-gray-600" }),
+                  entry.aliases.map((alias) => jsx("span", {
+                    className: "va-tag-chip inline-flex items-center rounded-full border border-white/8 bg-gray-950/50 px-2 py-0.5 text-xs text-gray-400",
+                    children: alias
+                  }, alias))
+                ]
               })
             ]
           }),
@@ -168,7 +176,7 @@ function VocabularyCard({ entry, index, onEdit, onDelete }) {
           })
         ]
       }),
-      entry.updatedAt && jsx("p", { className: "mt-4 text-xs text-gray-600", children: `آخر تحديث: ${formatDateTime(entry.updatedAt)}` })
+      entry.updatedAt && jsx("p", { className: "mt-3 text-xs text-gray-700", children: `آخر تحديث: ${formatDateTime(entry.updatedAt)}` })
     ]
   }, entry.id);
 }

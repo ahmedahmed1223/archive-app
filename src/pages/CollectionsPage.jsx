@@ -84,24 +84,34 @@ function CollectionForm({ collection, onCancel, onSave }) {
 
 function CollectionCard({ collection, itemCount, active, index, onOpen, onEdit, onDelete }) {
   const isSmart = collection.type === "smart";
+  const accentColor = collection.color || "#10b981";
   return jsxs(motion.article, {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
     onClick: onOpen,
-    className: `va-entity-card cursor-pointer rounded-2xl border p-4 text-right transition-colors ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-emerald-500/25"}`,
+    className: `va-entity-card cursor-pointer rounded-2xl border p-4 text-right transition-all ${active ? "border-emerald-500/35 bg-emerald-500/10" : "border-white/10 bg-gray-900/45 hover:border-white/20"}`,
+    style: { boxShadow: `inset -3px 0 0 0 ${accentColor}${active ? "88" : "44"}` },
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
         jsxs("div", { className: "flex min-w-0 items-start gap-3", children: [
-          jsx("span", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl", style: { backgroundColor: `${collection.color || "#10b981"}22`, color: collection.color || "#10b981" }, children: collection.icon || "📁" }),
+          jsx("span", {
+            className: "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl",
+            style: { backgroundColor: `${accentColor}22`, color: accentColor, boxShadow: `0 0 0 1px ${accentColor}30` },
+            children: collection.icon || "📁"
+          }),
           jsxs("div", { className: "min-w-0", children: [
             jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
               jsx("h3", { className: "truncate text-base font-bold text-white", children: collection.name || "مجموعة بدون اسم" }),
               isSmart && jsxs("span", { className: "inline-flex items-center gap-1 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-xs text-cyan-200", children: [jsx(Sparkles, { className: "h-3 w-3" }), "ذكية"] })
             ] }),
             collection.description && jsx("p", { className: "mt-1 line-clamp-2 text-sm leading-relaxed text-gray-500", children: collection.description }),
-            jsx("p", { className: "mt-3 text-xs text-gray-600", children: `${formatNumber(itemCount)} عنصر` })
+            jsxs("span", {
+              className: "mt-2.5 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+              style: { borderColor: `${accentColor}30`, backgroundColor: `${accentColor}12`, color: accentColor },
+              children: [jsx(Video, { className: "h-3 w-3 opacity-70" }), `${formatNumber(itemCount)} عنصر`]
+            })
           ] })
         ] }),
         jsxs("div", { className: "flex shrink-0 gap-1", onClick: (event) => event.stopPropagation(), children: [
@@ -109,7 +119,7 @@ function CollectionCard({ collection, itemCount, active, index, onOpen, onEdit, 
           jsx("button", { type: "button", onClick: onDelete, className: "rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-300", "aria-label": `حذف ${collection.name}`, children: jsx(Trash2, { className: "h-4 w-4" }) })
         ] })
       ] }),
-      collection.updatedAt && jsx("p", { className: "mt-4 text-xs text-gray-700", children: `آخر تحديث: ${formatDateTime(collection.updatedAt)}` })
+      collection.updatedAt && jsx("p", { className: "mt-3 text-xs text-gray-700", children: `آخر تحديث: ${formatDateTime(collection.updatedAt)}` })
     ]
   }, collection.id);
 }
@@ -134,12 +144,18 @@ function CollectionDetails({ collection, items, availableItems, onAddItems, onRe
 
   const canManageItems = collection.type !== "smart";
 
+  const panelAccent = collection.color || "#10b981";
   return jsxs("aside", {
     className: "va-preview-panel space-y-4 rounded-2xl va-surface-muted border p-4 text-right",
+    style: { borderTopColor: `${panelAccent}50` },
     dir: "rtl",
     children: [
       jsxs("div", { className: "flex items-start gap-3", children: [
-        jsx("span", { className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl", style: { backgroundColor: `${collection.color || "#10b981"}22`, color: collection.color || "#10b981" }, children: collection.icon || "📁" }),
+        jsx("span", {
+          className: "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl",
+          style: { backgroundColor: `${panelAccent}22`, color: panelAccent, boxShadow: `0 0 0 1px ${panelAccent}30` },
+          children: collection.icon || "📁"
+        }),
         jsxs("div", { className: "min-w-0", children: [
           jsx("h2", { className: "text-lg font-bold text-white", children: collection.name || "مجموعة" }),
           jsx("p", { className: "mt-1 text-sm text-gray-500", children: collection.description || (collection.type === "smart" ? "مجموعة ذكية تتحدث حسب قواعدها." : "مجموعة يدوية لتنظيم العناصر.") })

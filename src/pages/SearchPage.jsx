@@ -120,12 +120,14 @@ export function SearchPage() {
     videoItems = [],
     contentTypes = [],
     settings = {},
+    recentSearches = [],
     setCurrentPage,
     setSelectedItemId,
     setSearchQuery,
     setFilterType,
     setFilterSubtype,
-    addRecentSearch
+    addRecentSearch,
+    clearRecentSearches
   } = useAppStore();
 
   const initialRouteState = React.useMemo(() => parseSearchRouteParams(parseAppRoute().params), []);
@@ -342,18 +344,45 @@ export function SearchPage() {
           })
         ]
       }),
-      results.length === 0 ? jsx("section", {
-        className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35",
-        children: jsx(EmptyState, {
-          type: "search",
-          title: activeFilterCount ? "لا توجد نتائج مطابقة" : "ابدأ بكتابة كلمة بحث",
-          description: activeFilterCount
-            ? "جرّب كلمة أقصر، أو امسح بعض الفلاتر، أو افتح الأرشيف لاستعراض كل العناصر."
-            : "اكتب جزءاً من العنوان أو الوسم أو الملاحظة لتظهر النتائج هنا مباشرة.",
-          actionLabel: activeFilterCount > 0 ? "مسح البحث" : undefined,
-          onAction: activeFilterCount > 0 ? resetSearch : undefined,
-          actionIcon: activeFilterCount > 0 ? RefreshCw : undefined
-        })
+      results.length === 0 ? jsxs("section", {
+        className: "space-y-4",
+        children: [
+          jsx("div", {
+            className: "va-card rounded-2xl border border-dashed border-white/10 bg-gray-950/35",
+            children: jsx(EmptyState, {
+              type: "search",
+              title: activeFilterCount ? "لا توجد نتائج مطابقة" : "ابدأ بكتابة كلمة بحث",
+              description: activeFilterCount
+                ? "جرّب كلمة أقصر، أو امسح بعض الفلاتر، أو افتح الأرشيف لاستعراض كل العناصر."
+                : "اكتب جزءاً من العنوان أو الوسم أو الملاحظة لتظهر النتائج هنا مباشرة.",
+              actionLabel: activeFilterCount > 0 ? "مسح البحث" : undefined,
+              onAction: activeFilterCount > 0 ? resetSearch : undefined,
+              actionIcon: activeFilterCount > 0 ? RefreshCw : undefined
+            })
+          }),
+          recentSearches.length > 0 && jsxs("div", {
+            className: "va-card rounded-2xl border p-4 text-right",
+            dir: "rtl",
+            children: [
+              jsxs("div", {
+                className: "mb-3 flex items-center justify-between gap-2",
+                children: [
+                  jsxs("h3", { className: "flex items-center gap-2 text-sm font-semibold text-gray-300", children: [jsx(Tags, { className: "h-4 w-4 text-emerald-400" }), "عمليات البحث الأخيرة"] }),
+                  jsx("button", { type: "button", onClick: clearRecentSearches, className: "text-xs text-gray-600 hover:text-gray-400 transition-colors", children: "مسح الكل" })
+                ]
+              }),
+              jsx("div", {
+                className: "flex flex-wrap gap-2",
+                children: recentSearches.map((term) => jsx("button", {
+                  type: "button",
+                  onClick: () => setQuery(term),
+                  className: "inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-gray-900/60 px-3 py-1.5 text-xs text-gray-300 transition-colors hover:border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-200",
+                  children: [jsx(Search, { className: "h-3 w-3 opacity-60" }), term]
+                }, term))
+              })
+            ]
+          })
+        ]
       }) : jsxs("section", {
         className: "space-y-4",
         children: [

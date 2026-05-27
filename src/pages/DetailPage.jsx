@@ -2,6 +2,7 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  ArrowRight,
   CheckCircle2,
   Clock3,
   Copy,
@@ -10,6 +11,7 @@ import {
   HardDrive,
   PenLine,
   RefreshCw,
+  Star,
   Tags,
   Trash2,
   Video
@@ -219,22 +221,31 @@ export function DetailPage() {
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
+      jsxs("nav", { className: "flex items-center gap-2 text-sm text-gray-500", "aria-label": "مسار التنقل", children: [
+        jsx("button", { type: "button", onClick: () => setCurrentPage?.("archive"), className: "inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-gray-500 transition-colors hover:bg-white/5 hover:text-gray-300", children: [jsx(ArrowRight, { className: "h-3.5 w-3.5" }), "الأرشيف"] }),
+        jsx("span", { className: "text-gray-700", children: "/" }),
+        jsx("span", { className: "max-w-[200px] truncate text-gray-400", children: item.title || "التفاصيل" })
+      ] }),
       jsxs("section", { className: "va-page-hero overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 text-right shadow-2xl shadow-black/10", children: [
         previewSource ? jsx("video", { src: previewSource, controls: true, className: "aspect-video w-full bg-black object-contain" }) : item.thumbnail ? jsx("img", { src: item.thumbnail, alt: item.title, className: "h-64 w-full object-cover" }) : jsx("div", { className: "flex h-48 items-center justify-center bg-gray-950/60", children: jsx(Video, { className: "h-16 w-16 text-gray-700" }) }),
         jsxs("div", { className: "p-5", children: [
           jsxs("div", { className: "flex flex-wrap items-start justify-between gap-4", children: [
-            jsxs("div", { className: "min-w-0", children: [
-              jsx("h1", { className: "text-2xl font-bold text-white", children: item.title || "بدون عنوان" }),
-              jsx("p", { className: "mt-2 text-sm text-gray-500", children: [getTypeLabel(contentTypes, item.type), getSubtypeLabel(contentTypes, item.type, item.subtype)].filter(Boolean).join(" / ") }),
+            jsxs("div", { className: "min-w-0 flex-1", children: [
+              jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
+                jsx("h1", { className: "text-2xl font-bold text-white", children: item.title || "بدون عنوان" }),
+                item.isFavorite && jsx("span", { className: "inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/12 px-2 py-0.5 text-xs text-amber-200", children: [jsx(Star, { className: "h-3 w-3 fill-current" }), "مفضلة"] })
+              ] }),
+              jsx("p", { className: "mt-2 text-sm text-gray-500", children: [getTypeLabel(contentTypes, item.type), getSubtypeLabel(contentTypes, item.type, item.subtype)].filter(Boolean).join(" / ") || "غير مصنف" }),
               item.path && jsxs("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
                 jsx("p", { className: "max-w-2xl break-all text-xs text-gray-600", dir: "ltr", children: item.path }),
-                jsx("button", { type: "button", onClick: copyPath, className: "inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1 text-xs text-gray-400 hover:bg-white/5 hover:text-white", children: [jsx(Copy, { className: "h-3.5 w-3.5" }), "نسخ"] })
-              ] })
+                jsx("button", { type: "button", onClick: copyPath, className: "inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1 text-xs text-gray-400 hover:bg-white/5 hover:text-white transition-colors", children: [jsx(Copy, { className: "h-3.5 w-3.5" }), "نسخ"] })
+              ] }),
+              item.isDeleted && jsx("span", { className: "mt-3 inline-flex items-center gap-1.5 rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs text-red-300", children: "محذوف — في سلة المحذوفات" })
             ] }),
             jsxs("div", { className: "flex flex-wrap gap-2", children: [
-              jsx("button", { type: "button", onClick: () => toggleFavorite?.(item.id), className: "rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200 hover:bg-amber-500/15", children: item.isFavorite ? "إزالة المفضلة" : "مفضلة" }),
-              jsx("button", { type: "button", onClick: () => setEditing((value) => !value), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:bg-white/5", children: [jsx(PenLine, { className: "h-4 w-4" }), editing ? "إغلاق التحرير" : "تحرير"] }),
-              jsx("button", { type: "button", onClick: deleteOrRestore, className: "inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200 hover:bg-red-500/15", children: [item.isDeleted ? jsx(RefreshCw, { className: "h-4 w-4" }) : jsx(Trash2, { className: "h-4 w-4" }), item.isDeleted ? "استعادة" : "حذف"] })
+              jsx("button", { type: "button", onClick: () => toggleFavorite?.(item.id), className: `inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm transition-colors ${item.isFavorite ? "border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/15" : "border-white/10 text-gray-400 hover:bg-white/5 hover:text-amber-200"}`, children: [jsx(Star, { className: `h-4 w-4 ${item.isFavorite ? "fill-current" : ""}` }), item.isFavorite ? "إزالة المفضلة" : "مفضلة"] }),
+              jsx("button", { type: "button", onClick: () => setEditing((value) => !value), className: `va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm transition-colors ${editing ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200" : "text-gray-300 hover:bg-white/5"}`, children: [jsx(PenLine, { className: "h-4 w-4" }), editing ? "إغلاق التحرير" : "تحرير"] }),
+              jsx("button", { type: "button", onClick: deleteOrRestore, className: "inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/15", children: [item.isDeleted ? jsx(RefreshCw, { className: "h-4 w-4" }) : jsx(Trash2, { className: "h-4 w-4" }), item.isDeleted ? "استعادة" : "حذف"] })
             ] })
           ] })
         ] })
@@ -298,22 +309,33 @@ export function DetailPage() {
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
           ] }, field.id)) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })
         ] }),
-        jsxs("aside", { className: "va-preview-panel space-y-4 rounded-2xl va-surface-muted border p-5 text-right", children: [
+        jsxs("aside", { className: "va-preview-panel space-y-5 rounded-2xl va-surface-muted border p-5 text-right", children: [
           jsxs("section", { children: [
-            jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(Tags, { className: "h-5 w-5 text-emerald-400" }), "الوسوم"] }),
-            item.tags?.length ? jsx("div", { className: "mt-3 flex flex-wrap gap-2", children: item.tags.map((tag) => jsx("span", { className: "rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs text-gray-300", children: tag }, tag)) }) : jsx("p", { className: "mt-3 text-sm text-gray-500", children: "لا توجد وسوم." })
+            jsxs("h2", { className: "flex items-center gap-2 text-base font-bold text-white", children: [jsx(Tags, { className: "h-4 w-4 text-emerald-400" }), "الوسوم", item.tags?.length ? jsx("span", { className: "mr-auto rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-400", children: item.tags.length }) : null] }),
+            item.tags?.length ? jsx("div", { className: "mt-3 flex flex-wrap gap-1.5", children: item.tags.map((tag) => jsx("span", { className: "va-tag-chip inline-flex items-center rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1 text-xs text-gray-300 transition-colors hover:border-emerald-500/25 hover:text-emerald-200", children: tag }, tag)) }) : jsx("p", { className: "mt-3 text-sm text-gray-600", children: "لا توجد وسوم." })
           ] }),
-          jsxs("section", { children: [
-            jsx("h2", { className: "text-lg font-bold text-white", children: "النشاط" }),
-            jsx("p", { className: "mt-2 text-xs text-gray-600", children: `أنشئ: ${item.createdAt ? formatDateTime(item.createdAt) : "—"}` }),
-            jsx("p", { className: "text-xs text-gray-600", children: `آخر تحديث: ${item.updatedAt ? formatDateTime(item.updatedAt) : "—"}` }),
-            jsx("p", { className: "text-xs text-gray-600", children: `الإصدار: ${formatNumber(item.version || 1)}` })
+          jsxs("section", { className: "rounded-xl va-surface-subtle border p-3 space-y-2", children: [
+            jsx("h2", { className: "text-xs font-semibold uppercase tracking-wide text-gray-600", children: "معلومات العنصر" }),
+            jsxs("div", { className: "space-y-1.5", children: [
+              jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                jsx("span", { className: "text-xs text-gray-600", children: "أنشئ" }),
+                jsx("span", { className: "text-xs text-gray-400", children: item.createdAt ? formatDateTime(item.createdAt) : "—" })
+              ] }),
+              jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                jsx("span", { className: "text-xs text-gray-600", children: "آخر تحديث" }),
+                jsx("span", { className: "text-xs text-gray-400", children: item.updatedAt ? formatDateTime(item.updatedAt) : "—" })
+              ] }),
+              jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                jsx("span", { className: "text-xs text-gray-600", children: "الإصدار" }),
+                jsx("span", { className: "text-xs text-gray-400", children: `v${formatNumber(item.version || 1)}` })
+              ] })
+            ] })
           ] }),
           history.length > 0 && jsxs("section", { children: [
-            jsx("h2", { className: "text-lg font-bold text-white", children: "آخر التغييرات" }),
-            jsx("div", { className: "mt-3 space-y-2", children: history.map((record) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
-              jsx("p", { className: "text-sm font-semibold text-gray-300", children: record.action || "نشاط" }),
-              jsx("p", { className: "mt-1 text-xs text-gray-600", children: record.timestamp ? formatDateTime(record.timestamp) : "" })
+            jsx("h2", { className: "text-base font-bold text-white", children: "آخر التغييرات" }),
+            jsx("div", { className: "mt-3 space-y-2", children: history.slice(0, 5).map((record) => jsxs("div", { className: "rounded-xl va-surface-subtle border p-3", children: [
+              jsx("p", { className: "text-xs font-semibold text-gray-300", children: record.action === "create" ? "إنشاء" : record.action === "update" ? "تعديل" : record.action === "delete" ? "حذف" : record.action === "restore" ? "استعادة" : record.action || "نشاط" }),
+              jsx("p", { className: "mt-0.5 text-xs text-gray-600", children: record.timestamp ? formatDateTime(record.timestamp) : "" })
             ] }, record.id)) })
           ] })
         ] })
