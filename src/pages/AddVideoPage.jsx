@@ -29,7 +29,8 @@ import {
   parseVideoTags
 } from "../features/videos/viewModel.js";
 import { formatFileSize } from "../utils/formatting.js";
-import { MotionPage, PageHero, WorkflowStepper } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero, SaveIndicator, WorkflowStepper } from "../components/ui/V1Primitives.jsx";
+import { useFormSaveState } from "../components/common/useFormSaveState.js";
 
 
 const STEPS = [
@@ -38,6 +39,65 @@ const STEPS = [
   { id: "fields", label: "الحقول", detail: "حقول النوع المختار", icon: FileText },
   { id: "review", label: "المراجعة", detail: "تأكيد سريع قبل الحفظ", icon: Tags }
 ];
+
+// Draft persistence: writes to localStorage on every change so a refresh,
+// accidental navigation, or crash never loses in-progress data.
+const DRAFT_STORAGE_KEY = "videoArchive:addVideoDraft";
+const DRAFT_AUTO_SAVE_DELAY_MS = 600;
+
+function readStoredDraft() {
+  try {
+    const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function persistDraft(draft) {
+  try {
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearStoredDraft() {
+  try {
+    window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+  } catch {
+    /* noop */
+  }
+}
+
+// Each step decides whether the user can advance forward. The basic step
+// requires a title, the classify step a typeId, the fields step that all
+// required custom fields are filled, and review is always advanceable
+// (advancing = submitting).
+function getStepErrors(stepId, snapshot) {
+  const errors = [];
+  if (stepId === "basic") {
+    if (!snapshot.title.trim()) errors.push("أدخل عنوان الفيديو قبل المتابعة");
+  }
+  if (stepId === "classify") {
+    if (!snapshot.typeId) errors.push("اختر نوع المحتوى");
+  }
+  if (stepId === "fields") {
+    const missing = snapshot.fields.filter((field) => {
+      if (!field.required) return false;
+      const value = snapshot.metadata[fieldKey(field)];
+      return value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
+    });
+    if (missing.length) {
+      errors.push(`أكمل الحقول المطلوبة: ${missing.map((field) => field.label).join("، ")}`);
+    }
+  }
+  return errors;
+}
 
 function fieldKey(field) {
   return field.storageKey || field.name || field.id;
@@ -144,15 +204,23 @@ export function AddVideoPage() {
   } = useAppStore();
 
   const firstType = contentTypes.find((type) => type.status !== "archived") || contentTypes[0];
-  const [stepIndex, setStepIndex] = React.useState(0);
-  const [title, setTitle] = React.useState("");
-  const [path, setPath] = React.useState("");
-  const [thumbnail, setThumbnail] = React.useState("");
-  const [notes, setNotes] = React.useState("");
-  const [tags, setTags] = React.useState("");
-  const [typeId, setTypeId] = React.useState(firstType?.id || "");
-  const [subtypeId, setSubtypeId] = React.useState("");
-  const [metadata, setMetadata] = React.useState({});
+
+  // Hydrate from any pending draft from a previous session so users
+  // never lose progress to a refresh or accidental navigation.
+  const initialDraft = React.useMemo(() => readStoredDraft(), []);
+  const [stepIndex, setStepIndex] = React.useState(initialDraft?.stepIndex ?? 0);
+  const [title, setTitle] = React.useState(initialDraft?.title ?? "");
+  const [path, setPath] = React.useState(initialDraft?.path ?? "");
+  const [thumbnail, setThumbnail] = React.useState(initialDraft?.thumbnail ?? "");
+  const [notes, setNotes] = React.useState(initialDraft?.notes ?? "");
+  const [tags, setTags] = React.useState(initialDraft?.tags ?? "");
+  const [typeId, setTypeId] = React.useState(initialDraft?.typeId ?? firstType?.id ?? "");
+  const [subtypeId, setSubtypeId] = React.useState(initialDraft?.subtypeId ?? "");
+  const [metadata, setMetadata] = React.useState(initialDraft?.metadata ?? {});
+  const [draftRestored, setDraftRestored] = React.useState(!!initialDraft);
+  const [stepError, setStepError] = React.useState(null);
+  const draftSave = useFormSaveState();
+  const submitSave = useFormSaveState();
 
   // Explicit ids for each visible control so screen readers can
   // announce label+input pairs even when the layout splits them.
@@ -184,6 +252,37 @@ export function AddVideoPage() {
     if (subtypeId && !subtypes.some((subtype) => subtype.id === subtypeId)) setSubtypeId("");
   }, [subtypeId, subtypes]);
 
+  // Debounced auto-save of the current draft so a refresh or crash
+  // never costs the user their in-progress work. We skip empty drafts
+  // so we don't litter localStorage on first visit.
+  React.useEffect(() => {
+    const isDirty = title || path || thumbnail || notes || tags || subtypeId || Object.keys(metadata).length > 0;
+    if (!isDirty) return undefined;
+    const timer = window.setTimeout(() => {
+      const ok = persistDraft({
+        stepIndex, title, path, thumbnail, notes, tags, typeId, subtypeId, metadata,
+        savedAt: new Date().toISOString()
+      });
+      if (ok) draftSave.succeed();
+      else draftSave.fail(new Error("تعذّر حفظ المسودة محليًا"));
+    }, DRAFT_AUTO_SAVE_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [draftSave, metadata, notes, path, stepIndex, subtypeId, tags, thumbnail, title, typeId]);
+
+  // Surface a one-shot toast confirming the restored draft, then clear
+  // the flag so it doesn't fire again on every re-render.
+  React.useEffect(() => {
+    if (draftRestored) {
+      showToast?.("تمت استعادة مسودة سابقة", "info");
+      setDraftRestored(false);
+    }
+  }, [draftRestored, showToast]);
+
+  // Clear validation errors as soon as the user moves to a new step.
+  React.useEffect(() => {
+    setStepError(null);
+  }, [stepIndex]);
+
   const updateMetadata = (key, value) => setMetadata((current) => ({ ...current, [key]: value }));
   const applyPrimaryLocalFile = (file) => {
     const patch = createVideoLocalFilePatch(file, { currentTitle: title });
@@ -206,7 +305,12 @@ export function AddVideoPage() {
       metadata
     });
     try {
+      submitSave.begin();
       await addVideoItem?.(item);
+      submitSave.succeed();
+      // Successful submit invalidates the draft so the next AddVideo
+      // visit starts clean.
+      clearStoredDraft();
       showToast?.("تمت إضافة الفيديو", "success");
       if (addAnother) {
         setTitle("");
@@ -221,8 +325,35 @@ export function AddVideoPage() {
       setSelectedItemId?.(item.id);
       setCurrentPage?.("detail");
     } catch (error) {
+      submitSave.fail(error);
       showToast?.("تعذر إضافة الفيديو", "error");
     }
+  };
+
+  const tryAdvance = () => {
+    const errors = getStepErrors(currentStep.id, { title, typeId, fields, metadata });
+    if (errors.length) {
+      setStepError(errors.join(" — "));
+      return;
+    }
+    setStepError(null);
+    setStepIndex((value) => Math.min(STEPS.length - 1, value + 1));
+  };
+
+  const resetDraft = () => {
+    clearStoredDraft();
+    setTitle("");
+    setPath("");
+    setThumbnail("");
+    setNotes("");
+    setTags("");
+    setTypeId(firstType?.id || "");
+    setSubtypeId("");
+    setMetadata({});
+    setStepIndex(0);
+    setStepError(null);
+    draftSave.reset();
+    showToast?.("تم مسح المسودة", "info");
   };
 
   return jsxs(MotionPage, {
@@ -306,12 +437,22 @@ export function AddVideoPage() {
           jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `حقول مخصصة: ${Object.keys(metadata).length}` })
         ] })
       ] }),
+      stepError && jsx("div", { role: "alert", className: "rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-200", children: stepError }),
       jsxs("div", { className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3", children: [
-        jsx("button", { type: "button", disabled: stepIndex <= 0, onClick: () => setStepIndex((value) => Math.max(0, value - 1)), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"] }),
+        jsxs("div", { className: "flex items-center gap-3", children: [
+          jsx("button", { type: "button", disabled: stepIndex <= 0, onClick: () => setStepIndex((value) => Math.max(0, value - 1)), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"] }),
+          jsx(SaveIndicator, {
+            state: submitSave.state !== "idle" ? submitSave.state : draftSave.state,
+            message: submitSave.state !== "idle"
+              ? (submitSave.isSaving ? "يحفظ الفيديو..." : submitSave.isSaved ? "تم الحفظ" : "تعذر الحفظ")
+              : (draftSave.isSaving ? "يحفظ المسودة..." : draftSave.isSaved ? "تم حفظ المسودة" : null)
+          })
+        ] }),
         jsxs("div", { className: "flex flex-wrap gap-2", children: [
-          stepIndex < STEPS.length - 1 && jsx("button", { type: "button", onClick: () => setStepIndex((value) => Math.min(STEPS.length - 1, value + 1)), className: "va-primary-button inline-flex items-center gap-2  rounded-xl px-4 py-2 text-sm font-semibold text-white", children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })] }),
-          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(false), className: "va-primary-button  rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وفتح التفاصيل" }),
-          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave, onClick: () => save(true), className: "va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وإضافة آخر" })
+          jsx("button", { type: "button", onClick: resetDraft, className: "rounded-xl border border-white/10 px-3 py-2 text-xs text-gray-300 hover:bg-white/5", title: "مسح المسودة المحفوظة محليًا", children: "إعادة تعيين" }),
+          stepIndex < STEPS.length - 1 && jsxs("button", { type: "button", onClick: tryAdvance, className: "va-primary-button inline-flex items-center gap-2  rounded-xl px-4 py-2 text-sm font-semibold text-white", children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })] }),
+          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave || submitSave.isSaving, onClick: () => save(false), className: "va-primary-button  rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وفتح التفاصيل" }),
+          stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave || submitSave.isSaving, onClick: () => save(true), className: "va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وإضافة آخر" })
         ] })
       ] })
     ]
