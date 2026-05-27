@@ -3,7 +3,27 @@ export const ONBOARDING_STEPS = [
   { id: "security", label: "الحماية", detail: "اختيار الإعداد الآمن أو البدء السريع." },
   { id: "admin", label: "المدير", detail: "تعريف كلمة مرور المدير عند اختيار الإعداد الآمن." },
   { id: "appearance", label: "المظهر", detail: "اختيار Ink Slate أو Warm Off-white ولون التفاعل." },
-  { id: "interface", label: "الواجهة", detail: "شرح الشريط الجانبي، شريط السياق، لوحة التحكم، ومركز البيانات." }
+  { id: "interface", label: "الواجهة", detail: "شرح الشريط الجانبي، شريط السياق، لوحة التحكم، ومركز البيانات." },
+  { id: "shortcuts", label: "الاختصارات", detail: "أهم اختصارات لوحة المفاتيح لتسريع العمل اليومي." },
+  { id: "data", label: "البيانات", detail: "كيف تحفظ نسخة احتياطية، تستورد، أو تنقل لجهاز آخر." }
+];
+
+// Power-user keyboard shortcuts surfaced during onboarding so first-time
+// users discover them without having to dig into the Help page.
+export const ONBOARDING_SHORTCUTS = [
+  { keys: ["Ctrl", "K"], label: "لوحة الأوامر", detail: "بحث سريع في كل الإجراءات والصفحات." },
+  { keys: ["A"], label: "إضافة فيديو سريع", detail: "افتح نافذة الإضافة المنبثقة من أي صفحة." },
+  { keys: ["/"], label: "تركيز البحث", detail: "اقفز إلى حقل البحث في الأرشيف." },
+  { keys: ["?"], label: "قائمة الاختصارات", detail: "افتح قائمة كل الاختصارات الكاملة." }
+];
+
+// Data-center capabilities introduced during onboarding so users know
+// where backup, import, and transfer flows live before they need them.
+export const ONBOARDING_DATA_TOPICS = [
+  { id: "backup", label: "النسخ الاحتياطي", detail: "صدّر كل أرشيفك كملف JSON يمكن استعادته لاحقاً." },
+  { id: "import", label: "الاستيراد", detail: "ادمج نسخة سابقة أو استورد من ملف Excel." },
+  { id: "transfer", label: "النقل بين الأجهزة", detail: "أنشئ ملف نقل مع checksum لاستعادته على جهاز آخر." },
+  { id: "audit", label: "سجل العمليات", detail: "تتبع من غيّر ماذا ومتى لكل عملية على الأرشيف." }
 ];
 
 export const ONBOARDING_THEME_OPTIONS = [
