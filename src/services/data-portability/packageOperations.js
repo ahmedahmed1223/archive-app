@@ -22,8 +22,13 @@ import { safeJsonParse, sanitizePlainData } from "./json.js";
  * device name) OR an object `{ deviceId, deviceName }`. The richer
  * form is preferred — it lets receiving devices recognize a package
  * from a known peer for future delta/conflict resolution work.
+ *
+ * Pass `targetDeviceId` to mark the package as a delta intended for
+ * a specific peer (the importer can then advance its own clock for
+ * that peer). Pass `mode: "delta"` to add metadata that signals
+ * this isn't a full replacement.
  */
-export function createTransferPackage(state, sourceDevice) {
+export function createTransferPackage(state, sourceDevice, options = {}) {
   const payload = createPortableArchivePayload(state);
   const cleanPayload = sanitizePlainData(payload);
   const checksum = calculateTransferChecksum(stableStringifyForChecksum(cleanPayload));
@@ -40,6 +45,9 @@ export function createTransferPackage(state, sourceDevice) {
     exportedAt: new Date().toISOString(),
     sourceDeviceName,
     sourceDeviceId,
+    targetDeviceId: options.targetDeviceId || null,
+    mode: options.mode || "full",
+    baseSyncFloor: options.baseSyncFloor || null,
     counts: getPortablePayloadCounts(cleanPayload),
     checksum,
     payload: cleanPayload

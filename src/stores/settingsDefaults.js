@@ -37,7 +37,20 @@ export function defaultSettings() {
     systemHealth: {
       lastCheckAt: null,
       startupLastStatus: null
-    }
+    },
+    // Sync peers registry: every transfer package sent or received
+    // adds/updates an entry here keyed by the peer deviceId. The
+    // delta-export path reads `lastSentSyncFloor` to decide which
+    // entities to include.
+    //
+    //   syncPeers: {
+    //     [deviceId]: {
+    //       deviceId, deviceName,
+    //       lastSentAt, lastReceivedAt,
+    //       lastSentSyncFloor: { [entityId]: lastSentSyncVersion }
+    //     }
+    //   }
+    syncPeers: {}
   };
 }
 
@@ -47,6 +60,7 @@ export function mergeSettings(current = {}, patch = {}) {
     ...patch,
     ui: { ...(current.ui || {}), ...(patch.ui || {}) },
     notifications: { ...(current.notifications || {}), ...(patch.notifications || {}) },
-    systemHealth: { ...(current.systemHealth || {}), ...(patch.systemHealth || {}) }
+    systemHealth: { ...(current.systemHealth || {}), ...(patch.systemHealth || {}) },
+    syncPeers: { ...(current.syncPeers || {}), ...(patch.syncPeers || {}) }
   };
 }
