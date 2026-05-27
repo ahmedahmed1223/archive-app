@@ -118,15 +118,39 @@ export async function importNormalizedPayload(payload, mode = "merge") {
   const validation = validateBackupData(normalizedPayload);
   if (!validation.valid) return { success: false, errors: validation.errors };
 
+  // Snapshot the current DB so we can roll back if the write fails or the
+  // post-write integrity check detects a count mismatch.
   const previousSnapshot = await getIndexedDbDataSnapshot();
+
   try {
+    let writeCounts = null;
     if (mode === "replace") {
-      await writeNormalizedDataToIndexedDb(normalizedPayload);
+      writeCounts = await writeNormalizedDataToIndexedDb(normalizedPayload);
       await writeStorageManifest("استبدال كامل للبيانات", normalizedPayload);
     } else {
       await mergeNormalizedPayload(normalizedPayload);
     }
-    return { success: true, errors: [], data: normalizedPayload };
+
+    // Post-write integrity check (only meaningful for "replace" mode where
+    // we cleared then wrote). If the in-DB counts don't match the payload
+    // counts the transaction lied somehow — restore the snapshot.
+    if (mode === "replace" && writeCounts) {
+      const expected = {
+        contentTypes: normalizedPayload.contentTypes?.length || 0,
+        videoItems: normalizedPayload.videoItems?.length || 0,
+        virtualCollections: normalizedPayload.virtualCollections?.length || 0,
+        vocabulary: normalizedPayload.vocabulary?.length || 0,
+        hierarchicalTags: normalizedPayload.hierarchicalTags?.length || 0
+      };
+      const mismatches = Object.keys(expected)
+        .filter((key) => writeCounts[key] !== expected[key])
+        .map((key) => `${key}: متوقع ${expected[key]}، مكتوب ${writeCounts[key]}`);
+      if (mismatches.length > 0) {
+        throw new Error(`تعارض في عدد السجلات بعد الكتابة (${mismatches.join("، ")})`);
+      }
+    }
+
+    return { success: true, errors: [], data: normalizedPayload, counts: writeCounts };
   } catch (error) {
     try {
       await writeNormalizedDataToIndexedDb(previousSnapshot);

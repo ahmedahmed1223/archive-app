@@ -145,15 +145,15 @@ function HistoryRecord({ record, itemTitle, index, settings }) {
         ]
       }),
       record.action === "update" && record.field && jsxs("div", {
-        className: "mt-3 grid gap-2 rounded-xl va-surface-muted border p-3 text-xs md:grid-cols-2",
+        className: "mt-3 grid gap-1.5 rounded-xl va-surface-muted border p-3 text-xs md:grid-cols-2",
         children: [
-          jsxs("div", { className: "min-w-0", children: [
-            jsx("p", { className: "mb-1 text-red-300", children: "القيمة السابقة" }),
-            jsx("p", { className: "truncate font-mono text-gray-500", dir: "ltr", children: formatHistoryValue(record.oldValue) })
+          jsxs("div", { className: "min-w-0 rounded-lg border border-red-500/15 bg-red-500/8 p-2", children: [
+            jsx("p", { className: "mb-1.5 font-semibold text-red-300", children: "القيمة السابقة" }),
+            jsx("p", { className: "truncate font-mono text-gray-400", dir: "ltr", children: formatHistoryValue(record.oldValue) })
           ] }),
-          jsxs("div", { className: "min-w-0", children: [
-            jsx("p", { className: "mb-1 text-emerald-300", children: "القيمة الجديدة" }),
-            jsx("p", { className: "truncate font-mono text-gray-500", dir: "ltr", children: formatHistoryValue(record.newValue) })
+          jsxs("div", { className: "min-w-0 rounded-lg border border-emerald-500/15 bg-emerald-500/8 p-2", children: [
+            jsx("p", { className: "mb-1.5 font-semibold text-emerald-300", children: "القيمة الجديدة" }),
+            jsx("p", { className: "truncate font-mono text-gray-400", dir: "ltr", children: formatHistoryValue(record.newValue) })
           ] })
         ]
       })

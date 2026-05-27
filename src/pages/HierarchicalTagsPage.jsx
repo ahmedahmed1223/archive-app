@@ -124,7 +124,7 @@ function TagNode({
             "aria-label": isExpanded ? "طي الوسم" : "توسيع الوسم",
             children: hasChildren ? isExpanded ? jsx(ChevronDown, { className: "h-4 w-4" }) : jsx(ChevronLeft, { className: "h-4 w-4" }) : jsx(ChevronLeft, { className: "h-4 w-4" })
           }),
-          jsx("span", { className: "h-3 w-3 shrink-0 rounded-full", style: { backgroundColor: tag.color || "#10b981" } }),
+          jsx("span", { className: "h-3 w-3 shrink-0 rounded-full transition-shadow", style: { backgroundColor: tag.color || "#10b981", boxShadow: `0 0 0 2px ${tag.color || "#10b981"}28` } }),
           jsxs("div", { className: "min-w-0 flex-1", children: [
             jsx("p", { className: "truncate text-sm font-semibold text-white group-hover:text-emerald-200", children: tag.name || "وسم بدون اسم" }),
             level > 0 && jsx("p", { className: "truncate text-xs text-gray-600", children: getHierarchicalTagPath(tag.id, tags) })
@@ -161,19 +161,21 @@ function TagNode({
 }
 
 function FlatTagCard({ tag, tags, index, onEdit, onDelete }) {
+  const accentColor = tag.color || "#10b981";
   return jsxs(motion.article, {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.18, delay: Math.min(index, 10) * 0.025 },
-    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right",
+    className: "va-entity-card rounded-2xl va-surface-muted border p-4 text-right transition-all hover:border-white/20",
+    style: { boxShadow: `inset -3px 0 0 0 ${accentColor}44` },
     children: [
       jsxs("div", { className: "flex items-start justify-between gap-3", children: [
-        jsxs("div", { className: "min-w-0", children: [
+        jsxs("div", { className: "min-w-0 flex-1", children: [
           jsxs("div", { className: "flex items-center gap-2", children: [
-            jsx("span", { className: "h-3 w-3 rounded-full", style: { backgroundColor: tag.color || "#10b981" } }),
+            jsx("span", { className: "h-3 w-3 flex-shrink-0 rounded-full", style: { backgroundColor: accentColor, boxShadow: `0 0 0 2px ${accentColor}30` } }),
             jsx("h3", { className: "truncate text-base font-bold text-white", children: tag.name || "وسم بدون اسم" })
           ] }),
-          jsx("p", { className: "mt-2 truncate text-xs text-gray-500", children: getHierarchicalTagPath(tag.id, tags) || tag.name })
+          jsx("p", { className: "mt-1.5 truncate text-xs text-gray-500", children: getHierarchicalTagPath(tag.id, tags) || tag.name })
         ] }),
         jsxs("div", { className: "flex shrink-0 gap-1", children: [
           jsx("button", { type: "button", onClick: onEdit, className: "rounded-lg p-2 text-gray-500 hover:bg-white/5 hover:text-white", "aria-label": `تعديل ${tag.name}`, children: jsx(PenLine, { className: "h-4 w-4" }) }),

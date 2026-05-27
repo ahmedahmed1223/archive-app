@@ -17,6 +17,30 @@ import { defaultSettings, mergeSettings } from "../settingsDefaults.js";
 import { normalizeChangeRecord, normalizeUser } from "../storeModels.js";
 import { persistList, persistSettings } from "../storePersistence.js";
 import { undoRedoManager } from "../../components/common/undoManager.js";
+import { ACTIONS, PermissionError, requirePermission } from "../../features/users/permissions.js";
+
+/**
+ * Slice-level permission guard. Reads currentUser from the auth store
+ * and throws PermissionError if the action isn't allowed. The thrown
+ * error is caught at the slice boundary, logged to audit_logs as a
+ * denial, and surfaced as a toast — UI hiding (useCanPerform) and
+ * this guard together form defense in depth.
+ */
+function checkPermission(get, getAuthStore, action) {
+  const user = getAuthStore().getState().currentUser;
+  try {
+    requirePermission(user, action);
+    return true;
+  } catch (error) {
+    // Record the denial in audit_logs so admins can see attempts.
+    get().addAuditLog?.("permission.denied", null, "auth", {
+      action,
+      role: error.role,
+      username: error.username
+    });
+    throw error;
+  }
+}
 
 export const archiveInitialState = {
   videoItems: [],
@@ -120,6 +144,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return log;
     },
     addVideoItem: async (item) => {
+      checkPermission(get, getAuthStore, ACTIONS.VIDEO_CREATE);
       const value = createVideoItemValue(item);
       const record = normalizeChangeRecord({ itemId: value.id, action: "create", title: value.title, timestamp: nowIso() });
       set((state) => ({ videoItems: [value, ...state.videoItems], changeHistory: [record, ...state.changeHistory] }));
@@ -129,6 +154,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return value;
     },
     updateVideoItem: async (item) => {
+      checkPermission(get, getAuthStore, ACTIONS.VIDEO_UPDATE);
       const updated = createVideoItemValue({ ...item, updatedAt: nowIso(), id: item.id });
       const record = normalizeChangeRecord({ itemId: updated.id, action: "update", title: updated.title, timestamp: nowIso() });
       set((state) => ({
@@ -141,6 +167,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return updated;
     },
     deleteVideoItem: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.VIDEO_DELETE);
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
       const updated = { ...target, isDeleted: true, updatedAt: nowIso() };
@@ -162,6 +189,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return true;
     },
     restoreVideoItem: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.VIDEO_RESTORE);
       const target = get().videoItems.find((item) => item.id === id);
       if (!target) return false;
       const updated = { ...target, isDeleted: false, updatedAt: nowIso() };
@@ -197,6 +225,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return true;
     },
     bulkDeleteItems: async (ids = [], options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.VIDEO_BULK_DELETE);
       const idSet = new Set(ids);
       const previous = get().videoItems.filter((item) => idSet.has(item.id)).map((item) => ({ ...item }));
       if (!previous.length) return false;
@@ -309,6 +338,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return true;
     },
     emptyTrash: async () => {
+      checkPermission(get, getAuthStore, ACTIONS.VIDEO_BULK_DELETE);
       const deleted = get().videoItems.filter((item) => item.isDeleted);
       set((state) => ({ videoItems: state.videoItems.filter((item) => !item.isDeleted) }));
       for (const item of deleted) await dbDelete(STORES.ITEMS, item.id);
@@ -317,18 +347,21 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       }
     },
     addContentType: async (type) => {
+      checkPermission(get, getAuthStore, ACTIONS.TYPES_MANAGE);
       const value = createContentTypeValue(type);
       set((state) => ({ contentTypes: [...state.contentTypes, value] }));
       await dbPut(STORES.TYPES, value);
       return value;
     },
     updateContentType: async (type) => {
+      checkPermission(get, getAuthStore, ACTIONS.TYPES_MANAGE);
       const updated = createContentTypeValue({ ...type, id: type.id, createdAt: type.createdAt });
       set((state) => ({ contentTypes: state.contentTypes.map((item) => item.id === updated.id ? updated : item) }));
       await dbPut(STORES.TYPES, updated);
       return updated;
     },
     deleteContentType: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.TYPES_MANAGE);
       const previous = get().contentTypes.find((item) => item.id === id);
       const updated = get().contentTypes.map((item) => item.id === id ? { ...item, status: "archived", archivedAt: nowIso(), updatedAt: nowIso() } : item);
       set({ contentTypes: updated });
@@ -355,18 +388,21 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return true;
     },
     addVirtualCollection: async (collection) => {
+      checkPermission(get, getAuthStore, ACTIONS.COLLECTIONS_MANAGE);
       const value = createVirtualCollectionValue(collection);
       set((state) => ({ virtualCollections: [value, ...state.virtualCollections] }));
       await dbPut(STORES.COLLECTIONS, value);
       return value;
     },
     updateVirtualCollection: async (collection) => {
+      checkPermission(get, getAuthStore, ACTIONS.COLLECTIONS_MANAGE);
       const updated = createVirtualCollectionValue({ ...collection, id: collection.id, createdAt: collection.createdAt });
       set((state) => ({ virtualCollections: state.virtualCollections.map((item) => item.id === updated.id ? updated : item) }));
       await dbPut(STORES.COLLECTIONS, updated);
       return updated;
     },
     deleteVirtualCollection: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.COLLECTIONS_MANAGE);
       const target = get().virtualCollections.find((item) => item.id === id);
       if (!target) return false;
       set((state) => ({ virtualCollections: state.virtualCollections.filter((item) => item.id !== id) }));
@@ -402,18 +438,21 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return get().updateVirtualCollection(updated);
     },
     addVocabularyEntry: async (entry) => {
+      checkPermission(get, getAuthStore, ACTIONS.VOCABULARY_MANAGE);
       const value = { ...entry, id: entry.id || generateId("vocab"), updatedAt: nowIso(), createdAt: entry.createdAt || nowIso() };
       set((state) => ({ vocabulary: [value, ...state.vocabulary] }));
       await dbPut(STORES.VOCABULARY, value);
       return value;
     },
     updateVocabularyEntry: async (entry) => {
+      checkPermission(get, getAuthStore, ACTIONS.VOCABULARY_MANAGE);
       const updated = { ...entry, updatedAt: nowIso() };
       set((state) => ({ vocabulary: state.vocabulary.map((item) => item.id === updated.id ? updated : item) }));
       await dbPut(STORES.VOCABULARY, updated);
       return updated;
     },
     deleteVocabularyEntry: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.VOCABULARY_MANAGE);
       const target = get().vocabulary.find((item) => item.id === id);
       if (!target) return false;
       set((state) => ({ vocabulary: state.vocabulary.filter((item) => item.id !== id) }));
@@ -436,18 +475,21 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return true;
     },
     addHierarchicalTag: async (tag) => {
+      checkPermission(get, getAuthStore, ACTIONS.HTAGS_MANAGE);
       const value = { ...tag, id: tag.id || generateId("htag"), updatedAt: nowIso(), createdAt: tag.createdAt || nowIso() };
       set((state) => ({ hierarchicalTags: [value, ...state.hierarchicalTags] }));
       await dbPut(STORES.HTAGS, value);
       return value;
     },
     updateHierarchicalTag: async (tag) => {
+      checkPermission(get, getAuthStore, ACTIONS.HTAGS_MANAGE);
       const updated = { ...tag, updatedAt: nowIso() };
       set((state) => ({ hierarchicalTags: state.hierarchicalTags.map((item) => item.id === updated.id ? updated : item) }));
       await dbPut(STORES.HTAGS, updated);
       return updated;
     },
     deleteHierarchicalTag: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.HTAGS_MANAGE);
       const childIds = new Set([id]);
       let changed = true;
       while (changed) {
@@ -494,6 +536,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return get().videoItems.filter((item) => (item.tags || []).some((value) => names.has(value))).length;
     },
     addUser: async (user) => {
+      checkPermission(get, getAuthStore, ACTIONS.USER_MANAGE);
       const value = normalizeUser(user);
       if (get().users.some((item) => item.username.toLowerCase() === value.username.toLowerCase())) return false;
       set((state) => ({ users: [...state.users, value] }));
@@ -512,6 +555,7 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       return updated;
     },
     deleteUser: async (id, options = {}) => {
+      if (!options.skipUndo) checkPermission(get, getAuthStore, ACTIONS.USER_MANAGE);
       const target = get().users.find((item) => item.id === id);
       if (!target) return false;
       const wasActive = target.isActive !== false;

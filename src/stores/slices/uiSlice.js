@@ -11,7 +11,8 @@ export const uiInitialState = {
   notifications: [],
   notificationHistory: [],
   notificationCenterOpen: false,
-  backgroundOperation: null
+  backgroundOperation: null,
+  recentSearches: []
 };
 
 export const uiActionKeys = [
@@ -20,7 +21,9 @@ export const uiActionKeys = [
   "showToast",
   "toggleNotificationCenter",
   "openDataTab",
-  "openHelpSection"
+  "openHelpSection",
+  "addRecentSearch",
+  "clearRecentSearches"
 ];
 
 function scheduleNotificationDismiss(callback, timeout) {
@@ -77,6 +80,15 @@ export function createUiActions({ set, get }) {
       set({ currentPage: "help", selectedItemId: null });
     },
     setBackgroundOperation: (backgroundOperation) => set({ backgroundOperation }),
-    cancelBackgroundOperation: () => set({ backgroundOperation: null })
+    cancelBackgroundOperation: () => set({ backgroundOperation: null }),
+    addRecentSearch: (query) => {
+      if (!query || !query.trim()) return;
+      const normalized = query.trim();
+      set((state) => {
+        const filtered = (state.recentSearches || []).filter((item) => item !== normalized);
+        return { recentSearches: [normalized, ...filtered].slice(0, 12) };
+      });
+    },
+    clearRecentSearches: () => set({ recentSearches: [] })
   };
 }

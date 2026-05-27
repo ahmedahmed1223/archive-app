@@ -845,6 +845,108 @@ html.light .va-tool-button {
   color: var(--va-text-soft);
 }
 
+/* Tag chip — pill-style label for displaying metadata tags */
+.va-tag-chip {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(7, 17, 31, 0.72);
+  color: var(--va-text-soft);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  cursor: default;
+  user-select: text;
+}
+
+.va-tag-chip:hover {
+  border-color: color-mix(in srgb, var(--va-action) 30%, transparent);
+  background: color-mix(in srgb, var(--va-action) 8%, transparent);
+  color: color-mix(in srgb, var(--va-action) 72%, #ffffff);
+}
+
+html.light .va-tag-chip {
+  border-color: rgba(120, 113, 108, 0.22);
+  background: rgba(241, 236, 227, 0.65);
+  color: #485466;
+}
+
+html.light .va-tag-chip:hover {
+  border-color: color-mix(in srgb, var(--va-action) 36%, transparent);
+  background: color-mix(in srgb, var(--va-action) 10%, rgba(255,255,255,0.8));
+  color: var(--va-action-strong);
+}
+
+/* Breadcrumb nav */
+.va-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--va-text-faint);
+}
+
+.va-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--va-control-radius);
+  color: var(--va-text-soft);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.va-breadcrumb-link:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--va-text-strong);
+}
+
+/* Inline stat row — label + value side by side */
+.va-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  font-size: 0.75rem;
+}
+
+.va-stat-row + .va-stat-row {
+  border-top: 1px solid var(--va-line-soft);
+}
+
+/* ── Collection / tag / vocabulary color-accent cards ── */
+/* The box-shadow inset accent transitions when active state changes.
+   These classes ensure the transition is smooth. */
+.va-entity-card[style*="box-shadow"] {
+  transition: box-shadow 0.2s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+/* Metric badge used inside entity cards (item counts, video counts, etc.) */
+.va-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--va-text-soft);
+  background: rgba(255,255,255,0.04);
+  white-space: nowrap;
+}
+
+/* Category pill — colored category label inside vocabulary/collection cards */
+.va-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .va-sidebar {
   background: var(--va-ink-925) !important;
   border-inline-start: 1px solid var(--va-line-soft) !important;

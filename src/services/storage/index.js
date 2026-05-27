@@ -149,34 +149,100 @@ export async function getIndexedDbDataSnapshot() {
   };
 }
 
+/**
+ * Atomic replace of the IndexedDB stores using a single readwrite
+ * transaction. IndexedDB guarantees that if anything inside the
+ * transaction throws the browser rolls back every clear/put so the
+ * database stays consistent — there is no partial-write state.
+ *
+ * Behavior:
+ *  - Validates the payload shape before opening the transaction so a
+ *    malformed import is rejected before we touch storage.
+ *  - Clears DATA_STORES and (when users are supplied) USERS.
+ *  - Writes all records inside the same tx; the tx is awaited via
+ *    transactionDone so any abort/error throws back to the caller.
+ *  - Returns the count of records written per store so callers (and
+ *    the operation log) can verify the result matched the input.
+ *
+ * Throws ImportPayloadError with a structured `field` so callers can
+ * surface a specific message to the user instead of a generic failure.
+ */
+export class ImportPayloadError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = "ImportPayloadError";
+    this.field = field;
+  }
+}
+
+function ensureArrayOrEmpty(payload, key) {
+  const value = payload[key];
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) {
+    throw new ImportPayloadError(`الحقل "${key}" يجب أن يكون قائمة.`, key);
+  }
+  return value;
+}
+
 export async function writeNormalizedDataToIndexedDb(data = {}) {
+  if (!data || typeof data !== "object") {
+    throw new ImportPayloadError("حمولة الاستيراد غير صالحة.", "payload");
+  }
+
+  // Validate before opening the transaction so we never clear stores
+  // for a payload we cannot read.
+  const payload = {
+    contentTypes: ensureArrayOrEmpty(data, "contentTypes"),
+    videoItems: ensureArrayOrEmpty(data, "videoItems"),
+    changeHistory: ensureArrayOrEmpty(data, "changeHistory"),
+    bookmarks: ensureArrayOrEmpty(data, "bookmarks"),
+    relations: ensureArrayOrEmpty(data, "relations"),
+    virtualCollections: ensureArrayOrEmpty(data, "virtualCollections"),
+    vocabulary: ensureArrayOrEmpty(data, "vocabulary"),
+    hierarchicalTags: ensureArrayOrEmpty(data, "hierarchicalTags"),
+    auditLogs: ensureArrayOrEmpty(data, "auditLogs"),
+    users: Array.isArray(data.users) ? data.users : null,
+    settings: data.settings && typeof data.settings === "object" ? data.settings : null
+  };
+
   const db = await openStorageDb();
   const storeNames = Array.from(new Set([...DATA_STORES, STORES.USERS, STORES.SETTINGS]));
   const tx = db.transaction(storeNames, "readwrite");
 
   for (const storeName of DATA_STORES) tx.objectStore(storeName).clear();
-  if (Array.isArray(data.users) && data.users.length) tx.objectStore(STORES.USERS).clear();
+  if (payload.users && payload.users.length) tx.objectStore(STORES.USERS).clear();
 
-  const putMany = (storeName, records = []) => {
+  const putMany = (storeName, records) => {
     const store = tx.objectStore(storeName);
-    for (const record of records || []) {
-      if (record) store.put(record);
+    let written = 0;
+    for (const record of records) {
+      if (record) {
+        store.put(record);
+        written += 1;
+      }
     }
+    return written;
   };
 
-  putMany(STORES.TYPES, data.contentTypes);
-  putMany(STORES.ITEMS, data.videoItems);
-  putMany(STORES.HISTORY, data.changeHistory);
-  putMany(STORES.BOOKMARKS, data.bookmarks);
-  putMany(STORES.RELATIONS, data.relations);
-  putMany(STORES.COLLECTIONS, data.virtualCollections);
-  putMany(STORES.VOCABULARY, data.vocabulary);
-  putMany(STORES.HTAGS, data.hierarchicalTags);
-  putMany(STORES.AUDIT_LOGS, data.auditLogs);
-  if (Array.isArray(data.users) && data.users.length) putMany(STORES.USERS, data.users);
-  if (data.settings) tx.objectStore(STORES.SETTINGS).put({ ...data.settings, key: "app_settings" });
+  const counts = {
+    contentTypes: putMany(STORES.TYPES, payload.contentTypes),
+    videoItems: putMany(STORES.ITEMS, payload.videoItems),
+    changeHistory: putMany(STORES.HISTORY, payload.changeHistory),
+    bookmarks: putMany(STORES.BOOKMARKS, payload.bookmarks),
+    relations: putMany(STORES.RELATIONS, payload.relations),
+    virtualCollections: putMany(STORES.COLLECTIONS, payload.virtualCollections),
+    vocabulary: putMany(STORES.VOCABULARY, payload.vocabulary),
+    hierarchicalTags: putMany(STORES.HTAGS, payload.hierarchicalTags),
+    auditLogs: putMany(STORES.AUDIT_LOGS, payload.auditLogs),
+    users: payload.users && payload.users.length ? putMany(STORES.USERS, payload.users) : 0
+  };
+
+  if (payload.settings) {
+    tx.objectStore(STORES.SETTINGS).put({ ...payload.settings, key: "app_settings" });
+  }
 
   await transactionDone(tx);
+  return counts;
 }
 
 export async function writeStorageManifest(reason, data = {}) {

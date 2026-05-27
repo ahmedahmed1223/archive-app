@@ -98,8 +98,10 @@ export function DashboardPage() {
     settings,
     sqliteError,
     isPasswordSet,
+    recentSearches = [],
     setCurrentPage,
     setSelectedItemId,
+    setSearchQuery,
     updateSettings,
     runSystemHealthCheck,
     markItemViewed,
@@ -237,7 +239,7 @@ export function DashboardPage() {
           jsx(FormSection, {
             title: "آخر العناصر",
             icon: jsx(Bell, { className: "h-5 w-5 text-emerald-400" }),
-            actions: jsx("button", { type: "button", onClick: () => goTo("archive"), className: "text-sm text-emerald-300 hover:text-emerald-200", children: "فتح الأرشيف" }),
+            actions: jsx("button", { type: "button", onClick: () => goTo("archive"), className: "text-sm text-emerald-300 hover:text-emerald-200 transition-colors", children: "فتح الأرشيف ←" }),
             children: recentItems.length === 0 ? jsx(UXEmptyState, {
               icon: jsx(Video, { className: "h-7 w-7" }),
               title: "لا توجد فيديوهات بعد",
@@ -245,18 +247,38 @@ export function DashboardPage() {
               actions: jsx("button", { type: "button", onClick: () => goTo("add"), className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "إضافة أول فيديو" })
             }) : jsx("div", { className: "space-y-2", children: recentItems.map((item) => jsx(RecentItem, { item, onOpen: () => openItem(item) }, item.id)) })
           }),
-          jsx(FormSection, {
+          jsxs(FormSection, {
             title: "ملخص التنظيم",
             icon: jsx(Tags, { className: "h-5 w-5 text-emerald-400" }),
-            children: jsx("div", {
-              className: "grid grid-cols-2 gap-3",
-              children: [
-                jsx(MiniStat, { label: "أنواع", value: stats.types, hint: "بنية المحتوى", icon: jsx(Tags, { className: "h-4 w-4" }) }, "types"),
-                jsx(MiniStat, { label: "مجموعات", value: stats.collections, hint: "تنظيم مخصص", icon: jsx(Database, { className: "h-4 w-4" }) }, "collections"),
-                jsx(MiniStat, { label: "وسوم", value: stats.tags, hint: "هرمية", icon: jsx(Tags, { className: "h-4 w-4" }) }, "tags"),
-                jsx(MiniStat, { label: "آخر نشاط", value: latestAudit ? "موجود" : "—", hint: latestAudit ? formatDateTime(latestAudit.timestamp || latestAudit.createdAt) : "لا توجد سجلات", icon: jsx(Bell, { className: "h-4 w-4" }) }, "audit")
-              ]
-            })
+            children: [
+              jsx("div", {
+                className: "grid grid-cols-2 gap-3",
+                children: [
+                  jsx(MiniStat, { label: "أنواع", value: stats.types, hint: "بنية المحتوى", icon: jsx(Tags, { className: "h-4 w-4" }) }, "types"),
+                  jsx(MiniStat, { label: "مجموعات", value: stats.collections, hint: "تنظيم مخصص", icon: jsx(Database, { className: "h-4 w-4" }) }, "collections"),
+                  jsx(MiniStat, { label: "وسوم", value: stats.tags, hint: "هرمية", icon: jsx(Tags, { className: "h-4 w-4" }) }, "tags"),
+                  jsx(MiniStat, { label: "آخر نشاط", value: latestAudit ? "موجود" : "—", hint: latestAudit ? formatDateTime(latestAudit.timestamp || latestAudit.createdAt) : "لا توجد سجلات", icon: jsx(Bell, { className: "h-4 w-4" }) }, "audit")
+                ]
+              }),
+              recentSearches.length > 0 && jsxs("div", {
+                className: "mt-4 border-t border-white/5 pt-4",
+                children: [
+                  jsx("p", { className: "mb-2 text-xs font-semibold text-gray-600", children: "آخر عمليات البحث" }),
+                  jsx("div", {
+                    className: "flex flex-wrap gap-1.5",
+                    children: recentSearches.slice(0, 6).map((term) => jsx("button", {
+                      type: "button",
+                      onClick: () => {
+                        setSearchQuery?.(term);
+                        goTo("search");
+                      },
+                      className: "inline-flex items-center gap-1 rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1 text-xs text-gray-400 transition-colors hover:border-emerald-500/30 hover:text-emerald-300",
+                      children: [jsx(Search, { className: "h-3 w-3 opacity-60" }), term]
+                    }, term))
+                  })
+                ]
+              })
+            ]
           })
         ]
       })
