@@ -21,7 +21,13 @@ export function defaultSettings() {
       lastImportMode: "merge",
       transferLastMode: "merge",
       firstTaskChoice: "dashboard",
-      firstTaskChoiceUsed: false
+      firstTaskChoiceUsed: false,
+      // Device identity for multi-device sync. The real source of
+      // truth lives in localStorage (so device-name edits survive a
+      // settings reset), but we mirror them here so transfer packages
+      // can embed them without an extra IndexedDB roundtrip.
+      deviceId: null,
+      deviceName: null
     },
     notifications: {
       durationMs: 5500,

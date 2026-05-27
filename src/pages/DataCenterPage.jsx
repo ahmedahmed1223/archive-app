@@ -104,7 +104,22 @@ export function DataCenterPage() {
   const [favoritesOnly, setFavoritesOnly] = React.useState(false);
   const [selectedFormat, setSelectedFormat] = React.useState("json");
   const [importMode, setImportModeState] = React.useState(settings.ui?.lastImportMode || settings.ui?.transferLastMode || "merge");
-  const [sourceDeviceName, setSourceDeviceName] = React.useState(() => typeof navigator !== "undefined" ? navigator.platform || "هذا الجهاز" : "هذا الجهاز");
+  // Device identity is now seeded once on app boot by ensureDeviceIdentity
+  // and lives at settings.ui.deviceId / settings.ui.deviceName. Mirror
+  // the name into local state for the input control while the user edits.
+  const deviceId = settings.ui?.deviceId || null;
+  const [sourceDeviceName, setSourceDeviceName] = React.useState(() => settings.ui?.deviceName || "هذا الجهاز");
+  React.useEffect(() => {
+    const next = settings.ui?.deviceName;
+    if (next && next !== sourceDeviceName) setSourceDeviceName(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.ui?.deviceName]);
+  const commitDeviceName = React.useCallback(() => {
+    const trimmed = sourceDeviceName.trim();
+    if (trimmed && trimmed !== settings.ui?.deviceName) {
+      updateSettings?.({ ui: { ...(settings.ui || {}), deviceName: trimmed } });
+    }
+  }, [settings.ui, sourceDeviceName, updateSettings]);
   const [isWorking, setIsWorking] = React.useState(false);
   const [operationMessage, setOperationMessage] = React.useState("");
   const [importPreview, setImportPreview] = React.useState(null);
@@ -239,10 +254,11 @@ export function DataCenterPage() {
         });
         setOperationMessage(`تم تنزيل ${csvFiles.length} ملفات CSV.`);
       } else if (kind === "transfer") {
+        commitDeviceName();
         const transferPackage = createTransferPackage({
           ...useAppStore.getState(),
           ...exportPayload
-        }, sourceDeviceName.trim() || "هذا الجهاز");
+        }, { deviceId, deviceName: sourceDeviceName.trim() || "هذا الجهاز" });
         downloadArchiveBlob(new Blob([JSON.stringify(transferPackage, null, 2)], { type: "application/json;charset=utf-8" }), makeFileName("video-archive-transfer", "json"));
         setOperationMessage(`تم إنشاء ملف نقل آمن. checksum ${transferPackage.checksum}`);
       }
@@ -568,14 +584,24 @@ export function DataCenterPage() {
           jsxs("div", {
             className: "rounded-xl border border-white/5 bg-gray-950/25 p-4",
             children: [
-              jsx("h4", { className: "text-sm font-semibold text-white", children: "اسم الجهاز المصدر" }),
+              jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                jsx("h4", { className: "text-sm font-semibold text-white", children: "هوية هذا الجهاز" }),
+                deviceId && jsx("span", {
+                  className: "rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-mono text-emerald-200",
+                  dir: "ltr",
+                  title: deviceId,
+                  children: deviceId.split("_").pop().slice(0, 8)
+                })
+              ] }),
               jsx("input", {
                 value: sourceDeviceName,
                 onChange: (event) => setSourceDeviceName(event.target.value),
+                onBlur: commitDeviceName,
+                "aria-label": "اسم الجهاز",
                 className: "mt-3 w-full rounded-xl border border-white/10 bg-gray-950/50 px-3 py-2 text-sm text-white",
                 placeholder: "مثال: جهاز الأرشفة الرئيسي"
               }),
-              jsx("p", { className: "mt-3 text-xs leading-relaxed text-gray-500", children: "عند الاستيراد في الجهاز الآخر استخدم تبويب الاستيراد، وسيظهر فحص checksum والمعاينة قبل الدمج." })
+              jsx("p", { className: "mt-3 text-xs leading-relaxed text-gray-500", children: "هذه الهوية تُضمَّن في كل ملف نقل لتمييز الجهاز المرسل وتُخزّن محلياً فقط. الاسم قابل للتعديل أما المعرّف فثابت." })
             ]
           }),
           jsxs("div", {

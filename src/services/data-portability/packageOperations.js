@@ -16,17 +16,30 @@ import { validateBackupData } from "./validation.js";
 import { calculateTransferChecksum } from "./checksum.js";
 import { safeJsonParse, sanitizePlainData } from "./json.js";
 
-export function createTransferPackage(state, sourceDeviceName) {
+/**
+ * Build a transfer package envelope around the portable archive
+ * payload. `sourceDevice` can be a plain string (legacy positional
+ * device name) OR an object `{ deviceId, deviceName }`. The richer
+ * form is preferred — it lets receiving devices recognize a package
+ * from a known peer for future delta/conflict resolution work.
+ */
+export function createTransferPackage(state, sourceDevice) {
   const payload = createPortableArchivePayload(state);
   const cleanPayload = sanitizePlainData(payload);
   const checksum = calculateTransferChecksum(stableStringifyForChecksum(cleanPayload));
+  const deviceMeta = typeof sourceDevice === "string"
+    ? { deviceName: sourceDevice }
+    : (sourceDevice && typeof sourceDevice === "object" ? sourceDevice : {});
+  const sourceDeviceName = deviceMeta.deviceName || "جهاز غير مسمى";
+  const sourceDeviceId = deviceMeta.deviceId || null;
 
   return {
     packageType: TRANSFER_PACKAGE_TYPE,
     schemaVersion: TRANSFER_SCHEMA_VERSION,
     appVersion: TRANSFER_APP_VERSION,
     exportedAt: new Date().toISOString(),
-    sourceDeviceName: sourceDeviceName || "جهاز غير مسمى",
+    sourceDeviceName,
+    sourceDeviceId,
     counts: getPortablePayloadCounts(cleanPayload),
     checksum,
     payload: cleanPayload
