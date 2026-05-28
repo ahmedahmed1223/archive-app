@@ -28,6 +28,7 @@ import {
   PageHero,
   UXEmptyState
 } from "../components/ui/V1Primitives.jsx";
+import { KbdHint } from "../components/common/Kbd.jsx";
 import {
   createDashboardStats,
   getDashboardDemoItemIds
@@ -178,7 +179,12 @@ export function DashboardPage() {
           type: "button",
           onClick: () => goTo("add"),
           className: "va-primary-button inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white",
-          children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
+          title: "إضافة فيديو — اختصار A",
+          children: [
+            jsx(Video, { className: "h-4 w-4" }),
+            "إضافة فيديو",
+            jsx(KbdHint, { keys: ["A"], className: "opacity-80" })
+          ]
         }),
         children: [
           demoIds.length > 0 && !demoBannerDismissed && jsxs("div", {
@@ -236,7 +242,11 @@ export function DashboardPage() {
               ] })
             ] }),
             jsxs("div", { className: "flex flex-wrap gap-2", children: [
-              jsxs("button", { type: "button", onClick: () => goTo("add"), className: "va-primary-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white", children: [jsx(Video, { className: "h-4 w-4" }), "إضافة أول فيديو"] }),
+              jsxs("button", { type: "button", onClick: () => goTo("add"), className: "va-primary-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white", children: [
+                jsx(Video, { className: "h-4 w-4" }),
+                "إضافة أول فيديو",
+                jsx(KbdHint, { keys: ["A"], className: "opacity-80" })
+              ] }),
               jsxs("button", { type: "button", onClick: () => openDataTab("import"), className: "va-secondary-button inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/5", children: [jsx(Upload, { className: "h-4 w-4" }), "استيراد ملف نقل"] })
             ] })
           ] })
