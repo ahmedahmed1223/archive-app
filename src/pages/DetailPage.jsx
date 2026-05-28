@@ -139,7 +139,7 @@ export function DetailPage() {
   const history = React.useMemo(() => item ? changeHistory.filter((record) => record.itemId === item.id).sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()).slice(0, 10) : [], [changeHistory, item]);
   const previewSource = item?.path && isHtml5PreviewableVideo(item.path) ? getHtml5VideoPreviewSource(item.path) : null;
   const itemStats = [
-    { id: "type", label: "التصنيف", value: getTypeLabel(contentTypes, item.type) || "غير محدد", icon: Tags },
+    { id: "type", label: "التصنيف", value: getTypeLabel(contentTypes, item.type) || "غير محدد", icon: FileText },
     { id: "tags", label: "الوسوم", value: formatNumber(item.tags?.length || 0), icon: Tags },
     { id: "version", label: "الإصدار", value: formatNumber(item.version || 1), icon: Gauge },
     { id: "updated", label: "آخر تحديث", value: item.updatedAt ? formatDateTime(item.updatedAt) : "—", icon: Clock3 }
@@ -271,20 +271,20 @@ export function DetailPage() {
       }) }),
       editing && draft && jsxs("section", { className: "va-card space-y-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-right", children: [
         jsx("h2", { className: "text-lg font-bold text-white", children: "تحرير التفاصيل" }),
-        jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: draft.title || "", onChange: (event) => updateDraft({ title: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
+        jsxs("div", { className: "grid gap-4 md:grid-cols-2", children: [
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "العنوان" }), jsx("input", { value: draft.title || "", onChange: (event) => updateDraft({ title: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "النوع" }), jsx("select", { value: draft.type || "", onChange: (event) => updateDraft({ type: event.target.value, subtype: "" }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الفرع" }), jsx("select", { value: draft.subtype || "", onChange: (event) => updateDraft({ subtype: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "المسار" }), jsx("input", { value: draft.path || "", onChange: (event) => updateDraft({ path: event.target.value }), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [
             jsx("span", { children: "ملف محلي من الجهاز" }),
             jsx(LocalFilePicker, { value: draft.metadata?.localFile, onFileSelect: applyPrimaryLocalFile })
           ] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [jsx("span", { children: "الصورة المصغرة" }), jsx("input", { value: draft.thumbnail || "", onChange: (event) => updateDraft({ thumbnail: event.target.value }), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
-          jsxs("label", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none" })] })
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
+          jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none" })] })
         ] }),
-        fields.length > 0 && jsx("div", { className: "grid gap-4 lg:grid-cols-2", children: fields.map((field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "lg:col-span-2" : ""}`, children: [
+        fields.length > 0 && jsx("div", { className: "grid gap-4 md:grid-cols-2", children: fields.map((field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "md:col-span-2" : ""}`, children: [
           jsx("span", { children: field.label }),
           jsx(EditableField, { field, value: draft.metadata?.[fieldKey(field)], onChange: updateMetadata })
         ] }, field.id)) }),
@@ -304,7 +304,7 @@ export function DetailPage() {
             ] }),
             jsx("div", { className: "mt-2 text-sm text-gray-300", children: jsx(ReadonlyField, { field: { type: "localFile" }, value: item.metadata.localFile }) })
           ] }),
-          fields.length ? jsx("div", { className: "grid gap-3 lg:grid-cols-2", children: fields.map((field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
+          fields.length ? jsx("div", { className: "grid gap-3 md:grid-cols-2", children: fields.map((field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
             jsx("p", { className: "text-xs text-gray-600", children: field.label }),
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
           ] }, field.id)) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })

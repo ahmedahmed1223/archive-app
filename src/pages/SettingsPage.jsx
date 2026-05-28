@@ -176,7 +176,7 @@ export function SettingsPage() {
         icon: jsx(Sparkles, { className: "h-5 w-5 text-emerald-400" }),
         aside: jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200", children: settings.ui?.v1OnboardingCompleted ? "مكتمل" : "لم يكتمل" }),
         children: jsxs("div", {
-          className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
+          className: "grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]",
           children: [
             jsxs("div", {
               className: "rounded-xl va-surface-subtle border p-3",
@@ -194,7 +194,7 @@ export function SettingsPage() {
         description: "اختيارات عامة تؤثر على طريقة فتح الأرشيف والتعامل مع البيانات.",
         icon: jsx(Archive, { className: "h-5 w-5 text-emerald-400" }),
         children: jsxs("div", {
-          className: "grid gap-3 lg:grid-cols-2",
+          className: "grid gap-3 md:grid-cols-2",
           children: [
             jsx(SegmentedChoices, { label: "العرض الافتراضي للأرشيف", value: settings.defaultView || "grid", options: VIEW_OPTIONS, onChange: (value) => saveSettings({ defaultView: value }, "تم تحديث العرض الافتراضي") }),
             jsx(SelectRow, {
@@ -272,7 +272,7 @@ export function SettingsPage() {
         description: "العربية وRTL هما الأساس، ويمكن اختيار شكل الأرقام في التقارير والسجلات.",
         icon: jsx(Video, { className: "h-5 w-5 text-emerald-400" }),
         children: jsxs("div", {
-          className: "grid gap-3 lg:grid-cols-2",
+          className: "grid gap-3 md:grid-cols-2",
           children: [
             jsx(SegmentedChoices, {
               label: "نظام الأرقام",
@@ -302,7 +302,7 @@ export function SettingsPage() {
     description: "الأيقونات المدمجة والرموز والنصوص والصور الخارجية مدعومة في مدير الأنواع والمجموعات.",
     icon: jsx(LayoutGrid, { className: "h-5 w-5 text-emerald-400" }),
     children: jsxs("div", {
-      className: "grid gap-3 lg:grid-cols-2",
+      className: "grid gap-3 md:grid-cols-2",
       children: [
         jsx(SelectRow, {
           label: "آخر تبويب في منتقي الأيقونات",
@@ -379,7 +379,7 @@ export function SettingsPage() {
         jsx(ToggleRow, { label: "الحفظ التلقائي", checked: !!settings.autoSave, onChange: (checked) => saveSettings({ autoSave: checked }, "تم تحديث الحفظ التلقائي"), description: "يحفظ التغييرات اليومية بدون خطوة إضافية." }),
         jsx(ToggleRow, { label: "النسخ الاحتياطي التلقائي", checked: !!settings.autoBackup, onChange: (checked) => saveSettings({ autoBackup: checked }, "تم تحديث النسخ التلقائي"), description: "ينشئ نسخاً احتياطية حسب الجدولة المحددة." }),
         jsx("div", {
-          className: "grid gap-3 lg:grid-cols-2",
+          className: "grid gap-3 md:grid-cols-2",
           children: [
             jsx(SelectRow, {
               label: "جدولة النسخ الاحتياطي",
@@ -433,7 +433,7 @@ export function SettingsPage() {
           ]
         }),
         jsx("div", {
-          className: "grid gap-3 lg:grid-cols-2",
+          className: "grid gap-3 md:grid-cols-2",
           children: [
             jsx(TextInputRow, {
               label: "مهلة الجلسة بالدقائق",

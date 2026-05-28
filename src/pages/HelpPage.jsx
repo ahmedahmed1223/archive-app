@@ -18,7 +18,6 @@ import {
   Keyboard,
   LayoutGrid,
   Lightbulb,
-  Link,
   MessageCircle,
   Search,
   Shield,
@@ -440,7 +439,7 @@ export function HelpPage() {
   };
 
   return jsxs(MotionPage, {
-    className: "va-enter help-page flex h-[calc(100vh-4rem)] gap-6 p-4 text-right sm:p-6",
+    className: "help-page flex h-[calc(100vh-4rem)] gap-6 p-4 text-right sm:p-6",
     role: "main",
     "aria-label": "المساعدة والدليل",
     children: [
@@ -504,7 +503,7 @@ export function HelpPage() {
               className: "mt-5 space-y-4",
               children: [
                 jsxs("div", {
-                  className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
+                  className: "grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]",
                   children: [
                     jsxs("div", {
                       className: "relative",

@@ -56,7 +56,7 @@ function SearchResultCard({ item, typeLabel, subtypeLabel, index, onOpen }) {
     className: "va-video-list-item rounded-2xl va-surface-muted border p-4 text-right transition-colors hover:border-emerald-500/25",
     dir: "rtl",
     children: jsxs("div", {
-      className: "grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]",
+      className: "grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto]",
       children: [
         jsxs("div", {
           className: "min-w-0",
@@ -312,20 +312,20 @@ export function SearchPage() {
             ]
           }),
           jsxs("div", {
-            className: "mt-3 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]",
+            className: "mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-[1fr_1fr_auto_auto]",
             children: [
               jsxs("label", {
                 className: "block va-surface-muted rounded-xl border p-3",
                 children: [
                   jsx("span", { className: "text-xs text-gray-500", children: "من تاريخ" }),
-                  jsx("input", { type: "date", value: dateFrom, onChange: (event) => setDateFrom(event.target.value), className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white" })
+                  jsx("input", { type: "date", value: dateFrom, onChange: (event) => setDateFrom(event.target.value), dir: "ltr", className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white outline-none focus:border-emerald-500/40" })
                 ]
               }),
               jsxs("label", {
                 className: "block va-surface-muted rounded-xl border p-3",
                 children: [
                   jsx("span", { className: "text-xs text-gray-500", children: "إلى تاريخ" }),
-                  jsx("input", { type: "date", value: dateTo, onChange: (event) => setDateTo(event.target.value), className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white" })
+                  jsx("input", { type: "date", value: dateTo, onChange: (event) => setDateTo(event.target.value), dir: "ltr", className: "mt-2 min-h-9 w-full rounded-lg border border-white/10 bg-gray-900 px-3 py-1 text-sm text-white outline-none focus:border-emerald-500/40" })
                 ]
               }),
               jsx("button", {

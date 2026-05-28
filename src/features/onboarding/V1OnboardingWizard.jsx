@@ -78,6 +78,7 @@ function OptionButton({ active, children, onClick }) {
   return jsx("button", {
     type: "button",
     onClick,
+    "aria-pressed": active,
     className: `va-tool-button min-h-[88px] rounded-2xl border p-4 text-right transition-all ${
       active
         ? "border-emerald-400/45 bg-emerald-500/15 text-white shadow-lg shadow-emerald-500/10"
@@ -449,7 +450,7 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
     "aria-modal": true,
     "aria-label": replayMode ? "معالج البداية" : "معالج أول تشغيل",
     children: jsxs("div", { className: "mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-6xl flex-col justify-center gap-5", children: [
-      jsxs("header", { className: "grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]", children: [
+      jsxs("header", { className: "grid gap-4 md:grid-cols-[260px_minmax(0,1fr)]", children: [
         jsxs("div", { className: "rounded-3xl border border-white/10 bg-white/[0.035] p-5", children: [
           jsx("p", { className: "text-xs font-medium text-emerald-300", children: replayMode ? "إعادة تشغيل المعالج" : "الإصدار الأول" }),
           jsx("h2", { className: "mt-2 text-lg font-bold text-white", children: "أرشيف الفيديو" }),

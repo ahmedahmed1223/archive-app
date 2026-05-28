@@ -2,7 +2,6 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
-  CheckCircle2,
   Database,
   Eye,
   FolderOpen,
@@ -378,7 +377,7 @@ export function TypesPage() {
           ["الاستخدام", "ظهور منظم في الإضافة والأرشيف"]
         ].map(([label, detail], index) => jsxs("div", { className: "rounded-xl va-surface-subtle border p-3", children: [
           jsxs("div", { className: "flex items-center gap-2", children: [
-            jsx(CheckCircle2, { className: "h-4 w-4 text-emerald-300" }),
+            jsx("span", { className: "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/15 text-[10px] font-bold text-emerald-200", children: index + 1 }),
             jsx("p", { className: "text-sm font-semibold text-white", children: label })
           ] }),
           jsx("p", { className: "mt-1 text-xs leading-5 text-gray-500", children: detail })
@@ -387,7 +386,7 @@ export function TypesPage() {
       showEditor && jsx(TypeEditor, { type: editingType, onCancel: () => { setShowEditor(false); setEditingType(null); }, onSave: saveType }),
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]", children: [
         jsxs("div", { className: "space-y-4", children: [
-          jsxs("div", { className: "va-filter-surface grid gap-3 rounded-2xl va-surface-muted border p-3 lg:grid-cols-[minmax(0,1fr)_auto]", children: [
+          jsxs("div", { className: "va-filter-surface grid gap-3 rounded-2xl va-surface-muted border p-3 md:grid-cols-[minmax(0,1fr)_auto]", children: [
             jsxs("label", { className: "relative block", children: [
               jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
               jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث في الأنواع والفروع...", className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
@@ -429,8 +428,11 @@ export function TypesPage() {
             ] })
           ] })
         ] : [
-          jsx(FolderOpen, { className: "mx-auto h-12 w-12 text-gray-600" }),
-          jsx("p", { className: "mt-3 text-center text-sm text-gray-500", children: "اختر نوعًا لعرض تفاصيله." })
+          jsx("div", { className: "flex flex-col items-center justify-center py-8 text-center", children: [
+            jsx(FolderOpen, { className: "h-12 w-12 text-gray-700" }),
+            jsx("p", { className: "mt-3 text-sm font-medium text-gray-500", children: "اختر نوعًا لعرض تفاصيله" }),
+            jsx("p", { className: "mt-1 text-xs text-gray-600", children: "انقر على أي نوع في القائمة لعرض الفروع والحقول هنا." })
+          ] })
         ] })
       ] })
     ]

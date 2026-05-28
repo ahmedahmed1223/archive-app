@@ -182,7 +182,7 @@ function FieldRow({ field, value, onChange }) {
   const inputId = React.useId();
   const isWide = field.type === "textarea" || field.type === "localFile";
   return jsxs("div", {
-    className: `space-y-1 text-sm text-gray-300 ${isWide ? "lg:col-span-2" : ""}`,
+    className: `space-y-1 text-sm text-gray-300 ${isWide ? "md:col-span-2" : ""}`,
     children: [
       jsxs("label", { htmlFor: inputId, className: "block", children: [
         field.label,
@@ -372,7 +372,7 @@ export function AddVideoPage() {
           compact: true
         })
       }),
-      jsxs("section", { className: "grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]", children: [
+      jsxs("section", { className: "grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_0.9fr]", children: [
         jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
           jsxs("div", { className: "flex items-center justify-between gap-3", children: [
             jsxs("div", { className: "flex items-center gap-2", children: [
@@ -414,28 +414,33 @@ export function AddVideoPage() {
       ] }),
       jsxs("section", { className: "va-card rounded-2xl va-surface-muted border p-5 text-right", children: [
         jsx("h2", { className: "mb-4 text-lg font-bold text-white", children: currentStep.label }),
-        currentStep.id === "basic" && jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("label", { htmlFor: titleId, className: "block", children: "العنوان" }), jsx("input", { id: titleId, value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
+        currentStep.id === "basic" && jsxs("div", { className: "grid gap-4 md:grid-cols-2", children: [
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("label", { htmlFor: titleId, className: "block", children: "العنوان" }), jsx("input", { id: titleId, value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: pathId, className: "block", children: "الرابط أو المسار" }), jsx("input", { id: pathId, value: path, onChange: (event) => setPath(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "https:// أو D:\\..." })] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [
             jsx("label", { htmlFor: localFileId, className: "block", children: "ملف محلي من الجهاز" }),
             jsx(LocalFilePicker, { value: metadata.localFile, onFileSelect: applyPrimaryLocalFile, inputId: localFileId })
           ] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: thumbnailId, className: "block", children: "الصورة المصغرة" }), jsx("input", { id: thumbnailId, value: thumbnail, onChange: (event) => setThumbnail(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "رابط صورة اختياري" })] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("label", { htmlFor: notesId, className: "block", children: "ملاحظات" }), jsx("textarea", { id: notesId, value: notes, onChange: (event) => setNotes(event.target.value), className: "min-h-[100px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملخص أو ملاحظات أرشيفية" })] })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("label", { htmlFor: notesId, className: "block", children: "ملاحظات" }), jsx("textarea", { id: notesId, value: notes, onChange: (event) => setNotes(event.target.value), className: "min-h-[100px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "ملخص أو ملاحظات أرشيفية" })] })
         ] }),
-        currentStep.id === "classify" && jsxs("div", { className: "grid gap-4 lg:grid-cols-2", children: [
+        currentStep.id === "classify" && jsxs("div", { className: "grid gap-4 md:grid-cols-2", children: [
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: typeSelectId, className: "block", children: "نوع المحتوى" }), jsxs("select", { id: typeSelectId, value: typeId, onChange: (event) => setTypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: contentTypes.filter((type) => type.status !== "archived").map((type) => jsx("option", { value: type.id, children: type.name }, type.id)) })] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: subtypeSelectId, className: "block", children: "الفرع" }), jsxs("select", { id: subtypeSelectId, value: subtypeId, onChange: (event) => setSubtypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
-          jsxs("div", { className: "space-y-1 text-sm text-gray-300 lg:col-span-2", children: [jsx("label", { htmlFor: tagsId, className: "block", children: "الوسوم" }), jsx("input", { id: tagsId, value: tags, onChange: (event) => setTags(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "وسوم مفصولة بفاصلة، ويمكن استخدام مسارات الوسوم الهرمية" })] })
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("label", { htmlFor: tagsId, className: "block", children: "الوسوم" }), jsx("input", { id: tagsId, value: tags, onChange: (event) => setTags(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "وسوم مفصولة بفاصلة، ويمكن استخدام مسارات الوسوم الهرمية" })] })
         ] }),
-        currentStep.id === "fields" && (fields.length ? jsx("div", { className: "grid gap-4 lg:grid-cols-2", children: fields.map((field) => jsx(FieldRow, { field, value: metadata[fieldKey(field)], onChange: updateMetadata }, field.id)) }) : jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-400", children: "لا توجد حقول مخصصة لهذا النوع." })),
-        currentStep.id === "review" && jsxs("div", { className: "grid gap-3 lg:grid-cols-2", children: [
-          jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `العنوان: ${title || "غير محدد"}` }),
-          jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `النوع: ${selectedType?.name || "غير محدد"}` }),
-              jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `عدد الوسوم: ${parsedTags.length}` }),
-          jsx("p", { className: "va-surface-muted rounded-xl border p-3 text-sm text-gray-300", children: `حقول مخصصة: ${Object.keys(metadata).length}` })
-        ] })
+        currentStep.id === "fields" && (fields.length ? jsx("div", { className: "grid gap-4 md:grid-cols-2", children: fields.map((field) => jsx(FieldRow, { field, value: metadata[fieldKey(field)], onChange: updateMetadata }, field.id)) }) : jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-400", children: "لا توجد حقول مخصصة لهذا النوع." })),
+        currentStep.id === "review" && jsx("div", { className: "grid gap-3 md:grid-cols-2", children: [
+          ["العنوان", title || "غير محدد"],
+          ["التصنيف", [selectedType?.name, subtypes.find((s) => s.id === subtypeId)?.name].filter(Boolean).join(" / ") || "غير محدد"],
+          ["المصدر", path || metadata?.localFile?.name || "غير محدد"],
+          ["الوسوم", parsedTags.length ? `${parsedTags.length} وسم` : "لا توجد"],
+          ["الملاحظات", notes || "—"],
+          ["حقول مخصصة", Object.keys(metadata).filter((k) => k !== "localFile").length ? `${Object.keys(metadata).filter((k) => k !== "localFile").length} حقل` : "لا توجد"]
+        ].map(([label, value]) => jsxs("div", { className: "va-surface-muted rounded-xl border p-3", children: [
+          jsx("p", { className: "text-xs text-gray-500", children: label }),
+          jsx("p", { className: "mt-1 truncate text-sm font-semibold text-white", title: value, children: value })
+        ] }, label)) })
       ] }),
       stepError && jsx("div", { role: "alert", className: "rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-200", children: stepError }),
       jsxs("div", { className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3", children: [

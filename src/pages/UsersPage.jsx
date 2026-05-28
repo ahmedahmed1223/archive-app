@@ -16,7 +16,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { motion } from "framer-motion";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
-import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import { reportError } from "../utils/errorReporting.js";
 import { hashPassword, validatePasswordStrength } from "../utils/passwordHash.js";
 import { useCanPerform } from "../features/users/useCanPerform.js";
@@ -267,12 +267,8 @@ export function UsersPage() {
     await deleteUser?.(user.id);
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsx(PageHero, {
         icon: jsx(Users, { className: "h-6 w-6 text-emerald-400" }),
@@ -287,14 +283,16 @@ export function UsersPage() {
         ["معطل", summary.inactive, Trash2],
         ["مدير نشط", summary.activeAdmins, Shield]
       ].map(([label, value, Icon]) => jsxs("div", { className: "va-metric-card rounded-2xl va-surface-muted border p-4 text-right", children: [
-        jsxs("div", { className: "flex items-center justify-between gap-3", children: [
-          jsx("span", { className: "text-sm text-gray-500", children: label }),
-          jsx(Icon, { className: "h-5 w-5 text-emerald-400" })
-        ] }),
-        jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: formatNumber(value, settings.numberSystem) })
+        jsxs("div", { className: "flex items-start justify-between gap-3", children: [
+          jsxs("div", { className: "min-w-0", children: [
+            jsx("p", { className: "text-xs text-gray-500", children: label }),
+            jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: formatNumber(value, settings.numberSystem) })
+          ] }),
+          jsx("span", { className: "va-icon-tile flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", children: jsx(Icon, { className: "h-5 w-5" }) })
+        ] })
       ] }, label)) }),
       jsxs("section", { className: "va-filter-surface rounded-2xl va-surface-muted border p-4", children: [
-        jsxs("div", { className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]", children: [
+        jsxs("div", { className: "grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]", children: [
           jsxs("label", { className: "relative block", children: [
             jsx(Search, { className: "pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" }),
             jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "بحث بالاسم أو اسم المستخدم...", className: "min-h-11 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-emerald-500/40" })
@@ -304,11 +302,17 @@ export function UsersPage() {
             ...USER_ROLES.map((role) => jsx("option", { value: role.id, children: role.label }, role.id))
           ] })
         ] }),
-        jsx("div", { className: "mt-4 flex flex-wrap gap-2", children: USER_ROLES.map((role) => jsxs("button", { type: "button", onClick: () => setRoleFilter(role.id), className: `rounded-xl border px-3 py-2 text-sm ${roleFilter === role.id ? "text-white" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5"}`, style: roleFilter === role.id ? { borderColor: `${role.color}55`, backgroundColor: `${role.color}18` } : undefined, children: [
-          jsx("span", { className: "inline-block h-2.5 w-2.5 rounded-full", style: { backgroundColor: role.color } }),
-          role.label,
-          jsx("span", { className: "rounded-full bg-black/20 px-2 py-0.5 text-xs", children: formatNumber(summary.byRole[role.id] || 0) })
-        ] }, role.id)) })
+        jsx("div", { role: "group", "aria-label": "تصفية حسب الدور", className: "mt-4 flex flex-wrap gap-2", children: [
+          jsx("button", { type: "button", onClick: () => setRoleFilter("all"), className: `rounded-xl border px-3 py-2 text-sm gap-2 inline-flex items-center ${roleFilter === "all" ? "border-emerald-500/35 bg-emerald-500/15 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5"}`, children: [
+            "كل الأدوار",
+            jsx("span", { className: "rounded-full bg-black/20 px-2 py-0.5 text-xs", children: formatNumber(summary.total) })
+          ] }),
+          ...USER_ROLES.map((role) => jsxs("button", { type: "button", onClick: () => setRoleFilter(role.id), className: `rounded-xl border px-3 py-2 text-sm gap-2 inline-flex items-center ${roleFilter === role.id ? "text-white" : "border-white/10 bg-gray-950/35 text-gray-400 hover:bg-white/5"}`, style: roleFilter === role.id ? { borderColor: `${role.color}55`, backgroundColor: `${role.color}18` } : undefined, children: [
+            jsx("span", { className: "inline-block h-2.5 w-2.5 rounded-full", style: { backgroundColor: role.color } }),
+            role.label,
+            jsx("span", { className: "rounded-full bg-black/20 px-2 py-0.5 text-xs", children: formatNumber(summary.byRole[role.id] || 0) })
+          ] }, role.id))
+        ] })
       ] }),
       filteredUsers.length ? jsx("section", { className: "grid gap-3 lg:grid-cols-2", children: filteredUsers.map((user, index) => jsx(UserCard, {
         user,
