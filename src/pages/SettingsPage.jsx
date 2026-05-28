@@ -554,7 +554,7 @@ export function SettingsPage() {
         })
       }),
       jsxs("div", {
-        className: "grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)]",
+        className: "grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]",
         children: [
           jsx(SettingsTabs, { activeTab, onTabChange: setActiveTab }),
           jsx("div", { className: "min-w-0", children: tabContent[activeTab]?.() || renderGeneral() })
