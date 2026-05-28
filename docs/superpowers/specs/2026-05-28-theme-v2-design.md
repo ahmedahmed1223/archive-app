@@ -39,8 +39,11 @@ toggle, so users can opt in (or opt out) without risk of regression.
 - **Aesthetic:** Linear / Vercel / Stripe — modern SaaS with soft
   gradients, multi-layered shadows, precise typography, calculated motion
 - **Color philosophy:** Notion-style semantic colors (success/danger/
-  warning/info) layered over a single configurable accent. Existing
-  7-accent system carried into v2 unchanged
+  warning/info) layered over a single configurable accent. The 7-accent
+  *system* (teal/indigo/emerald/blue/slate/amber/rose) is carried into
+  v2. The individual hex values are re-tuned for v2's brighter canvas
+  — same names, more vibrant shades. Users keep their saved accent
+  preference and see the v2 variant of it.
 - **Density:** Roomy/Vercel as the default (`gap-16px`, `radius 12–16px`,
   colored shadows, gradient buttons). Existing density setting still
   toggles to compact for power users
@@ -269,8 +272,11 @@ Settings → المظهر gains a new section "إصدار الواجهة":
 ```
 
 - Storage: `settings.ui.themeVersion: "v1" | "v2"`
-- Default: `"v2"` for fresh installs, `"v1"` for existing users on
-  upgrade (via a one-shot migration that sets it if missing)
+- Default during rollout (PRs A–E): `"v1"` for everyone, so no
+  visible change until users opt in via the picker
+- Default after PR F (post-validation): `"v2"` for fresh installs
+  + a banner offering v2 to existing users (they keep v1 unless
+  they accept)
 - Apply: `main.js` reads it on boot and sets `<html
   data-theme-version="v2">`
 - 30-second preview: applies v2 temporarily with countdown; user
