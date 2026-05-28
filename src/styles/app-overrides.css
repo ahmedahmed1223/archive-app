@@ -391,6 +391,25 @@
     min-width: 44px;
     min-height: 44px;
   }
+  /* Touch targets on mobile — WCAG 2.1 AAA recommends 44×44 CSS pixels.
+   * Tailwind utilities like min-h-9 (36px) and min-h-10 (40px) override
+   * the base button rule because of specificity, so we explicitly force
+   * the baseline on small screens. Icon-only chips inside compact
+   * toolbars still get 44px so RTL/Arabic users with imprecise touch
+   * have a fair chance of hitting them. Non-interactive groups
+   * (`role="group"`, segmented controls) are exempt. */
+  @media (max-width: 640px) {
+    button.min-h-9,
+    button.min-h-10,
+    [role="button"].min-h-9,
+    [role="button"].min-h-10,
+    a.min-h-9,
+    a.min-h-10,
+    select.min-h-9,
+    select.min-h-10 {
+      min-height: 44px !important;
+    }
+  }
   /* Tap highlight — suppress default blue flash on mobile, use accent instead */
   button, [role="button"], a, label {
     -webkit-tap-highlight-color: rgba(16, 185, 129, 0.12);
@@ -650,7 +669,9 @@
   @media (max-width: 640px) {
     html, body, #root { overflow-x: clip; }
     table { min-width: 0; width: 100%; }
-    .overflow-x-auto { overflow-x: clip; }
+    /* NOTE: don't kill .overflow-x-auto on mobile — horizontal tab
+     * scrollers and code blocks rely on it. The table rule above
+     * already prevents tables from forcing the body to scroll. */
     .va-empty-state {
       min-height: 18rem;
       padding-block: 3rem !important;
