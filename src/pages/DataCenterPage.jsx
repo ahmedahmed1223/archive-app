@@ -969,13 +969,14 @@ export function DataCenterPage() {
         ]
       }),
       jsxs("section", {
-        className: "grid gap-4 xl:grid-cols-[260px_1fr]",
+        className: "grid gap-4 lg:grid-cols-[240px_1fr]",
         children: [
           jsxs("aside", {
-            className: "va-tab-surface h-fit rounded-2xl border border-white/10 bg-gray-950/55 p-3 backdrop-blur-sm xl:sticky xl:top-4",
+            className: "va-tab-surface h-fit rounded-2xl border border-white/10 bg-gray-950/55 p-3 backdrop-blur-sm lg:sticky lg:top-4",
             children: [
               jsx("div", {
-                className: "grid gap-2 sm:grid-cols-2 xl:grid-cols-1",
+                // Horizontal scroller below lg, vertical sidebar list at lg+.
+                className: "flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible",
                 role: "tablist",
                 "aria-label": "أقسام مركز البيانات",
                 children: DATA_CENTER_TABS.map((tab) => jsx(TabButton, {
@@ -985,7 +986,7 @@ export function DataCenterPage() {
                 }, tab.id))
               }),
               jsx("div", {
-                className: "mt-4 rounded-xl border border-white/5 bg-gray-900/40 p-3 text-xs leading-relaxed text-gray-500",
+                className: "mt-4 hidden lg:block rounded-xl border border-white/5 bg-gray-900/40 p-3 text-xs leading-relaxed text-gray-500",
                 children: "كل عملية حساسة تمر بفحص مبدئي ونسخة احتياطية عند الاستيراد أو الاستعادة."
               })
             ]

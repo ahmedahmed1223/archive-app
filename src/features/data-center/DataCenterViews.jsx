@@ -57,12 +57,14 @@ export function DataMetric({ label, value, hint, icon }) {
 
 export function TabButton({ tab, active, onClick }) {
   const Icon = tabIconMap[tab.id] || Database;
+  // Intrinsic chip inside the horizontal scroller; full-width row
+  // inside the lg: sidebar (the parent uses lg:flex-col).
   return jsxs("button", {
     type: "button",
     role: "tab",
     "aria-selected": active,
     onClick,
-    className: `va-tool-button flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-right text-sm transition-colors ${
+    className: `va-tool-button inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-3 py-2 text-sm transition-colors lg:w-full lg:gap-3 lg:px-3 lg:py-3 lg:text-right ${
       active
         ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
         : "border-white/5 bg-gray-900/40 text-gray-400 hover:border-white/10 hover:bg-white/5 hover:text-white"
