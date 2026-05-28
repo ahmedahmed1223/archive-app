@@ -104,6 +104,7 @@ export function DataCenterPage() {
     loadAllData,
     planIncomingDelta,
     applyResolvedDelta,
+    addAuditLog,
     showToast
   } = useAppStore();
 
@@ -287,6 +288,12 @@ export function DataCenterPage() {
           ...exportPayload
         }, { deviceId, deviceName: sourceDeviceName.trim() || "هذا الجهاز" });
         downloadArchiveBlob(new Blob([JSON.stringify(transferPackage, null, 2)], { type: "application/json;charset=utf-8" }), makeFileName("video-archive-transfer", "json"));
+        addAuditLog?.("sync.export", null, "video", {
+          kind: "transfer",
+          itemCount: transferPackage.counts?.videoItems || 0,
+          checksum: transferPackage.checksum,
+          deviceName: sourceDeviceName.trim() || "هذا الجهاز"
+        });
         setOperationMessage(`تم إنشاء ملف نقل آمن. checksum ${transferPackage.checksum}`);
       } else if (kind === "delta") {
         commitDeviceName();

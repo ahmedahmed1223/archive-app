@@ -34,6 +34,9 @@ const DataCenterPageLazy = React.lazy(() =>
 const ReportsPageLazy = React.lazy(() =>
   import("../pages/ReportsPage.jsx").then((mod) => ({ default: mod.ReportsPage }))
 );
+const SyncLogPageLazy = React.lazy(() =>
+  import("../pages/SyncLogPage.jsx").then((mod) => ({ default: mod.SyncLogPage }))
+);
 
 export const PAGE_COMPONENTS = {
   dashboard: DashboardPage,
@@ -50,7 +53,8 @@ export const PAGE_COMPONENTS = {
   htags: HierarchicalTagsPage,
   reports: ReportsPageLazy,
   users: UsersPage,
-  help: HelpPageLazy
+  help: HelpPageLazy,
+  "sync-log": SyncLogPageLazy
 };
 
 export { HEAVY_PAGE_IDS, PAGE_GROUPS };

@@ -13,3 +13,4 @@ export { ReportsPage } from "./ReportsPage.jsx";
 export { UsersPage } from "./UsersPage.jsx";
 export { HistoryPage } from "./HistoryPage.jsx";
 export { HelpPage } from "./HelpPage.jsx";
+export { SyncLogPage } from "./SyncLogPage.jsx";

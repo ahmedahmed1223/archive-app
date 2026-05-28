@@ -15,7 +15,8 @@ export const PAGE_NATIVE_MIGRATION = {
   htags: { status: "native", notes: "Page JSX lives in src/pages/HierarchicalTagsPage.jsx; tree helpers and # autocomplete paths are now driven by src/features/hierarchical-tags." },
   reports: { status: "native", notes: "Page JSX lives in src/pages/ReportsPage.jsx; export helpers use the explicit xlsx vendor module." },
   users: { status: "native", notes: "Page JSX lives in src/pages/UsersPage.jsx with native role filtering, account status controls, and protected admin handling." },
-  help: { status: "native", notes: "Page JSX lives in src/pages/HelpPage.jsx; shared UI wrappers and runtime bridges have been removed." }
+  help: { status: "native", notes: "Page JSX lives in src/pages/HelpPage.jsx; shared UI wrappers and runtime bridges have been removed." },
+  "sync-log": { status: "native", notes: "Page JSX lives in src/pages/SyncLogPage.jsx; reads audit_logs for sync.* events and renders per-device summary plus chronological log." }
 };
 
 export function getPageMigrationStatus() {

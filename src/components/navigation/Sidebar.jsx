@@ -17,6 +17,7 @@ import {
   Database,
   FolderOpen,
   FolderTree,
+  GitMerge,
   HardDrive,
   History,
   LayoutGrid,
@@ -47,7 +48,8 @@ const SIDEBAR_PAGE_PERMISSIONS = {
   settings: ACTIONS.SETTINGS_EDIT,
   backup: ACTIONS.BACKUP_CREATE,
   reports: ACTIONS.AUDIT_VIEW,
-  history: ACTIONS.AUDIT_VIEW
+  history: ACTIONS.AUDIT_VIEW,
+  "sync-log": ACTIONS.AUDIT_VIEW
 };
 
 
@@ -65,7 +67,8 @@ const iconMap = {
   history: History,
   help: CircleQuestionMark,
   backup: HardDrive,
-  reports: ChartColumn
+  reports: ChartColumn,
+  "sync-log": GitMerge
 };
 
 function useIsMobile() {

@@ -13,7 +13,8 @@ export const PAGE_MANIFEST = [
   { id: "history", group: "administration", heavy: false, meta: { title: "سجل التغييرات", breadcrumb: "الإدارة / السجل", hint: "مراجعة عمليات الإنشاء والتعديل والحذف.", helpSection: "notifications-guide" } },
   { id: "help", group: "administration", heavy: true, meta: { title: "المساعدة", breadcrumb: "الدليل / مركز المعرفة", hint: "مساعدة قابلة للبحث وروابط مباشرة للأقسام.", helpSection: "getting-started" } },
   { id: "backup", group: "data", heavy: true, meta: { title: "مركز البيانات", breadcrumb: "الرئيسية / النسخ والنقل", hint: "تصدير، استيراد، نقل لجهاز آخر، ونسخ احتياطي بخطوات واضحة.", helpSection: "transfer-export" } },
-  { id: "reports", group: "data", heavy: true, meta: { title: "التقارير", breadcrumb: "البيانات / التقارير", hint: "إحصاءات وسجلات نشاط تساعدك على مراجعة الأرشيف.", helpSection: "reports-settings" } }
+  { id: "reports", group: "data", heavy: true, meta: { title: "التقارير", breadcrumb: "البيانات / التقارير", hint: "إحصاءات وسجلات نشاط تساعدك على مراجعة الأرشيف.", helpSection: "reports-settings" } },
+  { id: "sync-log", group: "data", heavy: true, meta: { title: "سجل المزامنة", breadcrumb: "البيانات / المزامنة", hint: "كل عمليات تصدير ودمج حزم النقل بين الأجهزة مع تفاصيل الـ checksum.", helpSection: "transfer-export" } }
 ];
 
 export const PAGE_CONTEXT_META = Object.fromEntries(
