@@ -3,6 +3,7 @@ node_modules
 output/
 Base_old/
 .npm-cache/
+.superpowers/
 *.log
 IMPLEMENTATION_STATUS.md
 DESIGN.md

@@ -1016,3 +1016,7 @@ await runAsync("store action smoke tests", async () => {
   await useAppStore.getState().loadAllData();
   assert.deepEqual(useAppStore.getState().videoItems.map((item) => item.id), ["replace-video"]);
 });
+
+// Theme v2 storage tests — runs the standalone test suite from
+// verify-modules.theme-v2.mjs in the same node process.
+await import("./verify-modules.theme-v2.mjs");

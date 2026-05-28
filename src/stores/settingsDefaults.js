@@ -27,7 +27,12 @@ export function defaultSettings() {
       // settings reset), but we mirror them here so transfer packages
       // can embed them without an extra IndexedDB roundtrip.
       deviceId: null,
-      deviceName: null
+      deviceName: null,
+      // Theme version — "v1" (classic Office-style) or "v2"
+      // (modern Linear/Vercel-style). Defaults to v1 during the
+      // rollout window so existing users don't get surprised on
+      // upgrade. PR F flips this default once v2 is validated.
+      themeVersion: "v1"
     },
     notifications: {
       durationMs: 5500,

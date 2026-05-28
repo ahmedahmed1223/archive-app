@@ -1,0 +1,163 @@
+/*
+ * Theme v2 — Linear/Vercel-inspired token layer.
+ * Activated when <html data-theme-version="v2"> is set.
+ * Default v1 cascade is preserved (no change for existing users).
+ *
+ * Naming: --va-2-* mirrors v1's --va-* so component code can stay
+ * unchanged. Component-level v2-only classes (.va-2-card etc.)
+ * land in PR B.
+ */
+
+:root {
+  /* Dark mode (default) tokens for v2 — defined globally so v1
+   * users still pay the cost of CSS variable definitions but
+   * never read them. ~1KB of dead CSS that PR F will activate. */
+  --va-2-canvas:        #0a0b0e;
+  --va-2-surface:       #14161b;
+  --va-2-surface-2:     #1a1d24;
+  --va-2-surface-3:     #232830;
+
+  --va-2-line:          rgba(255, 255, 255, 0.06);
+  --va-2-line-strong:   rgba(255, 255, 255, 0.12);
+
+  --va-2-text-strong:   #f8f9fb;
+  --va-2-text:          #d4d6dc;
+  --va-2-text-soft:     #a8acb8;
+  --va-2-text-faint:    #6e727e;
+
+  /* Accent presets — indigo default, re-tuned for v2's canvas. */
+  --va-2-accent:        #6366f1;
+  --va-2-accent-strong: #4f46e5;
+  --va-2-accent-soft:   color-mix(in srgb, var(--va-2-accent) 12%, transparent);
+  --va-2-accent-glow:   color-mix(in srgb, var(--va-2-accent) 25%, transparent);
+
+  /* Semantic colors */
+  --va-2-success:       #10b981;
+  --va-2-danger:        #ef4444;
+  --va-2-warning:       #f59e0b;
+  --va-2-info:          #3b82f6;
+
+  /* Radii — larger than v1 */
+  --va-2-radius-sm:     0.5rem;
+  --va-2-radius-md:     0.75rem;
+  --va-2-radius-lg:     1rem;
+  --va-2-radius-xl:     1.25rem;
+  --va-2-radius-2xl:    1.5rem;
+
+  /* Shadows — multi-layered, optional colored glow */
+  --va-2-shadow-sm:     0 1px 2px rgba(0,0,0,0.40);
+  --va-2-shadow-md:     0 4px 8px -2px rgba(0,0,0,0.40),
+                        0 2px 4px -1px rgba(0,0,0,0.30);
+  --va-2-shadow-lg:     0 20px 40px -16px rgba(0,0,0,0.50),
+                        0 8px 16px -4px rgba(0,0,0,0.40);
+  --va-2-shadow-glow:   0 20px 40px -20px var(--va-2-accent-glow);
+
+  /* Typography scale — major third 1.250 */
+  --va-2-text-xs:       0.75rem;
+  --va-2-text-sm:       0.875rem;
+  --va-2-text-base:     1rem;
+  --va-2-text-lg:       1.125rem;
+  --va-2-text-xl:       1.25rem;
+  --va-2-text-2xl:      1.5rem;
+  --va-2-text-3xl:      1.875rem;
+  --va-2-text-4xl:      2.25rem;
+
+  /* Motion */
+  --va-2-duration-instant: 80ms;
+  --va-2-duration-fast:    160ms;
+  --va-2-duration-base:    240ms;
+  --va-2-duration-slow:    400ms;
+}
+
+/* Light-mode overrides — same names, lighter values. */
+html.light {
+  --va-2-canvas:        #f6f7f9;
+  --va-2-surface:       #ffffff;
+  --va-2-surface-2:     #fafbfc;
+  --va-2-surface-3:     #ffffff;
+
+  --va-2-line:          rgba(15, 17, 21, 0.08);
+  --va-2-line-strong:   rgba(15, 17, 21, 0.16);
+
+  --va-2-text-strong:   #0f1115;
+  --va-2-text:          #232831;
+  --va-2-text-soft:     #4a4f5a;
+  --va-2-text-faint:    #7a7f8a;
+
+  --va-2-accent:        #4f46e5;
+  --va-2-accent-strong: #4338ca;
+  --va-2-shadow-sm:     0 1px 2px rgba(15,17,21,0.06);
+  --va-2-shadow-md:     0 4px 12px -2px rgba(15,17,21,0.08),
+                        0 2px 4px -1px rgba(15,17,21,0.04);
+  --va-2-shadow-lg:     0 20px 40px -16px rgba(15,17,21,0.12),
+                        0 8px 16px -4px rgba(15,17,21,0.08);
+}
+
+/*
+ * Token re-bind: when v2 is active, the v1 names (--va-action etc.)
+ * point to v2 values so components reading the v1 tokens
+ * automatically pick up v2 colors. This is the entire mechanism
+ * that makes existing components inherit v2 visuals without code
+ * changes.
+ */
+html[data-theme-version="v2"] {
+  --va-action:          var(--va-2-accent);
+  --va-action-strong:   var(--va-2-accent-strong);
+  --va-action-soft:     var(--va-2-accent-soft);
+
+  --va-ink-950:         var(--va-2-canvas);
+  --va-ink-925:         var(--va-2-surface);
+  --va-ink-900:         var(--va-2-surface);
+  --va-ink-850:         var(--va-2-surface-2);
+  --va-ink-800:         var(--va-2-surface-3);
+  --va-ink-700:         var(--va-2-line-strong);
+  --va-ink-600:         var(--va-2-text-faint);
+  --va-ink-500:         var(--va-2-text-soft);
+
+  --va-line-soft:       var(--va-2-line);
+  --va-line:            var(--va-2-line-strong);
+  --va-line-strong:     var(--va-2-line-strong);
+
+  --va-text-strong:     var(--va-2-text-strong);
+  --va-text:            var(--va-2-text);
+  --va-text-soft:       var(--va-2-text-soft);
+  --va-text-faint:      var(--va-2-text-faint);
+
+  --va-shadow-card:     var(--va-2-shadow-sm);
+  --va-shadow-panel:    var(--va-2-shadow-md);
+  --va-shadow-elevated: var(--va-2-shadow-lg);
+
+  --va-panel-radius:    var(--va-2-radius-lg);
+  --va-card-radius:     var(--va-2-radius-md);
+  --va-control-radius:  var(--va-2-radius-md);
+}
+
+/* v2 accent preset re-tunes — same preset names, brighter values. */
+html[data-theme-version="v2"] .va-app-shell[data-accent="teal"] {
+  --va-2-accent:        #14b8a6;
+  --va-2-accent-strong: #0d9488;
+}
+html[data-theme-version="v2"] .va-app-shell[data-accent="indigo"] {
+  --va-2-accent:        #6366f1;
+  --va-2-accent-strong: #4f46e5;
+}
+html[data-theme-version="v2"] .va-app-shell[data-accent="emerald"] {
+  --va-2-accent:        #10b981;
+  --va-2-accent-strong: #059669;
+}
+html[data-theme-version="v2"] .va-app-shell[data-accent="blue"] {
+  --va-2-accent:        #3b82f6;
+  --va-2-accent-strong: #2563eb;
+}
+html[data-theme-version="v2"] .va-app-shell[data-accent="slate"] {
+  --va-2-accent:        #64748b;
+  --va-2-accent-strong: #475569;
+}
+html[data-theme-version="v2"] .va-app-shell[data-accent="amber"] {
+  --va-2-accent:        #f59e0b;
+  --va-2-accent-strong: #d97706;
+}
+html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
+  --va-2-accent:        #f43f5e;
+  --va-2-accent-strong: #e11d48;
+}
