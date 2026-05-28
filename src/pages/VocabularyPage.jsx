@@ -375,6 +375,7 @@ export function VocabularyPage() {
             : "أضف مصطلحات موحدة ليستخدمها الفريق من خلال الاستدعاء الذكي @.",
           actionLabel: vocabulary.length ? "مسح الفلاتر" : "إضافة أول مصطلح",
           actionIcon: vocabulary.length ? RefreshCw : undefined,
+          hintItems: vocabulary.length ? [] : ["@ للاستدعاء", "أسماء مستعارة", "تصنيف بالفئات"],
           onAction: vocabulary.length ? () => { setQuery(""); setCategory("all"); } : startCreate
         })
       }),

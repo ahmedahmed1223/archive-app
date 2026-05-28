@@ -15,6 +15,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 
 import { PageHero } from "../../components/ui/V1Primitives.jsx";
+import { KbdHint } from "../../components/common/Kbd.jsx";
 import { formatNumber } from "../../utils/formatting.js";
 import { isHtml5PreviewableVideo } from "./mediaPreview.js";
 import { ArchiveSortMenu } from "./ArchiveToolbar.jsx";
@@ -130,7 +131,12 @@ export function ArchivePageHero(props) {
           type: "button",
           onClick: openAdd,
           className: "va-primary-button inline-flex min-h-9 items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold text-white",
-          children: [jsx(Video, { className: "h-4 w-4" }), "إضافة فيديو"]
+          title: "إضافة فيديو — اختصار A",
+          children: [
+            jsx(Video, { className: "h-4 w-4" }),
+            "إضافة فيديو",
+            jsx(KbdHint, { keys: ["A"], className: "opacity-80" })
+          ]
         })
       ]
     }),
@@ -147,7 +153,11 @@ export function ArchivePageHero(props) {
                 onChange: (event) => setLocalSearch(event.target.value),
                 placeholder: "بحث لحظي بالعنوان أو الوسوم أو الملاحظات",
                 "aria-label": "بحث في الأرشيف",
-                className: "min-h-10 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-10 text-sm text-white outline-none focus:border-emerald-500/50"
+                className: "min-h-10 w-full va-surface-deep rounded-xl border py-2 pl-3 pr-12 text-sm text-white outline-none focus:border-emerald-500/50"
+              }),
+              jsx("span", {
+                className: "pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2",
+                children: jsx(KbdHint, { keys: ["/"], className: "opacity-70" })
               })
             ]
           }),

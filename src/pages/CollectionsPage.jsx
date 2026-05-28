@@ -343,7 +343,8 @@ export function CollectionsPage() {
             description: virtualCollections.length ? "امسح البحث أو استخدم كلمة أبسط." : "أنشئ مجموعة يدوية لتجميع الفيديوهات المهمة.",
             actionLabel: virtualCollections.length ? "مسح البحث" : "إنشاء مجموعة",
             onAction: virtualCollections.length ? () => setQuery("") : startCreate,
-            actionIcon: virtualCollections.length ? RefreshCw : undefined
+            actionIcon: virtualCollections.length ? RefreshCw : undefined,
+            hintItems: virtualCollections.length ? [] : ["مجموعات يدوية", "مجموعات ذكية", "ألوان مخصصة"]
           }) })
         ] }),
         jsx(CollectionDetails, {

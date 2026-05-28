@@ -394,6 +394,7 @@ export function HierarchicalTagsPage() {
           icon: jsx(FolderTree, { className: "h-16 w-16" }),
           title: "ابدأ شجرة الوسوم",
           description: "أنشئ وسمًا جذرًا ثم أضف فروعًا لتسهيل الاستدعاء عبر #.",
+          hintItems: ["# للاستدعاء", "وسوم متشعبة", "بحث فوري"],
           actionLabel: "إنشاء أول وسم",
           onAction: startCreateRoot
         })
