@@ -30,6 +30,7 @@ import {
   runOperationPreflight
 } from "../services/health/index.js";
 import { appConfirm } from "../components/common/ConfirmDialog.js";
+import { SyncConflictDialog } from "../features/sync/SyncConflictDialog.jsx";
 import {
   MotionPage,
   PageHero,
@@ -101,6 +102,8 @@ export function DataCenterPage() {
     restoreBackup,
     deleteBackup,
     loadAllData,
+    planIncomingDelta,
+    applyResolvedDelta,
     showToast
   } = useAppStore();
 
@@ -129,6 +132,8 @@ export function DataCenterPage() {
   const [isWorking, setIsWorking] = React.useState(false);
   const [operationMessage, setOperationMessage] = React.useState("");
   const [importPreview, setImportPreview] = React.useState(null);
+  const [conflictPlan, setConflictPlan] = React.useState(null);
+  const [conflictDialogOpen, setConflictDialogOpen] = React.useState(false);
   const [importErrors, setImportErrors] = React.useState([]);
   const [backups, setBackups] = React.useState([]);
   const [backupError, setBackupError] = React.useState("");
@@ -414,6 +419,79 @@ export function DataCenterPage() {
     }
   };
 
+  // Smart-merge path: classify the incoming package against local
+  // state and either auto-apply when nothing conflicts, or surface
+  // the SyncConflictDialog when both sides changed the same item.
+  // Only relevant for the "merge" import mode — "replace" wipes
+  // local state, so there's nothing to conflict with.
+  const handleSmartMerge = async () => {
+    if (!importPreview?.payload || !planIncomingDelta) return;
+    setIsWorking(true);
+    setOperationMessage("");
+    try {
+      const plan = planIncomingDelta(importPreview.payload, {
+        baseSyncFloor: importPreview.payload.baseSyncFloor || {}
+      });
+      if (!plan) {
+        showToast?.("تعذر تحليل الحزمة", "error");
+        return;
+      }
+      if (!plan.summary.needsReview) {
+        // Clean fast-forward — apply autoApply + the rest of the
+        // package via the regular merge path so collections/types
+        // ride along.
+        await createBackup?.(`قبل دمج ${importPreview.fileName}`);
+        await applyResolvedDelta?.({ autoApply: plan.autoApply, resolved: {} });
+        const result = await importNormalizedPayload(importPreview.payload, "merge");
+        if (!result?.success) throw new Error(result?.errors?.join("، ") || "فشل الدمج");
+        await loadAllData?.();
+        await loadBackups();
+        setOperationMessage(`تم الدمج بدون تعارضات. ${plan.summary.newCount} جديد، ${plan.summary.updateCount} محدّث.`);
+        setImportPreview(null);
+        showToast?.("تم الدمج تلقائياً", "success");
+        return;
+      }
+      // Needs review — open the dialog. Apply happens inside
+      // handleConflictResolve below.
+      setConflictPlan(plan);
+      setConflictDialogOpen(true);
+    } catch (error) {
+      const message = error?.message || "فشل تحليل التعارضات";
+      setOperationMessage(message);
+      showToast?.(message, "error");
+    } finally {
+      setIsWorking(false);
+    }
+  };
+
+  const handleConflictResolve = async (resolved) => {
+    if (!conflictPlan || !importPreview?.payload) return;
+    setIsWorking(true);
+    setOperationMessage("");
+    try {
+      await createBackup?.(`قبل حل تعارضات ${importPreview.fileName}`);
+      await applyResolvedDelta?.({ autoApply: conflictPlan.autoApply, resolved });
+      // Run the rest of the package (collections, types, vocabulary,
+      // tags) through the normal merge path so nothing is left behind.
+      const result = await importNormalizedPayload(importPreview.payload, "merge");
+      if (!result?.success) throw new Error(result?.errors?.join("، ") || "فشل تطبيق الحلول");
+      await loadAllData?.();
+      await loadBackups();
+      const counts = conflictPlan.summary;
+      setOperationMessage(`تم تطبيق الحلول. ${counts.newCount} جديد، ${counts.updateCount} محدّث، ${Object.keys(resolved).length} تعارض محلول.`);
+      setConflictDialogOpen(false);
+      setConflictPlan(null);
+      setImportPreview(null);
+      showToast?.("اكتمل الدمج بالحلول المختارة", "success");
+    } catch (error) {
+      const message = error?.message || "فشل تطبيق الحلول";
+      setOperationMessage(message);
+      showToast?.(message, "error");
+    } finally {
+      setIsWorking(false);
+    }
+  };
+
   const handleCreateBackup = async () => {
     setIsWorking(true);
     setOperationMessage("");
@@ -619,6 +697,14 @@ export function DataCenterPage() {
             icon: isWorking ? jsx(RefreshCw, { className: "h-4 w-4 opacity-70" }) : jsx(Shield, { className: "h-4 w-4" }),
             children: importMode === "replace" ? "استبدال بعد النسخ" : "دمج بعد النسخ"
           }),
+          importMode === "merge" && planIncomingDelta && jsx("button", {
+            type: "button",
+            onClick: handleSmartMerge,
+            disabled: isWorking,
+            className: "min-h-10 inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-100 transition-colors hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-60",
+            title: "يكتشف التعارضات بين الأجهزة قبل الدمج",
+            children: "دمج ذكي مع كشف التعارضات"
+          }),
           jsx("button", {
             type: "button",
             onClick: () => setImportPreview(null),
@@ -626,6 +712,15 @@ export function DataCenterPage() {
             children: "إلغاء المعاينة"
           })
         ]
+      }),
+      jsx(SyncConflictDialog, {
+        open: conflictDialogOpen,
+        conflicts: conflictPlan?.needsReview || [],
+        onApply: handleConflictResolve,
+        onCancel: () => {
+          setConflictDialogOpen(false);
+          setConflictPlan(null);
+        }
       })
     ]
   });
