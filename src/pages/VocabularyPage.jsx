@@ -7,6 +7,8 @@ import {
 } from "../stores/index.js";
 import {
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
   PenLine,
   Plus,
   RefreshCw,
@@ -20,7 +22,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
-import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import { reportError } from "../utils/errorReporting.js";
 import {
   VOCABULARY_CATEGORIES,
@@ -298,12 +300,8 @@ export function VocabularyPage() {
     }
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsx(PageHero, {
         icon: jsx(BookOpen, { className: "h-6 w-6 text-emerald-400" }),
@@ -324,7 +322,7 @@ export function VocabularyPage() {
         className: "va-filter-surface rounded-2xl va-surface-muted border p-4",
         children: [
           jsxs("div", {
-            className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
+            className: "grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]",
             children: [
               jsxs("label", {
                 className: "relative block",
@@ -380,12 +378,14 @@ export function VocabularyPage() {
           onAction: vocabulary.length ? () => { setQuery(""); setCategory("all"); } : startCreate
         })
       }),
-      jsx("div", {
-        className: "flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3",
+      totalPages > 1 && jsx("div", {
+        className: "va-control-surface flex flex-wrap items-center justify-between gap-3 va-surface-muted rounded-2xl border p-3",
+        role: "navigation",
+        "aria-label": "التنقل بين الصفحات",
         children: [
-          jsx("button", { type: "button", disabled: currentPage <= 1, onClick: () => setPage(currentPage - 1), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "السابق" }),
+          jsxs("button", { type: "button", disabled: currentPage <= 1, onClick: () => setPage(currentPage - 1), className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: [jsx(ChevronRight, { className: "h-4 w-4" }), "السابق"] }),
           jsx("p", { className: "text-sm text-gray-500", children: `الصفحة ${formatNumber(currentPage)} من ${formatNumber(totalPages)}` }),
-          jsx("button", { type: "button", disabled: currentPage >= totalPages, onClick: () => setPage(currentPage + 1), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "التالي" })
+          jsxs("button", { type: "button", disabled: currentPage >= totalPages, onClick: () => setPage(currentPage + 1), className: "inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: ["التالي", jsx(ChevronLeft, { className: "h-4 w-4" })] })
         ]
       })
     ]

@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
-import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   HIERARCHICAL_TAG_COLORS,
   buildHierarchicalTagModel,
@@ -54,7 +54,7 @@ function TagForm({ tag, parentTag, tags, onCancel, onSave }) {
     children: [
       jsx("h2", { className: "text-base font-bold text-white", children: tag ? "تعديل الوسم" : parentTag ? `وسم فرعي داخل ${parentTag.name}` : "وسم جذر جديد" }),
       jsxs("div", {
-        className: "mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]",
+        className: "mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]",
         children: [
           jsxs("label", { className: "space-y-1 text-sm text-gray-300", children: [
             jsx("span", { children: "اسم الوسم" }),
@@ -287,12 +287,8 @@ export function HierarchicalTagsPage() {
     }
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsx(PageHero, {
         icon: jsx(FolderTree, { className: "h-6 w-6 text-emerald-400" }),
@@ -324,11 +320,13 @@ export function HierarchicalTagsPage() {
         ].map(([label, value, Icon]) => jsxs("div", {
           className: "va-metric-card rounded-2xl va-surface-muted border p-4 text-right",
           children: [
-            jsxs("div", { className: "flex items-center justify-between gap-3", children: [
-              jsx("span", { className: "text-sm text-gray-500", children: label }),
-              jsx(Icon, { className: "h-5 w-5 text-emerald-400" })
-            ] }),
-            jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: formatNumber(value) })
+            jsxs("div", { className: "flex items-start justify-between gap-3", children: [
+              jsxs("div", { className: "min-w-0", children: [
+                jsx("p", { className: "text-xs text-gray-500", children: label }),
+                jsx("p", { className: "mt-2 text-2xl font-bold text-white", children: formatNumber(value) })
+              ] }),
+              jsx("span", { className: "va-icon-tile flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", children: jsx(Icon, { className: "h-5 w-5" }) })
+            ] })
           ]
         }, label))
       }),

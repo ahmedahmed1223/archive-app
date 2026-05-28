@@ -23,7 +23,7 @@ import { motion } from "framer-motion";
 
 import { appConfirm } from "../components/common/ConfirmDialog.js";
 import { EmptyState } from "../components/common/EmptyState.jsx";
-import { PageHero } from "../components/ui/V1Primitives.jsx";
+import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   HISTORY_ACTIONS,
   createHistoryRouteParams,
@@ -59,10 +59,12 @@ function HistoryMetric({ action, label, value, active, onClick }) {
     type: "button",
     onClick,
     "aria-pressed": active,
+    "aria-label": `${label}: ${value}`,
     className: `va-action-card flex min-h-[92px] items-center gap-3 rounded-2xl border p-4 text-right transition-colors ${active ? toneClasses(getHistoryActionTone(action)) : "border-white/10 bg-gray-900/45 text-gray-300 hover:bg-white/5"}`,
     children: [
       jsx("span", {
         className: `flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${toneClasses(getHistoryActionTone(action))}`,
+        "aria-hidden": "true",
         children: jsx(Icon, { className: "h-5 w-5" })
       }),
       jsxs("span", {
@@ -242,12 +244,8 @@ export function HistoryPage() {
     }
   };
 
-  return jsxs(motion.div, {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.2 },
-    className: "va-page-shell space-y-6 p-4 sm:p-6",
-    dir: "rtl",
+  return jsxs(MotionPage, {
+    className: "space-y-6 p-4 sm:p-6",
     children: [
       jsx(PageHero, {
         icon: jsx(History, { className: "h-6 w-6 text-emerald-400" }),
@@ -277,7 +275,7 @@ export function HistoryPage() {
         className: "va-filter-surface rounded-2xl va-surface-muted border p-4",
         children: [
           jsxs("div", {
-            className: "grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]",
+            className: "grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto]",
             children: [
               jsxs("label", {
                 className: "relative block",

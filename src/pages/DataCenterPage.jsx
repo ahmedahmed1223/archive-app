@@ -650,7 +650,7 @@ export function DataCenterPage() {
         ]
       }),
       jsxs("div", {
-        className: "mt-5 grid gap-4 lg:grid-cols-[1fr_0.9fr]",
+        className: "mt-5 grid gap-4 md:grid-cols-[1fr_0.9fr]",
         children: [
           jsxs("div", {
             className: "rounded-xl border border-white/5 bg-gray-950/25 p-4",
@@ -731,7 +731,6 @@ export function DataCenterPage() {
                   className: "min-h-10 w-full rounded-xl border border-white/10 bg-gray-950/50 px-3 text-sm text-white"
                 })
               ] }),
-              deltaTargetId && jsx("div", { className: "flex items-end" }, "spacer"),
               jsxs("div", { className: "flex flex-col items-end justify-end text-right text-xs text-gray-400", children: [
                 jsxs("span", { className: "rounded-full border border-white/10 bg-gray-950/45 px-2.5 py-1", children: [
                   "تغييرات معلّقة: ",
