@@ -507,3 +507,115 @@ html[data-theme-version="v2"] .va-floating-action-bar {
   border-radius: var(--va-2-radius-xl) !important;
   box-shadow: var(--va-2-shadow-lg) !important;
 }
+
+/* ===================================================================
+ * PR E — motion + light-mode polish (v2-scoped).
+ * =================================================================== */
+
+/* Spring-like easing curve for v2 interactions. Overshoots slightly
+ * for a lively-but-controlled feel (Linear-style). */
+html[data-theme-version="v2"] {
+  --va-2-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --va-2-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Apply spring easing to the lift interactions added in PR D. */
+html[data-theme-version="v2"] .va-primary-button,
+html[data-theme-version="v2"] .va-action-button,
+html[data-theme-version="v2"] .va-card,
+html[data-theme-version="v2"] .va-data-card,
+html[data-theme-version="v2"] .va-video-card,
+html[data-theme-version="v2"] .va-action-card {
+  transition-timing-function: var(--va-2-ease-spring) !important;
+}
+
+/* Page-enter — a slightly larger, smoother rise than v1. Honors the
+ * global data-motion="off"/"reduced" rules already in v1-identity.css. */
+html[data-theme-version="v2"] .va-motion-page {
+  animation: va-2-page-enter var(--va-2-duration-base) var(--va-2-ease-out) both;
+}
+@keyframes va-2-page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* data-motion lives on the .va-app-shell div (not <html>), and
+ * data-theme-version lives on <html>. Correct nesting: html[v2] is
+ * an ancestor of .va-app-shell[off] is an ancestor of the page. */
+html[data-theme-version="v2"] .va-app-shell[data-motion="off"] .va-motion-page,
+html[data-theme-version="v2"] .va-app-shell[data-motion="reduced"] .va-motion-page {
+  animation: none;
+}
+
+/* Glassmorphism modal backdrops + cards for v2. The base overlay
+ * already blurs 10px; v2 deepens it and tints the card surface. */
+html[data-theme-version="v2"] .va-dialog-overlay {
+  background: rgba(2, 6, 23, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.1) !important;
+}
+html[data-theme-version="v2"] .va-dialog-card,
+html[data-theme-version="v2"] [data-slot="dialog-content"],
+html[data-theme-version="v2"] [data-slot="alert-dialog-content"] {
+  border-radius: var(--va-2-radius-2xl) !important;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--va-2-accent) 6%, transparent), transparent 45%),
+    var(--va-2-surface-2) !important;
+  border: 1px solid var(--va-2-line-strong) !important;
+  box-shadow: var(--va-2-shadow-lg) !important;
+}
+
+/* Dialog entry — scale + rise with spring easing. */
+html[data-theme-version="v2"] .va-dialog-card {
+  animation: va-2-dialog-in var(--va-2-duration-base) var(--va-2-ease-out) both;
+}
+@keyframes va-2-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* The dialog card is portaled to document.body — OUTSIDE
+ * .va-app-shell — so the data-motion ancestor selector can't reach
+ * it. The OS-level prefers-reduced-motion media query (below) is the
+ * reliable cross-portal signal; the in-app motion-off case for this
+ * brief 240ms one-shot is acceptable to leave (framer-motion dialogs
+ * already honor useReducedMotion on their own JS-driven entries). */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-version="v2"] .va-motion-page,
+  html[data-theme-version="v2"] .va-dialog-card {
+    animation: none !important;
+  }
+}
+
+/* Light-mode v2 corrections — the white top-light gradients read as
+ * nothing on a white canvas, so in light mode we drop them and lean
+ * on borders + soft shadows for depth instead. */
+html.light[data-theme-version="v2"] .va-card,
+html.light[data-theme-version="v2"] .va-data-card,
+html.light[data-theme-version="v2"] .va-video-card,
+html.light[data-theme-version="v2"] .va-action-card,
+html.light[data-theme-version="v2"] .va-preview-panel,
+html.light[data-theme-version="v2"] .va-filter-surface,
+html.light[data-theme-version="v2"] .va-control-surface,
+html.light[data-theme-version="v2"] .va-tab-surface {
+  background: var(--va-2-surface) !important;
+  box-shadow: var(--va-2-shadow-sm);
+}
+html.light[data-theme-version="v2"] .va-card:hover,
+html.light[data-theme-version="v2"] .va-data-card:hover,
+html.light[data-theme-version="v2"] .va-video-card:hover,
+html.light[data-theme-version="v2"] .va-action-card:hover {
+  box-shadow: var(--va-2-shadow-md) !important;
+}
+
+/* Light-mode hero — softer accent radial over white. */
+html.light[data-theme-version="v2"] .va-page-hero,
+html.light[data-theme-version="v2"] .va-page-hero-compact,
+html.light[data-theme-version="v2"] .va-panel-premium {
+  background:
+    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--va-2-accent) 8%, transparent), transparent 42%),
+    var(--va-2-surface-2) !important;
+}
+
+/* Light-mode modal backdrop — lighter scrim, same blur. */
+html.light[data-theme-version="v2"] .va-dialog-overlay {
+  background: rgba(15, 17, 21, 0.28) !important;
+}
