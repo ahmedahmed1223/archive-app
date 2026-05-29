@@ -21,19 +21,25 @@ function run(name, fn) {
   catch (error) { console.error("FAIL -", name, "\n", error); process.exitCode = 1; }
 }
 
-run("default version is v1", () => {
+run("default version is v2", () => {
   store.clear();
-  assert.equal(DEFAULT_THEME_VERSION, "v1");
-  assert.equal(getStoredThemeVersion(), "v1");
+  assert.equal(DEFAULT_THEME_VERSION, "v2");
+  assert.equal(getStoredThemeVersion(), "v2");
 });
 
-run("normalize accepts v1 and v2 only", () => {
+run("normalize accepts v1 and v2, defaults to v2", () => {
   assert.equal(normalizeThemeVersion("v1"), "v1");
   assert.equal(normalizeThemeVersion("v2"), "v2");
-  assert.equal(normalizeThemeVersion(null), "v1");
-  assert.equal(normalizeThemeVersion("v3"), "v1");
-  assert.equal(normalizeThemeVersion(undefined), "v1");
-  assert.equal(normalizeThemeVersion(""), "v1");
+  assert.equal(normalizeThemeVersion(null), "v2");
+  assert.equal(normalizeThemeVersion("v3"), "v2");
+  assert.equal(normalizeThemeVersion(undefined), "v2");
+  assert.equal(normalizeThemeVersion(""), "v2");
+});
+
+run("explicit v1 choice is preserved (existing users keep classic)", () => {
+  store.clear();
+  storeThemeVersion("v1");
+  assert.equal(getStoredThemeVersion(), "v1");
 });
 
 run("storeThemeVersion writes to localStorage", () => {

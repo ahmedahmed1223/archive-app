@@ -1,17 +1,16 @@
 /*
  * Theme v2 — Linear/Vercel-inspired token layer.
- * Activated when <html data-theme-version="v2"> is set.
- * Default v1 cascade is preserved (no change for existing users).
+ * Activated when <html data-theme-version="v2"> is set, which is now
+ * the DEFAULT for users without an explicit choice. Users who picked
+ * "v1" via the Settings picker keep the classic cascade.
  *
  * Naming: --va-2-* mirrors v1's --va-* so component code can stay
- * unchanged. Component-level v2-only classes (.va-2-card etc.)
- * land in PR B.
+ * unchanged.
  */
 
 :root {
-  /* Dark mode (default) tokens for v2 — defined globally so v1
-   * users still pay the cost of CSS variable definitions but
-   * never read them. Only read when data-theme-version="v2".
+  /* Dark mode tokens for v2 — read whenever data-theme-version="v2"
+   * (the default). v1 users (explicit classic choice) never read them.
    *
    * Palette: cool violet-slate undertone (blue channel sits a step
    * above red/green) so the "neutrals" read as an intentional,
