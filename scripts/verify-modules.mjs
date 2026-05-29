@@ -977,6 +977,10 @@ await runAsync("store action smoke tests", async () => {
 
   const store = useAppStore.getState();
   await store.loadAllData();
+  await store.skipPasswordSetup();
+  assert.equal(useAuthStore.getState().isAuthenticated, true);
+  assert.equal(useAuthStore.getState().currentUser?.username, "admin");
+
   await store.setMasterPassword("StrongPass123!");
   assert.equal(useAppStore.getState().isPasswordSet, true);
   assert.equal(await useAuthStore.getState().login("admin", "StrongPass123!"), true);

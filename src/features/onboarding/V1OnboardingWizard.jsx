@@ -112,9 +112,9 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
   const replayMode = mode === "replay";
   const {
     settings,
-    users = [],
     isPasswordSet,
     setMasterPassword,
+    skipPasswordSetup,
     updateSettings,
     showToast
   } = useAppStore();
@@ -213,7 +213,9 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
       }
 
       if (!replayMode && securityMode === "quick") {
-        const adminUser = users.find((user) => user.username === "admin" && user.isActive) || users.find((user) => user.isActive);
+        await skipPasswordSetup?.();
+        const freshUsers = useAppStore.getState().users || [];
+        const adminUser = freshUsers.find((user) => user.username === "admin" && user.isActive !== false) || freshUsers.find((user) => user.isActive !== false);
         if (adminUser) {
           useAuthStore.setState({ currentUser: adminUser, isAuthenticated: true, authError: null });
         }

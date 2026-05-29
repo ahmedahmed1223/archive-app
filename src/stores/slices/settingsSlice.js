@@ -24,7 +24,7 @@ export const settingsActionKeys = [
   "disableAllKeyboardShortcuts"
 ];
 
-export function createSettingsActions({ set, get }) {
+export function createSettingsActions({ set, get, getAuthStore }) {
   return {
     updateSettings: async (patch = {}) => {
       const settings = mergeSettings(get().settings, patch);
@@ -69,6 +69,16 @@ export function createSettingsActions({ set, get }) {
         await dbPut(STORES.USERS, users[0]);
       }
       set({ settings, users, isPasswordSet: false, isLocked: false });
+      const quickUser = users.find((user) => user.username === "admin" && user.isActive !== false) || users.find((user) => user.isActive !== false);
+      if (quickUser) {
+        getAuthStore?.()?.setState?.({
+          currentUser: quickUser,
+          isAuthenticated: true,
+          authError: null,
+          mustChangePassword: !!quickUser.mustChangePassword
+        });
+        set({ currentUser: quickUser });
+      }
       await persistSettings(settings);
       return true;
     },

@@ -35,7 +35,7 @@ export const useAppStore = createStore((set, get) => ({
   ...uiInitialState,
   ...createUiActions({ set, get }),
   ...createArchiveActions({ set, get, getAuthStore: () => useAuthStore }),
-  ...createSettingsActions({ set, get }),
+  ...createSettingsActions({ set, get, getAuthStore: () => useAuthStore }),
   ...createDataTransferActions({ set, get })
 }));
 
