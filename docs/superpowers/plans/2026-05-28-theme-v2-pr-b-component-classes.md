@@ -1,166 +1,57 @@
-/*
- * Theme v2 — Linear/Vercel-inspired token layer.
- * Activated when <html data-theme-version="v2"> is set.
- * Default v1 cascade is preserved (no change for existing users).
- *
- * Naming: --va-2-* mirrors v1's --va-* so component code can stay
- * unchanged. Component-level v2-only classes (.va-2-card etc.)
- * land in PR B.
- */
+# Theme v2 — PR B (Component Classes) Implementation Plan
 
-:root {
-  /* Dark mode (default) tokens for v2 — defined globally so v1
-   * users still pay the cost of CSS variable definitions but
-   * never read them. ~1KB of dead CSS that PR F will activate. */
-  --va-2-canvas:        #0a0b0e;
-  --va-2-surface:       #14161b;
-  --va-2-surface-2:     #1a1d24;
-  --va-2-surface-3:     #232830;
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-  --va-2-line:          rgba(255, 255, 255, 0.06);
-  --va-2-line-strong:   rgba(255, 255, 255, 0.12);
+**Goal:** Add the opt-in v2 component classes (`.va-2-card`, `.va-2-primary-button`, `.va-2-secondary-button`, `.va-2-ghost-button`, `.va-2-input`, `.va-2-chip` + 4 semantic variants, `.va-2-surface` + `.va-2-surface-elevated`) to `v2-identity.css`. **No component opts in yet** — these are building blocks consumed in PR D. Zero visible change.
 
-  --va-2-text-strong:   #f8f9fb;
-  --va-2-text:          #d4d6dc;
-  --va-2-text-soft:     #a8acb8;
-  --va-2-text-faint:    #6e727e;
+**Architecture:** All classes are appended to the existing `src/styles/v2-identity.css`. They reference the `--va-2-*` tokens shipped in PR A. Each class is scoped to be usable in BOTH theme versions (they read `--va-2-*` directly, so they look the same regardless of `data-theme-version` — but in practice only v2 components will use them). Pure additive CSS.
 
-  /* Accent presets — indigo default, re-tuned for v2's canvas. */
-  --va-2-accent:        #6366f1;
-  --va-2-accent-strong: #4f46e5;
-  --va-2-accent-soft:   color-mix(in srgb, var(--va-2-accent) 12%, transparent);
-  --va-2-accent-glow:   color-mix(in srgb, var(--va-2-accent) 25%, transparent);
+**Tech Stack:** Vite 7, vite-plugin-singlefile, CSS custom properties.
 
-  /* Semantic colors */
-  --va-2-success:       #10b981;
-  --va-2-danger:        #ef4444;
-  --va-2-warning:       #f59e0b;
-  --va-2-info:          #3b82f6;
+**Reference spec:** `docs/superpowers/specs/2026-05-28-theme-v2-design.md` (Components section)
 
-  /* Radii — larger than v1 */
-  --va-2-radius-sm:     0.5rem;
-  --va-2-radius-md:     0.75rem;
-  --va-2-radius-lg:     1rem;
-  --va-2-radius-xl:     1.25rem;
-  --va-2-radius-2xl:    1.5rem;
+**Prerequisite:** PR A merged (provides `--va-2-*` tokens). Confirm `src/styles/v2-identity.css` exists on `main` before starting.
 
-  /* Shadows — multi-layered, optional colored glow */
-  --va-2-shadow-sm:     0 1px 2px rgba(0,0,0,0.40);
-  --va-2-shadow-md:     0 4px 8px -2px rgba(0,0,0,0.40),
-                        0 2px 4px -1px rgba(0,0,0,0.30);
-  --va-2-shadow-lg:     0 20px 40px -16px rgba(0,0,0,0.50),
-                        0 8px 16px -4px rgba(0,0,0,0.40);
-  --va-2-shadow-glow:   0 20px 40px -20px var(--va-2-accent-glow);
+---
 
-  /* Typography scale — major third 1.250 */
-  --va-2-text-xs:       0.75rem;
-  --va-2-text-sm:       0.875rem;
-  --va-2-text-base:     1rem;
-  --va-2-text-lg:       1.125rem;
-  --va-2-text-xl:       1.25rem;
-  --va-2-text-2xl:      1.5rem;
-  --va-2-text-3xl:      1.875rem;
-  --va-2-text-4xl:      2.25rem;
+## File Structure
 
-  /* Motion */
-  --va-2-duration-instant: 80ms;
-  --va-2-duration-fast:    160ms;
-  --va-2-duration-base:    240ms;
-  --va-2-duration-slow:    400ms;
-}
+**Modify (1 file):**
+- `src/styles/v2-identity.css` — append a clearly-delimited "Component classes (PR B)" section (~150 lines)
 
-/* Light-mode overrides — same names, lighter values. */
-html.light {
-  --va-2-canvas:        #f6f7f9;
-  --va-2-surface:       #ffffff;
-  --va-2-surface-2:     #fafbfc;
-  --va-2-surface-3:     #ffffff;
+**Untouched:** every other file. No JS, no components, no settings.
 
-  --va-2-line:          rgba(15, 17, 21, 0.08);
-  --va-2-line-strong:   rgba(15, 17, 21, 0.16);
+---
 
-  --va-2-text-strong:   #0f1115;
-  --va-2-text:          #232831;
-  --va-2-text-soft:     #4a4f5a;
-  --va-2-text-faint:    #7a7f8a;
+## Pre-flight
 
-  --va-2-accent:        #4f46e5;
-  --va-2-accent-strong: #4338ca;
-  --va-2-shadow-sm:     0 1px 2px rgba(15,17,21,0.06);
-  --va-2-shadow-md:     0 4px 12px -2px rgba(15,17,21,0.08),
-                        0 2px 4px -1px rgba(15,17,21,0.04);
-  --va-2-shadow-lg:     0 20px 40px -16px rgba(15,17,21,0.12),
-                        0 8px 16px -4px rgba(15,17,21,0.08);
-}
+- [ ] **Confirm on main with PR A merged**
 
-/*
- * Token re-bind: when v2 is active, the v1 names (--va-action etc.)
- * point to v2 values so components reading the v1 tokens
- * automatically pick up v2 colors. This is the entire mechanism
- * that makes existing components inherit v2 visuals without code
- * changes.
- */
-html[data-theme-version="v2"] {
-  --va-action:          var(--va-2-accent);
-  --va-action-strong:   var(--va-2-accent-strong);
-  --va-action-soft:     var(--va-2-accent-soft);
+Run: `git checkout main && git pull && test -f src/styles/v2-identity.css && grep -c "va-2-accent" src/styles/v2-identity.css`
+Expected: `git pull` up to date; file exists; grep count ≥ 1 (tokens present from PR A)
 
-  --va-ink-950:         var(--va-2-canvas);
-  --va-ink-925:         var(--va-2-surface);
-  --va-ink-900:         var(--va-2-surface);
-  --va-ink-850:         var(--va-2-surface-2);
-  --va-ink-800:         var(--va-2-surface-3);
-  --va-ink-700:         var(--va-2-line-strong);
-  --va-ink-600:         var(--va-2-text-faint);
-  --va-ink-500:         var(--va-2-text-soft);
+- [ ] **Create the branch**
 
-  --va-line-soft:       var(--va-2-line);
-  --va-line:            var(--va-2-line-strong);
-  --va-line-strong:     var(--va-2-line-strong);
+Run: `git checkout -b feat/theme-v2-pr-b-component-classes`
+Expected: `Switched to a new branch 'feat/theme-v2-pr-b-component-classes'`
 
-  --va-text-strong:     var(--va-2-text-strong);
-  --va-text:            var(--va-2-text);
-  --va-text-soft:       var(--va-2-text-soft);
-  --va-text-faint:      var(--va-2-text-faint);
+- [ ] **Baseline build size**
 
-  --va-shadow-card:     var(--va-2-shadow-sm);
-  --va-shadow-panel:    var(--va-2-shadow-md);
-  --va-shadow-elevated: var(--va-2-shadow-lg);
+Run: `npm run build 2>&1 | tail -3`
+Expected: `dist/index.html  1,596.XX kB`. Record it.
 
-  --va-panel-radius:    var(--va-2-radius-lg);
-  --va-card-radius:     var(--va-2-radius-md);
-  --va-control-radius:  var(--va-2-radius-md);
-}
+---
 
-/* v2 accent preset re-tunes — same preset names, brighter values. */
-html[data-theme-version="v2"] .va-app-shell[data-accent="teal"] {
-  --va-2-accent:        #14b8a6;
-  --va-2-accent-strong: #0d9488;
-}
-html[data-theme-version="v2"] .va-app-shell[data-accent="indigo"] {
-  --va-2-accent:        #6366f1;
-  --va-2-accent-strong: #4f46e5;
-}
-html[data-theme-version="v2"] .va-app-shell[data-accent="emerald"] {
-  --va-2-accent:        #10b981;
-  --va-2-accent-strong: #059669;
-}
-html[data-theme-version="v2"] .va-app-shell[data-accent="blue"] {
-  --va-2-accent:        #3b82f6;
-  --va-2-accent-strong: #2563eb;
-}
-html[data-theme-version="v2"] .va-app-shell[data-accent="slate"] {
-  --va-2-accent:        #64748b;
-  --va-2-accent-strong: #475569;
-}
-html[data-theme-version="v2"] .va-app-shell[data-accent="amber"] {
-  --va-2-accent:        #f59e0b;
-  --va-2-accent-strong: #d97706;
-}
-html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
-  --va-2-accent:        #f43f5e;
-  --va-2-accent-strong: #e11d48;
-}
+## Task 1: Surface + card classes
+
+**Files:**
+- Modify: `src/styles/v2-identity.css` (append at end of file)
+
+- [ ] **Step 1: Append surface + card classes**
+
+Append to the END of `src/styles/v2-identity.css`:
+
+```css
 
 /* ===================================================================
  * Component classes (PR B) — opt-in v2 visual treatments.
@@ -215,14 +106,40 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
   top: 1rem;
   bottom: 1rem;
   width: 3px;
-  /* Logical radius: round the inner (inline-start) corners so the
-   * stripe stays flush with the card's leading edge in both LTR
-   * and RTL. */
-  border-start-start-radius: 3px;
-  border-end-start-radius: 3px;
+  border-radius: 3px 0 0 3px;
   background: var(--va-2-entity-accent, var(--va-2-accent));
   opacity: 0.6;
 }
+```
+
+- [ ] **Step 2: Run verify + build**
+
+Run: `npm run verify 2>&1 | tail -5 && npm run build 2>&1 | tail -3`
+Expected: All checks pass; build succeeds; size grows ~0.5-1 KB.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/v2-identity.css dist/index.html
+git commit -m "feat(theme-v2): surface + card component classes (PR B)
+
+Adds .va-2-surface, .va-2-surface-elevated, .va-2-card, and
+.va-2-entity-card with top-light gradients, hover lift, and an
+RTL-aware accent stripe. Inert until components opt in (PR D)."
+```
+
+---
+
+## Task 2: Button classes
+
+**Files:**
+- Modify: `src/styles/v2-identity.css` (append at end)
+
+- [ ] **Step 1: Append button classes**
+
+Append to the END of `src/styles/v2-identity.css`:
+
+```css
 
 /* Buttons — primary (gradient + glow), secondary (outlined),
  * ghost (transparent), danger (semantic red gradient). */
@@ -310,6 +227,36 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
 .va-2-danger-button:hover {
   transform: translateY(-1px);
 }
+```
+
+- [ ] **Step 2: Run verify + build**
+
+Run: `npm run verify 2>&1 | tail -5 && npm run build 2>&1 | tail -3`
+Expected: All pass; size grows ~1 KB.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/v2-identity.css dist/index.html
+git commit -m "feat(theme-v2): button component classes (PR B)
+
+Adds .va-2-primary-button (gradient + glow + lift), -secondary
+(outlined), -ghost (icon buttons), and -danger (red gradient).
+All honor disabled/hover/active states. Inert until PR D."
+```
+
+---
+
+## Task 3: Input + chip classes
+
+**Files:**
+- Modify: `src/styles/v2-identity.css` (append at end)
+
+- [ ] **Step 1: Append input + chip classes**
+
+Append to the END of `src/styles/v2-identity.css`:
+
+```css
 
 /* Inputs — sunk-in feel (canvas deeper than surrounding surface),
  * accent focus ring. */
@@ -382,3 +329,76 @@ html.light .va-2-chip-success { color: color-mix(in srgb, var(--va-2-success) 55
 html.light .va-2-chip-danger { color: color-mix(in srgb, var(--va-2-danger) 55%, #000000); }
 html.light .va-2-chip-warning { color: color-mix(in srgb, var(--va-2-warning) 55%, #000000); }
 html.light .va-2-chip-info { color: color-mix(in srgb, var(--va-2-info) 55%, #000000); }
+```
+
+- [ ] **Step 2: Run verify + build**
+
+Run: `npm run verify 2>&1 | tail -5 && npm run build 2>&1 | tail -3`
+Expected: All pass; size grows ~1.5 KB.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/styles/v2-identity.css dist/index.html
+git commit -m "feat(theme-v2): input + chip component classes (PR B)
+
+Adds .va-2-input (sunk-in canvas bg + accent focus ring) and
+.va-2-chip with accent/success/danger/warning/info variants
+using color-mix tints that work across all 7 accent presets.
+Light-mode overrides darken chip text for legibility. Inert
+until PR D."
+```
+
+---
+
+## Final verification
+
+- [ ] **Full verify + build**
+
+Run: `npm run verify 2>&1 | tail -8 && npm run build 2>&1 | tail -3`
+Expected: All checks pass; build ~1,600 kB (PR A was 1,596.5; +~4 KB of component CSS is acceptable, total still well under any hard limit).
+
+- [ ] **Confirm zero visible change**
+
+The new classes are not referenced by any element. Open `dist/index.html` — app looks identical to PR A (which looks identical to v1 by default). Verify in DevTools that `.va-2-card` etc. exist in the stylesheet but match zero elements (`document.querySelectorAll('.va-2-card').length === 0`).
+
+- [ ] **Push + PR**
+
+```bash
+git push -u origin feat/theme-v2-pr-b-component-classes
+gh pr create --title "feat(theme-v2): component classes — surfaces, buttons, inputs, chips (PR B)" --body "Adds opt-in .va-2-* component classes consumed in PR D. Pure additive CSS, zero visible change (no element references them yet). Verify + build green."
+```
+
+- [ ] **Merge**
+
+```bash
+gh pr merge --squash --delete-branch
+git checkout main && git pull
+```
+
+---
+
+## Self-Review Checklist
+
+1. **Spec coverage** — every component class in the spec's "Components" section:
+   - [x] `.va-2-surface` + `.va-2-surface-elevated` → Task 1
+   - [x] `.va-2-card` + `.va-2-entity-card` → Task 1
+   - [x] `.va-2-primary-button` / secondary / ghost / danger → Task 2
+   - [x] `.va-2-input` → Task 3
+   - [x] `.va-2-chip` + 5 variants → Task 3
+   - [ ] Metric-card gradient-text, PageHero, Sidebar, Modal, Tabs treatments — **deferred to PR D** because those are component-specific compositions, not reusable classes. PR D builds them inline when the components opt in.
+   - [ ] **Fonts** — deferred to their own PR (binary woff2 fetch). v2 falls back to system fonts gracefully.
+
+2. **Placeholder scan** — every class has complete, real CSS. No TODOs.
+
+3. **Token consistency** — every `var(--va-2-*)` reference matches a token defined in PR A's token block. Notably: `--va-2-accent-glow`, `--va-2-shadow-glow`, `--va-2-shadow-md`, `--va-2-radius-{sm,md,lg}`, `--va-2-text-xs`, `--va-2-duration-fast` all exist from PR A.
+
+---
+
+## What's next
+
+- **PR C** — ThemeVersionPicker UI + 30s preview + main.js sync between localStorage and settings
+- **PR D** — Components opt into `.va-2-*` classes when `themeVersion === "v2"` (the visible payoff)
+- **PR E** — Motion presets + light-mode polish
+- **Fonts PR** — fetch + self-host Inter + IBM Plex Sans Arabic woff2
+- **PR F** — Flip default to v2 + opt-in banner
