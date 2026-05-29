@@ -55,6 +55,7 @@ import {
   getDefaultSettings,
   mergeAppSettings
 } from "../utils/settings.js";
+import { ThemeVersionPicker } from "../features/settings/ThemeVersionPicker.jsx";
 
 export function SettingsPage() {
   const {
@@ -213,6 +214,15 @@ export function SettingsPage() {
   const renderInterface = () => jsxs("div", {
     className: "space-y-4",
     children: [
+      jsx(SettingsCard, {
+        title: "إصدار الواجهة",
+        description: "بدّل بين النمط الكلاسيكي والنمط الحديث. التغيير فوري ويُحفظ تلقائيًا.",
+        icon: jsx(Sparkles, { className: "h-5 w-5 text-emerald-400" }),
+        children: jsx(ThemeVersionPicker, {
+          value: settings.ui?.themeVersion || "v1",
+          onChange: (version) => patchUi({ themeVersion: version }, version === "v2" ? "تم تفعيل النمط الحديث" : "تم تفعيل النمط الكلاسيكي")
+        })
+      }),
       jsx(SettingsCard, {
         title: "الهوية البصرية",
         description: "Ink Slate للوضع الليلي، Warm Off-white للوضع النهاري، ولون accent موحد للتفاعل.",
