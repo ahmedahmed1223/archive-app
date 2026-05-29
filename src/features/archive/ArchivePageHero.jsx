@@ -199,23 +199,6 @@ export function ArchivePageHero(props) {
                     ],
                     onChange: changeGridColumns
                   }),
-                  jsxs("label", {
-                    className: "inline-flex min-h-9 items-center gap-2 va-surface-muted rounded-xl border px-2.5 py-1 text-xs text-gray-400",
-                    title: "اختر بين 1 و8 أعمدة، أو اتركه تلقائيًا",
-                    children: [
-                      jsx("span", { className: "text-gray-500", children: "أعمدة" }),
-                      jsx("input", {
-                        type: "number",
-                        min: 1,
-                        max: 8,
-                        value: gridColumns === "auto" ? "" : gridColumns,
-                        placeholder: "تلقائي",
-                        onChange: (event) => changeGridColumns(event.target.value === "" ? "auto" : event.target.value),
-                        "aria-label": "عدد الأعمدة المخصص",
-                        className: "min-h-7 w-16 rounded-lg border border-white/10 bg-gray-950/55 px-2 text-center text-xs font-semibold text-white outline-none focus:border-emerald-500/50"
-                      })
-                    ]
-                  }),
                   jsx(SegmentedControl, {
                     label: "الصفوف",
                     value: activeGridRows,
