@@ -418,3 +418,55 @@ html[data-theme-version="v2"] .va-secondary-button:hover,
 html[data-theme-version="v2"] .va-tool-button:hover {
   border-color: color-mix(in srgb, var(--va-2-accent) 45%, transparent) !important;
 }
+
+/* Cards — top-light gradient overlay + hover lift + larger radius. */
+html[data-theme-version="v2"] .va-card,
+html[data-theme-version="v2"] .va-data-card,
+html[data-theme-version="v2"] .va-video-card,
+html[data-theme-version="v2"] .va-action-card,
+html[data-theme-version="v2"] .va-preview-panel {
+  border-radius: var(--va-2-radius-lg) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%),
+    var(--va-2-surface) !important;
+  transition: transform var(--va-2-duration-fast) ease,
+              border-color var(--va-2-duration-fast) ease,
+              box-shadow var(--va-2-duration-fast) ease !important;
+}
+html[data-theme-version="v2"] .va-card:hover,
+html[data-theme-version="v2"] .va-data-card:hover,
+html[data-theme-version="v2"] .va-video-card:hover,
+html[data-theme-version="v2"] .va-action-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--va-2-line-strong) !important;
+  box-shadow: var(--va-2-shadow-md) !important;
+}
+
+/* Metric cards — keep their existing gradient base but add v2 radius
+ * and a soft accent-tinted top light. */
+html[data-theme-version="v2"] .va-metric-card {
+  border-radius: var(--va-2-radius-lg) !important;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--va-2-accent) 5%, transparent), transparent 45%),
+    linear-gradient(180deg, var(--va-2-surface-2), var(--va-2-surface)) !important;
+}
+
+/* Page hero — cinematic multi-layer gradient. */
+html[data-theme-version="v2"] .va-page-hero,
+html[data-theme-version="v2"] .va-page-hero-compact,
+html[data-theme-version="v2"] .va-panel-premium {
+  border-radius: var(--va-2-radius-xl) !important;
+  background:
+    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--va-2-accent) 10%, transparent), transparent 40%),
+    linear-gradient(160deg, var(--va-2-surface-2), var(--va-2-surface) 60%) !important;
+}
+
+/* Tinted surfaces — subtle gradient for depth. */
+html[data-theme-version="v2"] .va-filter-surface,
+html[data-theme-version="v2"] .va-control-surface,
+html[data-theme-version="v2"] .va-tab-surface {
+  border-radius: var(--va-2-radius-lg) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 50%),
+    var(--va-2-surface) !important;
+}
