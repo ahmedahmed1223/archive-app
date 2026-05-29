@@ -219,7 +219,7 @@ export function SettingsPage() {
         description: "بدّل بين النمط الكلاسيكي والنمط الحديث. التغيير فوري ويُحفظ تلقائيًا.",
         icon: jsx(Sparkles, { className: "h-5 w-5 text-emerald-400" }),
         children: jsx(ThemeVersionPicker, {
-          value: settings.ui?.themeVersion || "v1",
+          value: settings.ui?.themeVersion || "v2",
           onChange: (version) => patchUi({ themeVersion: version }, version === "v2" ? "تم تفعيل النمط الحديث" : "تم تفعيل النمط الكلاسيكي")
         })
       }),

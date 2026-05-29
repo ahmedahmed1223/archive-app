@@ -34,7 +34,7 @@ const OPTIONS = [
  * This component also mirrors to localStorage + applies the live
  * <html> attribute so the change is instant without a reload.
  */
-export function ThemeVersionPicker({ value = "v1", onChange }) {
+export function ThemeVersionPicker({ value = "v2", onChange }) {
   const [previewLeft, setPreviewLeft] = React.useState(0);
   const previewTimerRef = React.useRef(null);
   const previewing = previewLeft > 0;

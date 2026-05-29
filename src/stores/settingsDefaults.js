@@ -29,10 +29,12 @@ export function defaultSettings() {
       deviceId: null,
       deviceName: null,
       // Theme version — "v1" (classic Office-style) or "v2"
-      // (modern Linear/Vercel-style). Defaults to v1 during the
-      // rollout window so existing users don't get surprised on
-      // upgrade. PR F flips this default once v2 is validated.
-      themeVersion: "v1"
+      // (modern Linear/Vercel-style). v2 is now the default; mirrors
+      // DEFAULT_THEME_VERSION in themeVersionStorage.js. The boot path
+      // (applyInitialThemeVersion) reads localStorage which uses the
+      // same default, so the live attribute, this settings mirror, and
+      // the picker all agree for users without an explicit choice.
+      themeVersion: "v2"
     },
     notifications: {
       durationMs: 5500,
