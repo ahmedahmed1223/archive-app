@@ -173,8 +173,10 @@ html[data-theme-version="v2"] .va-sidebar-item-active {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Inputs — accent focus glow ring on the real input elements that
- * live inside v2 surfaces. Scoped to main to avoid hitting login. */
+/* Inputs — accent focus glow ring on main-area inputs. NOTE: in
+ * this app the lock/login/onboarding gate screens render INSIDE
+ * <main>, so they also receive the v2 focus ring when v2 is active.
+ * That is intentional (consistent focus style once opted into v2). */
 html[data-theme-version="v2"] main input:not([type="checkbox"]):not([type="radio"]):focus,
 html[data-theme-version="v2"] main textarea:focus,
 html[data-theme-version="v2"] main select:focus {
@@ -240,7 +242,7 @@ git checkout main && git reset --hard origin/main
 
 1. **Spec coverage** — buttons ✓, cards ✓, metric cards ✓, hero ✓, sidebar pill ✓, inputs ✓, chips ✓, surfaces ✓. Deviation (CSS-scope vs JSX-opt-in) documented above.
 2. **!important correctness** — every property that v1 marks `!important` (button bg/border/shadow, card bg/border/shadow) is also `!important` in the v2 override, so the higher-specificity v2 rule wins. Properties v1 does NOT mark important (transform, transition) don't strictly need it but including it is harmless.
-3. **Scope isolation** — every selector starts with `html[data-theme-version="v2"]`. Grep the appended block: zero unscoped rules. Login screen (`.login-screen-shell`) is outside `main` so the input focus rule won't touch it.
+3. **Scope isolation** — every selector starts with `html[data-theme-version="v2"]`. Grep the appended block: zero unscoped rules. NOTE: the gate screens (lock/login/onboarding) render inside `<main>`, so the input-focus rule reaches them too — intentional, gives a consistent v2 focus style once opted in (corrected from an earlier draft that wrongly assumed they sat outside `main`).
 4. **Token references** — all `var(--va-2-*)` exist from PR A.
 5. **Reversibility** — toggling back to v1 removes the attribute, so every rule deactivates. v1 visuals are guaranteed identical.
 

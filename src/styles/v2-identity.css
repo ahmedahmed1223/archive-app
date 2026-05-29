@@ -480,8 +480,11 @@ html[data-theme-version="v2"] .va-sidebar-item-active {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Inputs — accent focus glow ring on the real input elements that
- * live inside v2 surfaces. Scoped to main to avoid hitting login. */
+/* Inputs — accent focus glow ring on main-area inputs. Scoped to
+ * `main`, which in this app also contains the lock / login /
+ * onboarding gate screens — so they get the v2 focus ring too when
+ * v2 is active. That's intentional: a consistent focus style across
+ * every input once the user has opted into v2. */
 html[data-theme-version="v2"] main input:not([type="checkbox"]):not([type="radio"]):focus,
 html[data-theme-version="v2"] main textarea:focus,
 html[data-theme-version="v2"] main select:focus {
