@@ -161,3 +161,61 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
   --va-2-accent:        #f43f5e;
   --va-2-accent-strong: #e11d48;
 }
+
+/* ===================================================================
+ * Component classes (PR B) — opt-in v2 visual treatments.
+ * Components apply these in PR D when themeVersion === "v2".
+ * Until then they're inert (no element references them).
+ * =================================================================== */
+
+/* Surfaces with a subtle top-light gradient for depth. */
+.va-2-surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 50%),
+    var(--va-2-surface);
+  border: 1px solid var(--va-2-line);
+  border-radius: var(--va-2-radius-lg);
+}
+.va-2-surface-elevated {
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--va-2-accent) 4%, transparent), transparent 40%),
+    var(--va-2-surface-2);
+  border: 1px solid var(--va-2-line);
+  border-radius: var(--va-2-radius-lg);
+  box-shadow: var(--va-2-shadow-md);
+}
+
+/* Card — top-light gradient, hover lifts 2px with shadow. */
+.va-2-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%),
+    var(--va-2-surface);
+  border: 1px solid var(--va-2-line);
+  border-radius: var(--va-2-radius-lg);
+  padding: 1.25rem;
+  transition: transform var(--va-2-duration-fast) ease,
+              border-color var(--va-2-duration-fast) ease,
+              box-shadow var(--va-2-duration-fast) ease;
+}
+.va-2-card:hover {
+  border-color: var(--va-2-line-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--va-2-shadow-md);
+}
+
+/* Entity card — adds an accent stripe on the leading (RTL: right) edge.
+ * Components pass --va-2-entity-accent inline for per-item colors. */
+.va-2-entity-card {
+  position: relative;
+}
+.va-2-entity-card::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  top: 1rem;
+  bottom: 1rem;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+  background: var(--va-2-entity-accent, var(--va-2-accent));
+  opacity: 0.6;
+}
