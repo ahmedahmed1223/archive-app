@@ -306,3 +306,75 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
 .va-2-danger-button:hover {
   transform: translateY(-1px);
 }
+
+/* Inputs — sunk-in feel (canvas deeper than surrounding surface),
+ * accent focus ring. */
+.va-2-input {
+  width: 100%;
+  background: var(--va-2-canvas);
+  color: var(--va-2-text-strong);
+  border: 1px solid var(--va-2-line);
+  border-radius: var(--va-2-radius-md);
+  padding: 0.625rem 0.875rem;
+  min-height: 2.5rem;
+  transition: border-color var(--va-2-duration-fast) ease,
+              box-shadow var(--va-2-duration-fast) ease;
+}
+.va-2-input::placeholder {
+  color: var(--va-2-text-faint);
+}
+.va-2-input:hover {
+  border-color: var(--va-2-line-strong);
+}
+.va-2-input:focus {
+  border-color: var(--va-2-accent);
+  box-shadow: 0 0 0 3px var(--va-2-accent-glow);
+  outline: none;
+}
+
+/* Chips/badges — base + 4 semantic variants. Each uses color-mix
+ * so the tint reads correctly across all 7 accent presets. */
+.va-2-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--va-2-surface-2);
+  border: 1px solid var(--va-2-line);
+  border-radius: var(--va-2-radius-sm);
+  padding: 0.25rem 0.625rem;
+  font-size: var(--va-2-text-xs);
+  font-weight: 500;
+  color: var(--va-2-text-soft);
+}
+.va-2-chip-accent {
+  background: color-mix(in srgb, var(--va-2-accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--va-2-accent) 25%, transparent);
+  color: color-mix(in srgb, var(--va-2-accent) 35%, #ffffff);
+}
+.va-2-chip-success {
+  background: color-mix(in srgb, var(--va-2-success) 12%, transparent);
+  border-color: color-mix(in srgb, var(--va-2-success) 25%, transparent);
+  color: color-mix(in srgb, var(--va-2-success) 35%, #ffffff);
+}
+.va-2-chip-danger {
+  background: color-mix(in srgb, var(--va-2-danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--va-2-danger) 25%, transparent);
+  color: color-mix(in srgb, var(--va-2-danger) 35%, #ffffff);
+}
+.va-2-chip-warning {
+  background: color-mix(in srgb, var(--va-2-warning) 12%, transparent);
+  border-color: color-mix(in srgb, var(--va-2-warning) 25%, transparent);
+  color: color-mix(in srgb, var(--va-2-warning) 38%, #ffffff);
+}
+.va-2-chip-info {
+  background: color-mix(in srgb, var(--va-2-info) 12%, transparent);
+  border-color: color-mix(in srgb, var(--va-2-info) 25%, transparent);
+  color: color-mix(in srgb, var(--va-2-info) 35%, #ffffff);
+}
+
+/* Light-mode chip text needs darker mix (white mix is invisible). */
+html.light .va-2-chip-accent { color: color-mix(in srgb, var(--va-2-accent) 60%, #000000); }
+html.light .va-2-chip-success { color: color-mix(in srgb, var(--va-2-success) 55%, #000000); }
+html.light .va-2-chip-danger { color: color-mix(in srgb, var(--va-2-danger) 55%, #000000); }
+html.light .va-2-chip-warning { color: color-mix(in srgb, var(--va-2-warning) 55%, #000000); }
+html.light .va-2-chip-info { color: color-mix(in srgb, var(--va-2-info) 55%, #000000); }
