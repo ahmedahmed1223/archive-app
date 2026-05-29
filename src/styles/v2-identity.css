@@ -219,3 +219,90 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
   background: var(--va-2-entity-accent, var(--va-2-accent));
   opacity: 0.6;
 }
+
+/* Buttons — primary (gradient + glow), secondary (outlined),
+ * ghost (transparent), danger (semantic red gradient). */
+.va-2-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(180deg, var(--va-2-accent), var(--va-2-accent-strong));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--va-2-radius-md);
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.011em;
+  box-shadow: var(--va-2-shadow-glow), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform var(--va-2-duration-fast) ease,
+              box-shadow var(--va-2-duration-fast) ease;
+}
+.va-2-primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 25px 50px -20px var(--va-2-accent-glow),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.va-2-primary-button:active {
+  transform: translateY(0) scale(0.98);
+}
+.va-2-primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.va-2-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--va-2-surface-2);
+  color: var(--va-2-text-strong);
+  border: 1px solid var(--va-2-line-strong);
+  border-radius: var(--va-2-radius-md);
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: background var(--va-2-duration-fast) ease,
+              border-color var(--va-2-duration-fast) ease;
+}
+.va-2-secondary-button:hover {
+  background: var(--va-2-surface-3);
+  border-color: var(--va-2-accent);
+}
+
+.va-2-ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--va-2-text-soft);
+  border: none;
+  border-radius: var(--va-2-radius-sm);
+  padding: 0.5rem;
+  transition: background var(--va-2-duration-fast) ease,
+              color var(--va-2-duration-fast) ease;
+}
+.va-2-ghost-button:hover {
+  background: var(--va-2-surface-2);
+  color: var(--va-2-text-strong);
+}
+
+.va-2-danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(180deg, var(--va-2-danger), #dc2626);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--va-2-radius-md);
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: transform var(--va-2-duration-fast) ease;
+}
+.va-2-danger-button:hover {
+  transform: translateY(-1px);
+}
