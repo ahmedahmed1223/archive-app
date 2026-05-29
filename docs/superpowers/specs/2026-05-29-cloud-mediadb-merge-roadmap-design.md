@@ -85,5 +85,16 @@ This supersedes/absorbs `2026-05-28-archive-enhancements-from-legacy.md`:
 - Manual smoke per feature (described in each PR's plan).
 - Subagent two-stage review (spec compliance + code quality) before merge.
 
+## Future direction: cloud migration (post-roadmap)
+
+**The user has stated the end goal is to turn this app into a cloud system like CLOUD-MediaDB** (backend + Dropbox/Firebase-style storage + sharing). The offline-first state is therefore a *stage*, not the destination. This roadmap is built **cloud-migration-aware** so none of the 11 features have to be rewritten later:
+
+- **Keep all persistence behind the existing `dbGet/dbPut/dbGetAll` wrappers** (`src/services/storage/`). The later cloud layer swaps the IndexedDB implementation for a remote/synced one in ONE place; feature code that only calls the wrappers migrates for free.
+- **Feature logic stays storage-agnostic and pure** — completeness, related-items, autocomplete ranking, conditional-field evaluation all operate on in-memory entities, so they work identically against local or cloud-backed data.
+- **The sync scaffolding already shipped is the migration bridge**: `deviceId` + `syncVersion` + `lastModifiedBy` (PRs #35/#36), conflict detection + 3-way merge (PRs #39/#41/#42), and `audit_logs` give us the per-entity versioning a cloud backend needs. PR 10's field-level diffs further strengthen this.
+- **Don't bake offline-only assumptions** into new features (e.g. no "this is the only device" logic; respect the existing multi-device sync model).
+
+A dedicated **cloud-migration spec** will be brainstormed separately after this roadmap ships. Likely scope at that time: a backend choice (Firebase/Supabase/custom), auth migration, Dropbox/Drive file linking, real-time presence, and shared projects — each its own spec → plan → PR cycle. Out of scope for THIS roadmap; recorded here only to guide design decisions now.
+
 ## Open questions
 None blocking. Split-pane sequencing (PR 7 early vs mid) is a plan-time decision, not a design ambiguity.
