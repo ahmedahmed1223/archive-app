@@ -11,23 +11,31 @@
 :root {
   /* Dark mode (default) tokens for v2 — defined globally so v1
    * users still pay the cost of CSS variable definitions but
-   * never read them. ~1KB of dead CSS that PR F will activate. */
-  --va-2-canvas:        #0a0b0e;
-  --va-2-surface:       #14161b;
-  --va-2-surface-2:     #1a1d24;
-  --va-2-surface-3:     #232830;
+   * never read them. Only read when data-theme-version="v2".
+   *
+   * Palette: cool violet-slate undertone (blue channel sits a step
+   * above red/green) so the "neutrals" read as an intentional,
+   * designed dark — the modern Linear / Vercel / Raycast feel —
+   * rather than a flat neutral gray-black. */
+  --va-2-canvas:        #0a0a0f;
+  --va-2-surface:       #14151d;
+  --va-2-surface-2:     #1b1c26;
+  --va-2-surface-3:     #24262f;
 
-  --va-2-line:          rgba(255, 255, 255, 0.06);
-  --va-2-line-strong:   rgba(255, 255, 255, 0.12);
+  --va-2-line:          rgba(255, 255, 255, 0.07);
+  --va-2-line-strong:   rgba(255, 255, 255, 0.13);
 
-  --va-2-text-strong:   #f8f9fb;
-  --va-2-text:          #d4d6dc;
-  --va-2-text-soft:     #a8acb8;
-  --va-2-text-faint:    #6e727e;
+  --va-2-text-strong:   #f6f7fb;
+  --va-2-text:          #c9ccd6;
+  --va-2-text-soft:     #989cab;
+  --va-2-text-faint:    #6b6f7c;
 
-  /* Accent presets — indigo default, re-tuned for v2's canvas. */
-  --va-2-accent:        #6366f1;
-  --va-2-accent-strong: #4f46e5;
+  /* Accent presets — vivid violet-indigo default, crisper for v2's
+   * cool canvas (reads more "2024 SaaS" than flat indigo-500).
+   * #7673f7 clears WCAG AA (4.82:1) as text on the dark surface, so
+   * accent-colored links / active labels stay legible. */
+  --va-2-accent:        #7673f7;
+  --va-2-accent-strong: #5b50e6;
   --va-2-accent-soft:   color-mix(in srgb, var(--va-2-accent) 12%, transparent);
   --va-2-accent-glow:   color-mix(in srgb, var(--va-2-accent) 25%, transparent);
 
@@ -69,23 +77,25 @@
   --va-2-duration-slow:    400ms;
 }
 
-/* Light-mode overrides — same names, lighter values. */
+/* Light-mode overrides — same names, lighter values. Canvas + raised
+ * surfaces carry a faint cool-blue tint so the light theme reads as
+ * "designed" rather than stark office-white. */
 html.light {
-  --va-2-canvas:        #f6f7f9;
+  --va-2-canvas:        #f4f6fa;
   --va-2-surface:       #ffffff;
-  --va-2-surface-2:     #fafbfc;
+  --va-2-surface-2:     #f6f8fc;
   --va-2-surface-3:     #ffffff;
 
-  --va-2-line:          rgba(15, 17, 21, 0.08);
-  --va-2-line-strong:   rgba(15, 17, 21, 0.16);
+  --va-2-line:          rgba(15, 23, 42, 0.09);
+  --va-2-line-strong:   rgba(15, 23, 42, 0.17);
 
-  --va-2-text-strong:   #0f1115;
-  --va-2-text:          #232831;
-  --va-2-text-soft:     #4a4f5a;
-  --va-2-text-faint:    #7a7f8a;
+  --va-2-text-strong:   #0d0f16;
+  --va-2-text:          #21262f;
+  --va-2-text-soft:     #474d58;
+  --va-2-text-faint:    #767c88;
 
-  --va-2-accent:        #4f46e5;
-  --va-2-accent-strong: #4338ca;
+  --va-2-accent:        #5650e8;
+  --va-2-accent-strong: #473dd6;
   --va-2-shadow-sm:     0 1px 2px rgba(15,17,21,0.06);
   --va-2-shadow-md:     0 4px 12px -2px rgba(15,17,21,0.08),
                         0 2px 4px -1px rgba(15,17,21,0.04);
@@ -138,8 +148,8 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="teal"] {
   --va-2-accent-strong: #0d9488;
 }
 html[data-theme-version="v2"] .va-app-shell[data-accent="indigo"] {
-  --va-2-accent:        #6366f1;
-  --va-2-accent-strong: #4f46e5;
+  --va-2-accent:        #7673f7;
+  --va-2-accent-strong: #5b50e6;
 }
 html[data-theme-version="v2"] .va-app-shell[data-accent="emerald"] {
   --va-2-accent:        #10b981;
