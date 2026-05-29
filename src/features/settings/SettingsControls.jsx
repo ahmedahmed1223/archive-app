@@ -225,37 +225,24 @@ export function SettingsTabs({ activeTab, onTabChange }) {
     tabs: SETTINGS_TABS.filter((tab) => (tab.role || "personal") === role)
   })).filter((group) => group.tabs.length > 0);
 
-  // Two layouts in one component:
-  //   - default: horizontal scrollable bar (mobile, tablet, narrow
-  //     laptop) using flex with overflow-x-auto. Tabs sit side-by-side.
-  //   - lg:flex-col (1024px+): switches back to the original sticky
-  //     sidebar layout that pairs with the lg:grid-cols-[260px_...]
-  //     parent. Role-group dividers become horizontal bullets on the
-  //     bar (we render only the role label as a chip header).
+  // Single layout: a horizontal scrollable bar at every width. Role
+  // groups flow left-to-right separated by a vertical rule.
   return jsxs("nav", {
     className: cx(
       "va-tab-surface rounded-2xl border p-2",
-      // Sidebar mode at lg+
-      "lg:sticky lg:top-4 lg:h-fit",
-      // Horizontal scroller below lg
-      "flex gap-1 overflow-x-auto lg:block lg:overflow-visible"
+      // Always a horizontal scrollable bar — at every width.
+      "flex gap-1 overflow-x-auto"
     ),
     dir: "rtl",
     "aria-label": "تبويبات الإعدادات",
     children: grouped.map((group, groupIndex) => jsxs("div", {
       className: cx(
-        // Stay inline below lg so groups flow horizontally.
-        "flex shrink-0 items-center gap-1 lg:block",
-        // Vertical separator chip on horizontal layout; horizontal
-        // rule on sidebar layout.
-        groupIndex > 0 ? "border-r border-white/10 pe-1 lg:mt-2 lg:border-r-0 lg:border-t lg:pt-2" : "",
-        groupIndex > 0 ? "ps-1 lg:px-0" : ""
+        // Always inline so role groups flow left-to-right on the bar.
+        "flex shrink-0 items-center gap-1",
+        // Vertical separator between groups (RTL: a right border).
+        groupIndex > 0 ? "border-r border-white/10 pe-1 ps-1" : ""
       ),
       children: [
-        jsx("p", {
-          className: "hidden lg:block px-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500",
-          children: group.label
-        }),
         ...group.tabs.map((tab) => {
           const Icon = TAB_ICONS[tab.id] || CircleQuestionFallback;
           const selected = activeTab === tab.id;
@@ -265,8 +252,6 @@ export function SettingsTabs({ activeTab, onTabChange }) {
             "aria-current": selected ? "page" : undefined,
             className: cx(
               "relative inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm transition-colors",
-              // Full-width row in sidebar mode, intrinsic chip in bar mode
-              "lg:mb-1 lg:flex lg:w-full lg:gap-3 lg:px-3 lg:py-2.5 lg:text-right",
               selected ? "text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"
             ),
             children: [
@@ -275,7 +260,7 @@ export function SettingsTabs({ activeTab, onTabChange }) {
                 className: "absolute inset-0 rounded-xl border border-[color-mix(in_srgb,var(--va-action)_45%,transparent)] bg-[color-mix(in_srgb,var(--va-action)_15%,transparent)]"
               }),
               jsx(Icon, { className: "relative h-4 w-4 shrink-0" }),
-              jsx("span", { className: "relative lg:flex-1", children: tab.label })
+              jsx("span", { className: "relative", children: tab.label })
             ]
           }, tab.id);
         })
