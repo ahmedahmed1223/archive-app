@@ -538,8 +538,11 @@ html[data-theme-version="v2"] .va-motion-page {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.va-app-shell[data-motion="off"] html[data-theme-version="v2"] .va-motion-page,
-html[data-theme-version="v2"][data-motion="off"] .va-motion-page {
+/* data-motion lives on the .va-app-shell div (not <html>), and
+ * data-theme-version lives on <html>. Correct nesting: html[v2] is
+ * an ancestor of .va-app-shell[off] is an ancestor of the page. */
+html[data-theme-version="v2"] .va-app-shell[data-motion="off"] .va-motion-page,
+html[data-theme-version="v2"] .va-app-shell[data-motion="reduced"] .va-motion-page {
   animation: none;
 }
 
@@ -569,9 +572,17 @@ html[data-theme-version="v2"] .va-dialog-card {
   from { opacity: 0; transform: translateY(8px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.va-app-shell[data-motion="off"] html[data-theme-version="v2"] .va-dialog-card,
-html[data-theme-version="v2"][data-motion="off"] .va-dialog-card {
-  animation: none;
+/* The dialog card is portaled to document.body — OUTSIDE
+ * .va-app-shell — so the data-motion ancestor selector can't reach
+ * it. The OS-level prefers-reduced-motion media query (below) is the
+ * reliable cross-portal signal; the in-app motion-off case for this
+ * brief 240ms one-shot is acceptable to leave (framer-motion dialogs
+ * already honor useReducedMotion on their own JS-driven entries). */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-version="v2"] .va-motion-page,
+  html[data-theme-version="v2"] .va-dialog-card {
+    animation: none !important;
+  }
 }
 
 /* Light-mode v2 corrections — the white top-light gradients read as
