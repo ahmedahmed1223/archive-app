@@ -79,6 +79,49 @@ Show the star rating on cards/rows, like the review chip in Item 3, via a `stora
 2. **PR — Item 2** (default-type presets). Tiny, builds on Item 1.
 3. **PR — Items 3 + 4** (card surfacing via storageKey conventions). Together, since they share the card-convention mechanism.
 
+## Deeper pass — data-model comparison (legacy SQLite schema vs current)
+
+Extracting the legacy `CREATE TABLE` schema revealed its full data model. Cross-checked against the current app, these additional items surfaced:
+
+### Item 5 — Video bookmarks / time-markers ("إشارات مرجعية") (★★★ priority — LATENT)
+Legacy `bookmarks(itemId, timestamp REAL, label, description)` = named markers at a specific second inside a video, with insert/delete ("إدراج/حذف إشارة مرجعية").
+- **Current state:** the `BOOKMARKS` IndexedDB store EXISTS (schema.js, archiveSlice loadAllData, and the data-portability layer already import/export/validate it) — but there is **zero UI**. It's a fully latent feature.
+- **Scope:** a `normalizeBookmark` model + a bookmarks slice (add/remove/list by itemId) + a "إشارات مرجعية" panel on `DetailPage` (add at a timestamp, label, jump-to). Highest archival value; the persistence + transfer plumbing is already done.
+- **Risk:** low-medium (additive UI + a slice; store + transfer already exist).
+
+### Item 6 — Video relations ("روابط بين المواد") (★★ priority — LATENT)
+Legacy `video_relations(sourceId, targetId, relationType, label)` = links between items (related / part-of / sequel).
+- **Current state:** the `relations` store EXISTS (loaded in archiveSlice, handled by data-portability) but has **no UI**.
+- **Scope:** a relations slice + a "مواد ذات صلة" section on `DetailPage` (link/unlink + navigate). 
+- **Risk:** medium (new UI + slice; store exists).
+
+### Item 7 — Surface avatar + email on users (★ priority — LATENT)
+Legacy users had `avatar, email`. The current user model (`normalizeUser`) already carries `avatar`, `email`, `customPermissions` — but the `UserForm` only edits username/displayName/role/password, so avatar + email are never set or shown.
+- **Scope:** add avatar (emoji/initial/color) + email inputs to `UserForm`; show avatar on user cards + the sidebar widget.
+- **Risk:** low. Modest value (nicer identity); fields already in the model.
+
+### Item 8 — Custom roles + permissions registry (☆ strategic — ABSENT, big scope)
+Legacy had `roles(name, nameAr, permissions[], isDefault)` + `permissions(name, category, isDangerous)` + per-user `customPermissions` — i.e. admins could define their own roles, categorize permissions, flag dangerous ones, and override per user.
+- **Current state:** the app uses a **deliberate fixed 3-role matrix** (`ROLE_ACTIONS`: admin/editor/viewer) chosen in Phase 3 for simplicity. `customPermissions` exists on the model but isn't honored or editable.
+- **Assessment:** this is a large RBAC expansion (custom-role CRUD, a permissions registry UI, merging role + custom permissions in `canPerform`). Only worth it if granular/custom roles are genuinely needed. **Recommend deferring** unless required — the fixed matrix covers the common case.
+
+### Already covered / deliberately not needed
+- **Saved searches** (legacy `saved_searches`) ≈ current **saved views** (`savedArchiveViews`, max 12 on Archive). Covered.
+- **Per-user theme/density/sidebar** (legacy `user_settings`) — current handles via `settings.ui` (per install). Covered for single-device; per-account split is YAGNI here.
+- **Sessions/multi-device** (legacy `sessions`/`user_sessions`) — current uses a random session token + 12h TTL + the new device-identity/sync layer. Sufficient; no IP/userAgent tracking needed for a local-first tool.
+- **user_profiles** (bio/location/website/socialLinks) — YAGNI for an internal archive.
+
+## Updated sequencing (all items)
+
+1. **Item 1** — rating field type (self-contained, highest value, lowest risk).
+2. **Item 5** — video bookmarks UI (latent, high archival value, plumbing done).
+3. **Item 2** — rating + review-status presets on default types.
+4. **Item 6** — video relations UI (latent).
+5. **Items 3 + 4** — surface rating + review-status chips on archive cards.
+6. **Item 7** — avatar + email on users (small polish).
+7. **Item 8** — custom roles (strategic, deferred unless needed).
+
 ## Out of scope (legacy features deliberately NOT ported)
 - The legacy build is a Tailwind-compiled bundle with only the stock `bounce/ping/pulse/spin` keyframes — no custom motion worth porting (theme v2's spring + glassmorphism already exceed it).
 - Arabic-locale sorting — already present in 6 modules.
+- QR / print — confirmed false positives (base64 alphabet + WASM `k.print`), not real legacy features.
