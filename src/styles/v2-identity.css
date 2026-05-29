@@ -573,3 +573,38 @@ html[data-theme-version="v2"] .va-dialog-card {
 html[data-theme-version="v2"][data-motion="off"] .va-dialog-card {
   animation: none;
 }
+
+/* Light-mode v2 corrections — the white top-light gradients read as
+ * nothing on a white canvas, so in light mode we drop them and lean
+ * on borders + soft shadows for depth instead. */
+html.light[data-theme-version="v2"] .va-card,
+html.light[data-theme-version="v2"] .va-data-card,
+html.light[data-theme-version="v2"] .va-video-card,
+html.light[data-theme-version="v2"] .va-action-card,
+html.light[data-theme-version="v2"] .va-preview-panel,
+html.light[data-theme-version="v2"] .va-filter-surface,
+html.light[data-theme-version="v2"] .va-control-surface,
+html.light[data-theme-version="v2"] .va-tab-surface {
+  background: var(--va-2-surface) !important;
+  box-shadow: var(--va-2-shadow-sm);
+}
+html.light[data-theme-version="v2"] .va-card:hover,
+html.light[data-theme-version="v2"] .va-data-card:hover,
+html.light[data-theme-version="v2"] .va-video-card:hover,
+html.light[data-theme-version="v2"] .va-action-card:hover {
+  box-shadow: var(--va-2-shadow-md) !important;
+}
+
+/* Light-mode hero — softer accent radial over white. */
+html.light[data-theme-version="v2"] .va-page-hero,
+html.light[data-theme-version="v2"] .va-page-hero-compact,
+html.light[data-theme-version="v2"] .va-panel-premium {
+  background:
+    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--va-2-accent) 8%, transparent), transparent 42%),
+    var(--va-2-surface-2) !important;
+}
+
+/* Light-mode modal backdrop — lighter scrim, same blur. */
+html.light[data-theme-version="v2"] .va-dialog-overlay {
+  background: rgba(15, 17, 21, 0.28) !important;
+}
