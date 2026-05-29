@@ -382,3 +382,39 @@ html.light .va-2-chip-success { color: color-mix(in srgb, var(--va-2-success) 55
 html.light .va-2-chip-danger { color: color-mix(in srgb, var(--va-2-danger) 55%, #000000); }
 html.light .va-2-chip-warning { color: color-mix(in srgb, var(--va-2-warning) 55%, #000000); }
 html.light .va-2-chip-info { color: color-mix(in srgb, var(--va-2-info) 55%, #000000); }
+
+/* ===================================================================
+ * PR D — v2 component enhancements (attribute-scoped).
+ * Active only under html[data-theme-version="v2"]. v1 untouched.
+ * Uses !important to override v1's !important declarations.
+ * =================================================================== */
+
+/* Primary buttons — gradient fill + glow + hover lift. */
+html[data-theme-version="v2"] .va-primary-button,
+html[data-theme-version="v2"] .va-action-button {
+  background: linear-gradient(180deg, var(--va-2-accent), var(--va-2-accent-strong)) !important;
+  border-color: transparent !important;
+  border-radius: var(--va-2-radius-md) !important;
+  box-shadow: var(--va-2-shadow-glow), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transition: transform var(--va-2-duration-fast) ease, box-shadow var(--va-2-duration-fast) ease !important;
+}
+html[data-theme-version="v2"] .va-primary-button:hover,
+html[data-theme-version="v2"] .va-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 25px 50px -20px var(--va-2-accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+html[data-theme-version="v2"] .va-primary-button:active,
+html[data-theme-version="v2"] .va-action-button:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* Secondary + tool buttons — refined radius + accent hover border. */
+html[data-theme-version="v2"] .va-secondary-button,
+html[data-theme-version="v2"] .va-tool-button {
+  border-radius: var(--va-2-radius-md) !important;
+  transition: background var(--va-2-duration-fast) ease, border-color var(--va-2-duration-fast) ease !important;
+}
+html[data-theme-version="v2"] .va-secondary-button:hover,
+html[data-theme-version="v2"] .va-tool-button:hover {
+  border-color: color-mix(in srgb, var(--va-2-accent) 45%, transparent) !important;
+}
