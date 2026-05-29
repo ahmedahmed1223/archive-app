@@ -382,3 +382,128 @@ html.light .va-2-chip-success { color: color-mix(in srgb, var(--va-2-success) 55
 html.light .va-2-chip-danger { color: color-mix(in srgb, var(--va-2-danger) 55%, #000000); }
 html.light .va-2-chip-warning { color: color-mix(in srgb, var(--va-2-warning) 55%, #000000); }
 html.light .va-2-chip-info { color: color-mix(in srgb, var(--va-2-info) 55%, #000000); }
+
+/* ===================================================================
+ * PR D — v2 component enhancements (attribute-scoped).
+ * Active only under html[data-theme-version="v2"]. v1 untouched.
+ * Uses !important to override v1's !important declarations.
+ * =================================================================== */
+
+/* Primary buttons — gradient fill + glow + hover lift. */
+html[data-theme-version="v2"] .va-primary-button,
+html[data-theme-version="v2"] .va-action-button {
+  background: linear-gradient(180deg, var(--va-2-accent), var(--va-2-accent-strong)) !important;
+  border-color: transparent !important;
+  border-radius: var(--va-2-radius-md) !important;
+  box-shadow: var(--va-2-shadow-glow), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transition: transform var(--va-2-duration-fast) ease, box-shadow var(--va-2-duration-fast) ease !important;
+}
+html[data-theme-version="v2"] .va-primary-button:hover,
+html[data-theme-version="v2"] .va-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 25px 50px -20px var(--va-2-accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+html[data-theme-version="v2"] .va-primary-button:active,
+html[data-theme-version="v2"] .va-action-button:active {
+  transform: translateY(0) scale(0.985);
+}
+
+/* Secondary + tool buttons — refined radius + accent hover border. */
+html[data-theme-version="v2"] .va-secondary-button,
+html[data-theme-version="v2"] .va-tool-button {
+  border-radius: var(--va-2-radius-md) !important;
+  transition: background var(--va-2-duration-fast) ease, border-color var(--va-2-duration-fast) ease !important;
+}
+html[data-theme-version="v2"] .va-secondary-button:hover,
+html[data-theme-version="v2"] .va-tool-button:hover {
+  border-color: color-mix(in srgb, var(--va-2-accent) 45%, transparent) !important;
+}
+
+/* Cards — top-light gradient overlay + hover lift + larger radius. */
+html[data-theme-version="v2"] .va-card,
+html[data-theme-version="v2"] .va-data-card,
+html[data-theme-version="v2"] .va-video-card,
+html[data-theme-version="v2"] .va-action-card,
+html[data-theme-version="v2"] .va-preview-panel {
+  border-radius: var(--va-2-radius-lg) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%),
+    var(--va-2-surface) !important;
+  transition: transform var(--va-2-duration-fast) ease,
+              border-color var(--va-2-duration-fast) ease,
+              box-shadow var(--va-2-duration-fast) ease !important;
+}
+html[data-theme-version="v2"] .va-card:hover,
+html[data-theme-version="v2"] .va-data-card:hover,
+html[data-theme-version="v2"] .va-video-card:hover,
+html[data-theme-version="v2"] .va-action-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--va-2-line-strong) !important;
+  box-shadow: var(--va-2-shadow-md) !important;
+}
+
+/* Metric cards — keep their existing gradient base but add v2 radius
+ * and a soft accent-tinted top light. */
+html[data-theme-version="v2"] .va-metric-card {
+  border-radius: var(--va-2-radius-lg) !important;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--va-2-accent) 5%, transparent), transparent 45%),
+    linear-gradient(180deg, var(--va-2-surface-2), var(--va-2-surface)) !important;
+}
+
+/* Page hero — cinematic multi-layer gradient. */
+html[data-theme-version="v2"] .va-page-hero,
+html[data-theme-version="v2"] .va-page-hero-compact,
+html[data-theme-version="v2"] .va-panel-premium {
+  border-radius: var(--va-2-radius-xl) !important;
+  background:
+    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--va-2-accent) 10%, transparent), transparent 40%),
+    linear-gradient(160deg, var(--va-2-surface-2), var(--va-2-surface) 60%) !important;
+}
+
+/* Tinted surfaces — subtle gradient for depth. */
+html[data-theme-version="v2"] .va-filter-surface,
+html[data-theme-version="v2"] .va-control-surface,
+html[data-theme-version="v2"] .va-tab-surface {
+  border-radius: var(--va-2-radius-lg) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 50%),
+    var(--va-2-surface) !important;
+}
+
+/* Sidebar active item — full gradient pill instead of edge bar. */
+html[data-theme-version="v2"] .va-sidebar-item-active {
+  border-radius: var(--va-2-radius-md) !important;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--va-2-accent) 22%, transparent),
+    color-mix(in srgb, var(--va-2-accent) 12%, transparent)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Inputs — accent focus glow ring on main-area inputs. Scoped to
+ * `main`, which in this app also contains the lock / login /
+ * onboarding gate screens — so they get the v2 focus ring too when
+ * v2 is active. That's intentional: a consistent focus style across
+ * every input once the user has opted into v2. */
+html[data-theme-version="v2"] main input:not([type="checkbox"]):not([type="radio"]):focus,
+html[data-theme-version="v2"] main textarea:focus,
+html[data-theme-version="v2"] main select:focus {
+  border-color: var(--va-2-accent) !important;
+  box-shadow: 0 0 0 3px var(--va-2-accent-glow) !important;
+  outline: none !important;
+}
+
+/* Chips / tags / badges — larger radius, refined border. */
+html[data-theme-version="v2"] .va-chip,
+html[data-theme-version="v2"] .va-tag-chip,
+html[data-theme-version="v2"] .va-category-pill,
+html[data-theme-version="v2"] .va-status-badge,
+html[data-theme-version="v2"] .va-count-badge {
+  border-radius: var(--va-2-radius-sm) !important;
+}
+
+/* Floating action bar — elevated v2 surface with shadow. */
+html[data-theme-version="v2"] .va-floating-action-bar {
+  border-radius: var(--va-2-radius-xl) !important;
+  box-shadow: var(--va-2-shadow-lg) !important;
+}
