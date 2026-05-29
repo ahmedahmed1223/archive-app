@@ -507,3 +507,38 @@ html[data-theme-version="v2"] .va-floating-action-bar {
   border-radius: var(--va-2-radius-xl) !important;
   box-shadow: var(--va-2-shadow-lg) !important;
 }
+
+/* ===================================================================
+ * PR E — motion + light-mode polish (v2-scoped).
+ * =================================================================== */
+
+/* Spring-like easing curve for v2 interactions. Overshoots slightly
+ * for a lively-but-controlled feel (Linear-style). */
+html[data-theme-version="v2"] {
+  --va-2-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --va-2-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Apply spring easing to the lift interactions added in PR D. */
+html[data-theme-version="v2"] .va-primary-button,
+html[data-theme-version="v2"] .va-action-button,
+html[data-theme-version="v2"] .va-card,
+html[data-theme-version="v2"] .va-data-card,
+html[data-theme-version="v2"] .va-video-card,
+html[data-theme-version="v2"] .va-action-card {
+  transition-timing-function: var(--va-2-ease-spring) !important;
+}
+
+/* Page-enter — a slightly larger, smoother rise than v1. Honors the
+ * global data-motion="off"/"reduced" rules already in v1-identity.css. */
+html[data-theme-version="v2"] .va-motion-page {
+  animation: va-2-page-enter var(--va-2-duration-base) var(--va-2-ease-out) both;
+}
+@keyframes va-2-page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.va-app-shell[data-motion="off"] html[data-theme-version="v2"] .va-motion-page,
+html[data-theme-version="v2"][data-motion="off"] .va-motion-page {
+  animation: none;
+}
