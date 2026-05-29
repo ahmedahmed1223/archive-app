@@ -215,7 +215,11 @@ html[data-theme-version="v2"] .va-app-shell[data-accent="rose"] {
   top: 1rem;
   bottom: 1rem;
   width: 3px;
-  border-radius: 3px 0 0 3px;
+  /* Logical radius: round the inner (inline-start) corners so the
+   * stripe stays flush with the card's leading edge in both LTR
+   * and RTL. */
+  border-start-start-radius: 3px;
+  border-end-start-radius: 3px;
   background: var(--va-2-entity-accent, var(--va-2-accent));
   opacity: 0.6;
 }
