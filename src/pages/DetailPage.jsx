@@ -318,6 +318,8 @@ export function DetailPage() {
         jsx("span", { className: "text-gray-700", children: "/" }),
         jsx("span", { className: "max-w-[200px] truncate text-gray-400", children: item.title || "التفاصيل" })
       ] }),
+      jsxs("div", { className: "grid gap-6 xl:grid-cols-[minmax(0,460px)_minmax(0,1fr)] xl:items-start", children: [
+        jsxs("div", { className: "space-y-6 xl:sticky xl:top-4 xl:self-start", children: [
       jsxs("section", { className: "va-page-hero overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-l from-gray-900 via-gray-900/95 to-gray-950 text-right shadow-2xl shadow-black/10", children: [
         previewSource ? jsx("video", { ref: videoRef, src: previewSource, controls: true, className: "aspect-video w-full bg-black object-contain" }) : item.thumbnail ? jsx("img", { src: item.thumbnail, alt: item.title, className: "h-64 w-full object-cover" }) : jsx("div", { className: "flex h-48 items-center justify-center bg-gray-950/60", children: jsx(Video, { className: "h-16 w-16 text-gray-700" }) }),
         previewSource && jsxs("div", { className: "border-t border-white/10 bg-gray-950/40 p-4", dir: "rtl", children: [
@@ -358,6 +360,8 @@ export function DetailPage() {
           ] })
         ] })
       ] }),
+        ] }),
+      jsxs("div", { className: "min-w-0 space-y-6", children: [
       jsx("section", { className: "grid gap-3 sm:grid-cols-2 xl:grid-cols-4", children: itemStats.map((stat, index) => {
         const Icon = stat.icon;
         return jsxs(motion.div, {
@@ -401,7 +405,7 @@ export function DetailPage() {
           jsx("button", { type: "button", onClick: save, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "حفظ" })
         ] })
       ] }),
-      jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]", children: [
+      jsxs("section", { className: "space-y-6", children: [
         jsxs("div", { className: "va-card space-y-4 rounded-2xl va-surface-muted border p-5 text-right", children: [
           jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(FileText, { className: "h-5 w-5 text-emerald-400" }), "البيانات"] }),
           completeness && jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
@@ -488,6 +492,8 @@ export function DetailPage() {
               jsx("p", { className: "mt-0.5 text-xs text-gray-600", children: record.timestamp ? formatDateTime(record.timestamp) : "" })
             ] }, record.id)) })
           ] })
+        ] })
+      ] })
         ] })
       ] })
     ]
