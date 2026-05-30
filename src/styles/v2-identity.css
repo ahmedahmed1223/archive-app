@@ -671,3 +671,29 @@ html.light[data-theme-version="v2"] :is(
 ) .text-white:not([class*="bg-"]):not(button):not(a) {
   color: var(--va-2-text-strong);
 }
+
+/*
+ * Light-mode accent-text fix. Active states of grouped/segmented controls,
+ * tabs, badges and chips use a LIGHT accent text (text-emerald-100/200,
+ * text-amber-*, text-blue-*, text-red-*) over a LIGHT accent tint
+ * (bg-emerald-500/15 …). That pairing reads fine on the dark canvas but is
+ * light-on-light (≈1:1, invisible — icons included, since they inherit
+ * currentColor) in light mode. Remap the light accent text utilities to a
+ * darker accent shade in light mode; the dark text stays legible on the
+ * light tint. Solid accent buttons keep white via their own
+ * `color:#fff !important`, so they are unaffected.
+ */
+html.light[data-theme-version="v2"] :is(.text-emerald-100, .text-emerald-200, .text-emerald-300) { color: #047857; }
+html.light[data-theme-version="v2"] :is(.text-amber-100, .text-amber-200, .text-amber-300)       { color: #b45309; }
+html.light[data-theme-version="v2"] :is(.text-red-100, .text-red-200, .text-red-300)             { color: #b91c1c; }
+html.light[data-theme-version="v2"] :is(.text-blue-100, .text-blue-200, .text-blue-300)          { color: #1d4ed8; }
+html.light[data-theme-version="v2"] :is(.text-cyan-200, .text-cyan-300)                          { color: #0e7490; }
+
+/* Restore light accent text inside the force-dark onboarding/login shell:
+   html is .light there too, so the remap above would darken accent text to
+   dark-on-dark. The shell is dark, so light accent text is correct. */
+html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-emerald-100, .text-emerald-200, .text-emerald-300) { color: #6ee7b7; }
+html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-amber-100, .text-amber-200, .text-amber-300)       { color: #fcd34d; }
+html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-red-100, .text-red-200, .text-red-300)             { color: #fca5a5; }
+html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-blue-100, .text-blue-200, .text-blue-300)          { color: #93c5fd; }
+html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-cyan-200, .text-cyan-300)                          { color: #67e8f9; }
