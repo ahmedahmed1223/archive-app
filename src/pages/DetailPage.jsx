@@ -31,6 +31,7 @@ import { getFieldsForSelection, groupCustomFields, getVisibleFields, getMissingR
 import { StarRating } from "../components/common/StarRating.jsx";
 import { computeCompleteness, COMPLETENESS_TIERS } from "../features/archive/completeness.js";
 import { getRelatedItems } from "../features/archive/relatedItems.js";
+import { revertItemToChange, describeFieldValue } from "../features/archive/itemHistory.js";
 import {
   createLocalFileValue,
   createVideoLocalFilePatch,
@@ -185,6 +186,10 @@ export function DetailPage() {
     [bookmarks, item?.id]
   );
   const relatedItems = React.useMemo(() => item ? getRelatedItems(item, videoItems, { limit: 6 }) : [], [item, videoItems]);
+  const itemHistory = React.useMemo(
+    () => (changeHistory || []).filter((record) => record.itemId === item?.id && Array.isArray(record.changes) && record.changes.length > 0),
+    [changeHistory, item?.id]
+  );
   const subtypes = selectedType?.subtypes || [];
   const history = React.useMemo(() => item ? changeHistory.filter((record) => record.itemId === item.id).sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()).slice(0, 10) : [], [changeHistory, item]);
   const previewSource = item?.path && isHtml5PreviewableVideo(item.path) ? getHtml5VideoPreviewSource(item.path) : null;
@@ -233,6 +238,22 @@ export function DetailPage() {
     if (!video) return;
     video.currentTime = Math.max(0, Number(timestamp) || 0);
     video.play?.().catch(() => {});
+  };
+
+  const restoreVersion = async (record) => {
+    const confirmed = await appConfirm(`استرجاع القيم كما كانت قبل تعديل ${formatDateTime(record.timestamp)}؟ سيُنشأ تعديل جديد بهذه القيم.`, {
+      title: "استرجاع نسخة سابقة",
+      kind: "warning",
+      confirmLabel: "استرجاع"
+    });
+    if (!confirmed) return;
+    const reverted = createVideoItemValue({ ...revertItemToChange(item, record.changes), id: item.id, createdAt: item.createdAt, version: (item.version || 1) + 1 });
+    try {
+      await updateVideoItem?.(reverted);
+      showToast?.("تم استرجاع النسخة السابقة", "success");
+    } catch (error) {
+      showToast?.("تعذّر استرجاع النسخة", "error");
+    }
   };
 
   const save = async () => {
@@ -426,6 +447,22 @@ export function DetailPage() {
                 related.reason ? jsx("p", { className: "mt-1 text-[11px] text-gray-500", children: related.reason }) : null
               ]
             }) }, related.item.id)) })
+          ] }) : null,
+          itemHistory.length ? jsxs("section", { children: [
+            jsxs("h2", { className: "flex items-center gap-2 text-base font-bold text-white", children: [jsx(Clock3, { className: "h-4 w-4 text-emerald-400" }), "سجل التعديلات"] }),
+            jsx("ul", { className: "mt-3 space-y-2", children: itemHistory.slice(0, 12).map((record) => jsxs("li", { className: "rounded-xl va-surface-subtle border p-3", children: [
+              jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                jsx("span", { className: "text-xs text-gray-400", children: formatDateTime(record.timestamp) }),
+                jsx("button", { type: "button", onClick: () => restoreVersion(record), className: "shrink-0 rounded-lg border border-white/10 px-2 py-1 text-[11px] text-gray-300 transition-colors hover:border-emerald-500/30 hover:text-emerald-200", children: "استرجاع" })
+              ] }),
+              jsx("ul", { className: "mt-1.5 space-y-0.5", children: record.changes.slice(0, 5).map((change, index) => jsxs("li", { className: "truncate text-[11px] text-gray-500", children: [
+                jsxs("span", { className: "text-gray-400", children: [change.label, ": "] }),
+                jsx("span", { children: describeFieldValue(change.oldValue) }),
+                " ← ",
+                jsx("span", { className: "text-gray-300", children: describeFieldValue(change.newValue) })
+              ] }, `${record.id}-${index}`)) }),
+              record.changes.length > 5 ? jsx("p", { className: "mt-1 text-[10px] text-gray-600", children: `+${record.changes.length - 5} تغييرات أخرى` }) : null
+            ] }, record.id)) })
           ] }) : null,
           jsxs("section", { className: "rounded-xl va-surface-subtle border p-3 space-y-2", children: [
             jsx("h2", { className: "text-xs font-semibold uppercase tracking-wide text-gray-600", children: "معلومات العنصر" }),

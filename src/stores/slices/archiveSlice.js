@@ -4,6 +4,7 @@ import {
   getMissingDefaultArchiveContentTypes
 } from "../../features/types/viewModel.js";
 import { createVirtualCollectionValue } from "../../features/collections/viewModel.js";
+import { diffVideoItemFields } from "../../features/archive/itemHistory.js";
 import {
   STORES,
   dbClear,
@@ -204,7 +205,8 @@ export function createArchiveActions({ set, get, getAuthStore }) {
         createVideoItemValue({ ...item, updatedAt: nowIso(), id: item.id }),
         { deviceId, previous }
       );
-      const record = normalizeChangeRecord({ itemId: updated.id, action: "update", title: updated.title, timestamp: nowIso() });
+      const changes = previous ? diffVideoItemFields(previous, updated) : [];
+      const record = normalizeChangeRecord({ itemId: updated.id, action: "update", title: updated.title, changes, timestamp: nowIso() });
       set((state) => ({
         videoItems: state.videoItems.map((current) => current.id === updated.id ? updated : current),
         changeHistory: [record, ...state.changeHistory]
