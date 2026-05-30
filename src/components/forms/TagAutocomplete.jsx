@@ -56,7 +56,7 @@ function getAutocompleteMatch(text, caret, triggers) {
   return best;
 }
 
-function createSuggestions({ match, allowed, vocabulary, hierarchicalTags, videoItems }) {
+function createSuggestions({ match, allowed, vocabulary, hierarchicalTags, videoItems, currentTags = [] }) {
   if (!match || !allowed.includes(match.kind)) return [];
   const q = normalizeArabicSearchText(match.query || "");
 
@@ -91,23 +91,43 @@ function createSuggestions({ match, allowed, vocabulary, hierarchicalTags, video
       color: tag.color
     };
   });
+  // Predictive ranking (PR 6): pure pass over existing items computes each
+  // tag's overall frequency and how often it co-occurs with the tags already
+  // entered in this field. Co-occurrence dominates, then raw frequency.
+  const frequency = new Map();
+  const coOccurrence = new Map();
+  const currentSet = new Set((currentTags || []).map((tag) => normalizeArabicSearchText(tag)).filter(Boolean));
+  (videoItems || []).forEach((item) => {
+    const normalized = (Array.isArray(item.tags) ? item.tags : []).map((tag) => normalizeArabicSearchText(tag));
+    const sharesCurrent = currentSet.size > 0 && normalized.some((key) => currentSet.has(key));
+    normalized.forEach((key) => {
+      if (!key) return;
+      frequency.set(key, (frequency.get(key) || 0) + 1);
+      if (sharesCurrent && !currentSet.has(key)) coOccurrence.set(key, (coOccurrence.get(key) || 0) + 1);
+    });
+  });
+
   const seen = new Set(hTags.map((tag) => normalizeArabicSearchText(tag.insertText || tag.label)));
   const flatTags = [];
   (videoItems || []).forEach((item) => {
     (Array.isArray(item.tags) ? item.tags : []).forEach((tag) => {
       const key = normalizeArabicSearchText(tag);
-      if (!key || seen.has(key)) return;
+      if (!key || seen.has(key) || currentSet.has(key)) return;
       seen.add(key);
+      const count = frequency.get(key) || 0;
+      const co = coOccurrence.get(key) || 0;
       flatTags.push({
         id: `tag-${tag}`,
         kind: "tags",
         label: tag,
         insertText: tag,
         group: "وسوم مستخدمة",
-        detail: "مستخدمة في الأرشيف"
+        detail: co > 0 ? `مرتبطة · استُخدمت ${count}` : `استُخدمت ${count}`,
+        score: co * 1000 + count
       });
     });
   });
+  flatTags.sort((a, b) => b.score - a.score);
 
   return [...hTags, ...flatTags].filter((item) => {
     const haystack = normalizeArabicSearchText(`${item.label} ${item.detail}`);
@@ -139,13 +159,18 @@ export function TagAutocomplete({
     tags: getAutocompleteTrigger(settings, "tags", "#")
   }), [settings]);
 
+  const currentTags = React.useMemo(
+    () => String(value || "").split(/[,،\n]/).map((tag) => tag.trim()).filter(Boolean),
+    [value]
+  );
   const suggestions = React.useMemo(() => createSuggestions({
     match,
     allowed,
     vocabulary,
     hierarchicalTags,
-    videoItems
-  }), [match, allowed, vocabulary, hierarchicalTags, videoItems]);
+    videoItems,
+    currentTags
+  }), [match, allowed, vocabulary, hierarchicalTags, videoItems, currentTags]);
 
   const groupedSuggestions = React.useMemo(() => {
     const groups = [];
