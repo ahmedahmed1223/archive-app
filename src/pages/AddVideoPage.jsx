@@ -360,6 +360,15 @@ export function AddVideoPage() {
     showToast?.("تم مسح المسودة", "info");
   };
 
+  const [showPanel, setShowPanel] = React.useState(() => {
+    try { return localStorage.getItem("videoArchive:addVideoSidePanel") !== "0"; } catch (error) { return true; }
+  });
+  const toggleSidePanel = () => setShowPanel((value) => {
+    const next = !value;
+    try { localStorage.setItem("videoArchive:addVideoSidePanel", next ? "1" : "0"); } catch (error) { /* ignore */ }
+    return next;
+  });
+
   return jsxs(MotionPage, {
     className: "space-y-6 p-4 sm:p-6",
     children: [
@@ -376,48 +385,22 @@ export function AddVideoPage() {
           compact: true
         })
       }),
-      jsxs("section", { className: "grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_0.9fr]", children: [
-        jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
-          jsxs("div", { className: "flex items-center justify-between gap-3", children: [
-            jsxs("div", { className: "flex items-center gap-2", children: [
-              jsx(ClipboardCheck, { className: "h-5 w-5 text-emerald-300" }),
-              jsx("h2", { className: "text-sm font-bold text-white", children: "جاهزية الحفظ" })
-            ] }),
-            jsx("span", { dir: "ltr", className: "font-mono text-sm text-emerald-200", children: `${readyPercent}%` })
-          ] }),
-          jsx("div", { className: "mt-3 h-2 overflow-hidden rounded-full bg-white/10", dir: "rtl", children: jsx(motion.div, { className: "h-full rounded-full bg-emerald-400", initial: false, animate: { width: `${readyPercent}%` }, transition: { duration: 0.28 } }) }),
-          jsx("div", { className: "mt-3 grid gap-2 sm:grid-cols-2", children: readyChecks.map((check) => jsxs("span", { className: `inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${check.ok ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-500"}`, children: [
-            check.ok ? jsx(CheckCircle2, { className: "h-3.5 w-3.5" }) : jsx(Circle, { className: "h-3.5 w-3.5" }),
-            check.label
-          ] }, check.id)) })
-        ] }),
-        jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
-          jsxs("div", { className: "flex items-center gap-2", children: [
-            jsx(Sparkles, { className: "h-5 w-5 text-amber-300" }),
-            jsx("h2", { className: "text-sm font-bold text-white", children: "ملخص مباشر" })
-          ] }),
-          jsx("div", { className: "mt-3 grid gap-2 text-sm text-gray-400", children: [
-            ["العنوان", title || "بانتظار الإدخال"],
-            ["التصنيف", selectedType?.name || "غير محدد"],
-            ["الوسوم", parsedTags.length ? `${parsedTags.length} وسم` : "لا توجد"],
-            ["المصدر", path || metadata.localFile?.name || "غير محدد"]
-          ].map(([label, value]) => jsxs("div", { className: "flex items-center justify-between gap-3 rounded-xl va-surface-subtle border px-3 py-2", children: [
-            jsx("span", { className: "text-gray-500", children: label }),
-            jsx("span", { className: "min-w-0 truncate text-gray-200", children: value })
-          ] }, label)) })
-        ] }),
-        jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
-          jsxs("div", { className: "flex items-center gap-2", children: [
-            jsx(Eye, { className: "h-5 w-5 text-cyan-300" }),
-            jsx("h2", { className: "text-sm font-bold text-white", children: "الخطوة الحالية" })
-          ] }),
-          jsx("p", { className: "mt-3 text-lg font-bold text-white", children: currentStep.label }),
-          jsx("p", { className: "mt-1 text-sm leading-7 text-gray-500", children: currentStep.detail }),
-          jsx("p", { className: "mt-3 rounded-xl va-surface-subtle border p-3 text-xs leading-6 text-gray-500", children: stepIndex === STEPS.length - 1 ? "راجع الملخص ثم احفظ، أو استخدم حفظ وإضافة آخر للعمل المتكرر." : "يمكنك الانتقال بين الخطوات بحرية؛ لن يتم الحفظ إلا من خطوة المراجعة." })
-        ] })
-      ] }),
+      jsxs("div", {
+        className: `grid gap-5 ${showPanel ? "xl:grid-cols-[minmax(0,1fr)_340px]" : ""}`,
+        children: [
+          jsxs("div", { className: "min-w-0 space-y-4", children: [
       jsxs("section", { className: "va-card rounded-2xl va-surface-muted border p-5 text-right", children: [
-        jsx("h2", { className: "mb-4 text-lg font-bold text-white", children: currentStep.label }),
+        jsxs("div", { className: "mb-4 flex items-center justify-between gap-3", children: [
+          jsx("h2", { className: "text-lg font-bold text-white", children: currentStep.label }),
+          jsxs("button", {
+            type: "button",
+            onClick: toggleSidePanel,
+            "aria-pressed": showPanel,
+            title: showPanel ? "إخفاء اللوحة الجانبية" : "إظهار اللوحة الجانبية",
+            className: "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-gray-400 transition-colors hover:bg-white/5 hover:text-white",
+            children: [jsx(Eye, { className: "h-3.5 w-3.5" }), showPanel ? "إخفاء اللوحة" : "إظهار اللوحة"]
+          })
+        ] }),
         currentStep.id === "basic" && jsxs("div", { className: "grid gap-4 md:grid-cols-2", children: [
           jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("label", { htmlFor: titleId, className: "block", children: "العنوان" }), jsx("input", { id: titleId, value: title, onChange: (event) => setTitle(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "عنوان الفيديو" })] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: pathId, className: "block", children: "الرابط أو المسار" }), jsx("input", { id: pathId, value: path, onChange: (event) => setPath(event.target.value), dir: "ltr", className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "https:// أو D:\\..." })] }),
@@ -464,6 +447,53 @@ export function AddVideoPage() {
           stepIndex === STEPS.length - 1 && jsx("button", { type: "button", disabled: !canSave || submitSave.isSaving, onClick: () => save(true), className: "va-secondary-button rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40", children: "حفظ وإضافة آخر" })
         ] })
       ] })
+          ]
+          }),
+          showPanel && jsxs("aside", {
+            className: "min-w-0 space-y-4 xl:sticky xl:top-6 xl:self-start",
+            children: [
+              jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
+                jsxs("div", { className: "flex items-center justify-between gap-3", children: [
+                  jsxs("div", { className: "flex items-center gap-2", children: [
+                    jsx(ClipboardCheck, { className: "h-5 w-5 text-emerald-300" }),
+                    jsx("h2", { className: "text-sm font-bold text-white", children: "جاهزية الحفظ" })
+                  ] }),
+                  jsx("span", { dir: "ltr", className: "font-mono text-sm text-emerald-200", children: `${readyPercent}%` })
+                ] }),
+                jsx("div", { className: "mt-3 h-2 overflow-hidden rounded-full bg-white/10", dir: "rtl", children: jsx(motion.div, { className: "h-full rounded-full bg-emerald-400", initial: false, animate: { width: `${readyPercent}%` }, transition: { duration: 0.28 } }) }),
+                jsx("div", { className: "mt-3 grid gap-2 sm:grid-cols-2", children: readyChecks.map((check) => jsxs("span", { className: `inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${check.ok ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-100" : "border-white/10 bg-gray-950/35 text-gray-500"}`, children: [
+                  check.ok ? jsx(CheckCircle2, { className: "h-3.5 w-3.5" }) : jsx(Circle, { className: "h-3.5 w-3.5" }),
+                  check.label
+                ] }, check.id)) })
+              ] }),
+              jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
+                jsxs("div", { className: "flex items-center gap-2", children: [
+                  jsx(Sparkles, { className: "h-5 w-5 text-amber-300" }),
+                  jsx("h2", { className: "text-sm font-bold text-white", children: "ملخص مباشر" })
+                ] }),
+                jsx("div", { className: "mt-3 grid gap-2 text-sm text-gray-400", children: [
+                  ["العنوان", title || "بانتظار الإدخال"],
+                  ["التصنيف", selectedType?.name || "غير محدد"],
+                  ["الوسوم", parsedTags.length ? `${parsedTags.length} وسم` : "لا توجد"],
+                  ["المصدر", path || metadata.localFile?.name || "غير محدد"]
+                ].map(([label, value]) => jsxs("div", { className: "flex items-center justify-between gap-3 rounded-xl va-surface-subtle border px-3 py-2", children: [
+                  jsx("span", { className: "text-gray-500", children: label }),
+                  jsx("span", { className: "min-w-0 truncate text-gray-200", children: value })
+                ] }, label)) })
+              ] }),
+              jsxs("div", { className: "va-card rounded-2xl va-surface-muted border p-4 text-right", children: [
+                jsxs("div", { className: "flex items-center gap-2", children: [
+                  jsx(Eye, { className: "h-5 w-5 text-cyan-300" }),
+                  jsx("h2", { className: "text-sm font-bold text-white", children: "الخطوة الحالية" })
+                ] }),
+                jsx("p", { className: "mt-3 text-lg font-bold text-white", children: currentStep.label }),
+                jsx("p", { className: "mt-1 text-sm leading-7 text-gray-500", children: currentStep.detail }),
+                jsx("p", { className: "mt-3 rounded-xl va-surface-subtle border p-3 text-xs leading-6 text-gray-500", children: stepIndex === STEPS.length - 1 ? "راجع الملخص ثم احفظ، أو استخدم حفظ وإضافة آخر للعمل المتكرر." : "يمكنك الانتقال بين الخطوات بحرية؛ لن يتم الحفظ إلا من خطوة المراجعة." })
+              ] })
+            ]
+          })
+        ]
+      })
     ]
   });
 }
