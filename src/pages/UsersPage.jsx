@@ -39,10 +39,12 @@ function getRole(roleId) {
 function UserForm({ user, users, onCancel, onSave }) {
   const [username, setUsername] = React.useState(user?.username || "");
   const [displayName, setDisplayName] = React.useState(user?.displayName || "");
+  const [email, setEmail] = React.useState(user?.email || "");
   const [role, setRole] = React.useState(normalizeUserRole(user?.role || "viewer"));
   const [password, setPassword] = React.useState("");
   const usernameId = React.useId();
   const displayNameId = React.useId();
+  const emailId = React.useId();
   const passwordId = React.useId();
   const roleGroupId = React.useId();
 
@@ -51,7 +53,7 @@ function UserForm({ user, users, onCancel, onSave }) {
 
   const save = () => {
     if (!canSave) return;
-    onSave({ ...user, username, displayName, role, password });
+    onSave({ ...user, username, displayName, email: email.trim() || undefined, role, password });
   };
 
   return jsxs("section", {
@@ -84,6 +86,18 @@ function UserForm({ user, users, onCancel, onSave }) {
               onChange: (event) => setDisplayName(event.target.value),
               className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
               placeholder: "اسم المستخدم داخل الواجهة"
+            })
+          ] }),
+          jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
+            jsx("label", { htmlFor: emailId, className: "block", children: "البريد الإلكتروني" }),
+            jsx("input", {
+              id: emailId,
+              value: email,
+              onChange: (event) => setEmail(event.target.value),
+              type: "email",
+              dir: "ltr",
+              className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40",
+              placeholder: "user@example.com"
             })
           ] }),
           !user && jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [
@@ -151,6 +165,7 @@ function UserCard({ user, currentUser, users, index, recentOpsCount = 0, onEdit,
               isCurrent && jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-200", children: "الحالي" })
             ] }),
             jsx("p", { className: "mt-1 truncate text-xs text-gray-500 font-mono", dir: "ltr", children: `@${user.username}` }),
+            user.email && jsx("p", { className: "mt-0.5 truncate text-xs text-gray-500", dir: "ltr", children: user.email }),
             user.lastLoginAt && jsx("p", { className: "mt-2 text-xs text-gray-600", children: `آخر دخول: ${formatDateTime(user.lastLoginAt)}` }),
             jsxs("p", {
               className: "mt-1 flex items-center gap-1.5 text-xs text-gray-500",
