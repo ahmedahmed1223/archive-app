@@ -20,7 +20,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { getFieldsForSelection } from "../features/types/viewModel.js";
+import { getFieldsForSelection, groupCustomFields } from "../features/types/viewModel.js";
 import { StarRating } from "../components/common/StarRating.jsx";
 import {
   createLocalFileValue,
@@ -102,6 +102,37 @@ function getStepErrors(stepId, snapshot) {
 
 function fieldKey(field) {
   return field.storageKey || field.name || field.id;
+}
+
+/**
+ * Renders the "fields" entry step. When the type's custom fields carry group
+ * names, they are split into tabs (one per group) so a type with many fields
+ * stays scannable; otherwise a flat two-column grid is shown.
+ */
+function FieldsStep({ fields, metadata, onChange }) {
+  const groups = React.useMemo(() => groupCustomFields(fields), [fields]);
+  const [active, setActive] = React.useState(0);
+  React.useEffect(() => { if (active >= groups.length) setActive(0); }, [groups.length, active]);
+
+  if (!fields.length) {
+    return jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-400", children: "لا توجد حقول مخصصة لهذا النوع." });
+  }
+  const tabbed = groups.length > 1;
+  const visible = tabbed ? (groups[active]?.fields || []) : fields;
+  return jsxs("div", {
+    className: "space-y-3",
+    children: [
+      tabbed ? jsx("div", { role: "tablist", className: "flex flex-wrap gap-1 overflow-x-auto rounded-xl va-surface-muted border p-1", children: groups.map((group, index) => jsxs("button", {
+        type: "button",
+        role: "tab",
+        "aria-selected": active === index,
+        onClick: () => setActive(index),
+        className: `inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${active === index ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+        children: [group.name, jsx("span", { className: "rounded-full bg-white/10 px-1.5 text-[10px]", children: `${group.fields.length}` })]
+      }, group.name)) }) : null,
+      jsx("div", { className: "grid gap-4 md:grid-cols-2", children: visible.map((field) => jsx(FieldRow, { field, value: metadata[fieldKey(field)], onChange }, field.id)) })
+    ]
+  });
 }
 
 function LocalFilePicker({ value, onFileSelect, inputId }) {
@@ -416,7 +447,7 @@ export function AddVideoPage() {
           jsxs("div", { className: "space-y-1 text-sm text-gray-300", children: [jsx("label", { htmlFor: subtypeSelectId, className: "block", children: "الفرع" }), jsxs("select", { id: subtypeSelectId, value: subtypeId, onChange: (event) => setSubtypeId(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none", children: [jsx("option", { value: "", children: "بدون فرع" }), ...subtypes.map((subtype) => jsx("option", { value: subtype.id, children: subtype.name }, subtype.id))] })] }),
           jsxs("div", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("label", { htmlFor: tagsId, className: "block", children: "الوسوم" }), jsx("input", { id: tagsId, value: tags, onChange: (event) => setTags(event.target.value), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "وسوم مفصولة بفاصلة، ويمكن استخدام مسارات الوسوم الهرمية" })] })
         ] }),
-        currentStep.id === "fields" && (fields.length ? jsx("div", { className: "grid gap-4 md:grid-cols-2", children: fields.map((field) => jsx(FieldRow, { field, value: metadata[fieldKey(field)], onChange: updateMetadata }, field.id)) }) : jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-400", children: "لا توجد حقول مخصصة لهذا النوع." })),
+        currentStep.id === "fields" && jsx(FieldsStep, { fields, metadata, onChange: updateMetadata }),
         currentStep.id === "review" && jsx("div", { className: "grid gap-3 md:grid-cols-2", children: [
           ["العنوان", title || "غير محدد"],
           ["التصنيف", [selectedType?.name, subtypes.find((s) => s.id === subtypeId)?.name].filter(Boolean).join(" / ") || "غير محدد"],
