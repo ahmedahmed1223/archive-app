@@ -27,7 +27,7 @@ import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
 } from "../features/archive/mediaPreview.js";
-import { getFieldsForSelection, groupCustomFields } from "../features/types/viewModel.js";
+import { getFieldsForSelection, groupCustomFields, getVisibleFields, getMissingRequiredFields } from "../features/types/viewModel.js";
 import { StarRating } from "../components/common/StarRating.jsx";
 import { computeCompleteness, COMPLETENESS_TIERS } from "../features/archive/completeness.js";
 import { getRelatedItems } from "../features/archive/relatedItems.js";
@@ -174,6 +174,8 @@ export function DetailPage() {
   }, [item?.id, item?.isDeleted, markItemViewed]);
 
   const fields = React.useMemo(() => item ? getFieldsForSelection(contentTypes, draft?.type || item.type, draft?.subtype || item.subtype) : [], [contentTypes, draft?.subtype, draft?.type, item]);
+  const editFields = React.useMemo(() => getVisibleFields(fields, draft?.metadata || {}), [fields, draft?.metadata]);
+  const readFields = React.useMemo(() => item ? getVisibleFields(fields, item.metadata || {}) : [], [fields, item]);
   const selectedType = contentTypes.find((type) => type.id === (draft?.type || item?.type));
   const completeness = React.useMemo(() => item ? computeCompleteness(item, selectedType) : null, [item, selectedType]);
   const videoRef = React.useRef(null);
@@ -234,6 +236,11 @@ export function DetailPage() {
   };
 
   const save = async () => {
+    const missingRequired = getMissingRequiredFields(fields, draft.metadata || {});
+    if (missingRequired.length) {
+      showToast?.(`حقول مطلوبة فارغة: ${missingRequired.map((field) => field.label).join("، ")}`, "error");
+      return;
+    }
     const updated = createVideoItemValue({
       ...item,
       ...draft,
@@ -364,7 +371,7 @@ export function DetailPage() {
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none" })] })
         ] }),
-        fields.length > 0 && jsx(GroupedFields, { fields, gap: "gap-4", renderField: (field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "md:col-span-2" : ""}`, children: [
+        editFields.length > 0 && jsx(GroupedFields, { fields: editFields, gap: "gap-4", renderField: (field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "md:col-span-2" : ""}`, children: [
           jsx("span", { children: field.label }),
           jsx(EditableField, { field, value: draft.metadata?.[fieldKey(field)], onChange: updateMetadata })
         ] }, field.id) }),
@@ -395,7 +402,7 @@ export function DetailPage() {
             ] }),
             jsx("div", { className: "mt-2 text-sm text-gray-300", children: jsx(ReadonlyField, { field: { type: "localFile" }, value: item.metadata.localFile }) })
           ] }),
-          fields.length ? jsx(GroupedFields, { fields, gap: "gap-3", renderField: (field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
+          readFields.length ? jsx(GroupedFields, { fields: readFields, gap: "gap-3", renderField: (field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
             jsx("p", { className: "text-xs text-gray-600", children: field.label }),
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
           ] }, field.id) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })

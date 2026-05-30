@@ -227,7 +227,21 @@ function FieldsEditor({ draft, setDraft }) {
             FIELD_OPTION_TYPES.includes(field.type) ? jsxs("label", { className: "block text-xs text-gray-400", children: [
               jsx("span", { className: "block", children: "الخيارات (مفصولة بفاصلة)" }),
               jsx("input", { value: (field.options || []).join("، "), onChange: (event) => updateField(field.id, { options: parseFieldOptions(event.target.value) }), className: "mt-1 min-h-9 w-full va-surface-deep rounded-lg border px-3 text-sm text-white outline-none focus:border-emerald-500/40", placeholder: "خيار 1، خيار 2" })
-            ] }) : null
+            ] }) : null,
+            jsxs("div", { className: "block text-xs text-gray-400", children: [
+              jsx("span", { className: "block", children: "إلزامية الحفظ" }),
+              jsx("button", { type: "button", onClick: () => updateField(field.id, { requiredToSave: !field.requiredToSave }), "aria-pressed": !!field.requiredToSave, className: `mt-1 inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-lg border px-3 text-sm transition-colors ${field.requiredToSave ? "border-amber-500/35 bg-amber-500/15 text-amber-100" : "border-white/10 bg-gray-950/35 text-gray-300 hover:bg-white/5"}`, children: field.requiredToSave ? "يمنع الحفظ إن كان فارغاً" : "غير إلزامي للحفظ" })
+            ] }),
+            jsxs("div", { className: "block text-xs text-gray-400 sm:col-span-2", children: [
+              jsx("span", { className: "block", children: "إظهار شرطي — أظهر هذا الحقل فقط عندما يساوي حقلٌ آخر قيمةً معيّنة" }),
+              jsxs("div", { className: "mt-1 grid gap-2 sm:grid-cols-2", children: [
+                jsxs("select", { value: field.showWhen?.fieldKey || "", onChange: (event) => updateField(field.id, { showWhen: event.target.value ? { fieldKey: event.target.value, equals: field.showWhen?.equals ?? "" } : null }), className: "min-h-9 w-full va-surface-deep rounded-lg border px-2 text-sm text-white outline-none focus:border-emerald-500/40", children: [
+                  jsx("option", { value: "", children: "دائماً (بلا شرط)" }),
+                  ...fields.filter((other) => other.id !== field.id).map((other) => jsx("option", { value: other.storageKey || other.name, children: other.label }, other.id))
+                ] }),
+                jsx("input", { value: field.showWhen?.equals ?? "", onChange: (event) => updateField(field.id, { showWhen: field.showWhen?.fieldKey ? { fieldKey: field.showWhen.fieldKey, equals: event.target.value } : null }), disabled: !field.showWhen?.fieldKey, placeholder: "القيمة المطلوبة", className: "min-h-9 w-full va-surface-deep rounded-lg border px-3 text-sm text-white outline-none focus:border-emerald-500/40 disabled:opacity-40" })
+              ] })
+            ] })
           ] }) : null
         ]
       }, field.id)) }) : jsx("p", { className: "mt-3 text-xs text-gray-500", children: "لا توجد حقول مخصصة بعد." })

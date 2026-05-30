@@ -48,6 +48,8 @@ export function createCustomFieldValue(partial = {}) {
     order: Number.isFinite(Number(partial.order)) ? Number(partial.order) : 0,
     groupId: partial.groupId,
     group: typeof partial.group === "string" ? partial.group.trim() : "",
+    requiredToSave: !!partial.requiredToSave,
+    showWhen: normalizeShowWhen(partial.showWhen),
     status: partial.status || "active",
     archivedAt: partial.archivedAt,
     archivedBy: partial.archivedBy
@@ -69,6 +71,51 @@ export function groupCustomFields(fields = []) {
     map.get(key).push(field);
   }
   return order.map((name) => ({ name, fields: map.get(name) }));
+}
+
+/** Normalize a conditional-visibility rule to { fieldKey, equals } or null. */
+export function normalizeShowWhen(showWhen) {
+  if (!showWhen || typeof showWhen !== "object") return null;
+  const fieldKey = String(showWhen.fieldKey || "").trim();
+  if (!fieldKey) return null;
+  return { fieldKey, equals: showWhen.equals === undefined ? "" : showWhen.equals };
+}
+
+/**
+ * A field is visible unless it declares a showWhen rule that does not match
+ * the current metadata. Comparison is string-based (and array-membership for
+ * multi-value fields) so it works for select/text/checkbox values alike.
+ */
+export function isFieldVisible(field, metadata = {}) {
+  const rule = field?.showWhen;
+  if (!rule || !rule.fieldKey) return true;
+  const actual = metadata?.[rule.fieldKey];
+  const expected = rule.equals;
+  if (Array.isArray(actual)) return actual.map((value) => String(value)).includes(String(expected));
+  if (typeof actual === "boolean") return String(actual) === String(expected);
+  return String(actual ?? "") === String(expected ?? "");
+}
+
+export function getVisibleFields(fields = [], metadata = {}) {
+  return fields.filter((field) => isFieldVisible(field, metadata));
+}
+
+function isFieldValueEmpty(value) {
+  if (value === undefined || value === null || value === "") return true;
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+}
+
+/**
+ * Visible fields flagged required / requiredToSave that are still empty.
+ * Hidden (showWhen-failed) fields never block — you can't fill what you
+ * can't see. Used by the Add/Detail save paths for a hard validation gate.
+ */
+export function getMissingRequiredFields(fields = [], metadata = {}) {
+  return getVisibleFields(fields, metadata).filter((field) => {
+    if (!field.required && !field.requiredToSave) return false;
+    return isFieldValueEmpty(metadata?.[field.storageKey || field.name]);
+  });
 }
 
 export function createSubtypeValue(partial = {}) {
