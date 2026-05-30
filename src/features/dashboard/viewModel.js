@@ -1,3 +1,5 @@
+import { summarizeCompleteness } from "../archive/completeness.js";
+
 export function parseDurationSeconds(value) {
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   if (!value || typeof value !== "string") return 0;
@@ -17,6 +19,8 @@ export function createDashboardStats({
   now = Date.now()
 } = {}) {
   const activeItems = videoItems.filter((item) => !item.isDeleted);
+  const completenessTypeById = new Map(contentTypes.map((type) => [type.id, type]));
+  const completeness = summarizeCompleteness(activeItems, completenessTypeById);
   const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
   const totalSeconds = activeItems.reduce(
     (sum, video) => sum + parseDurationSeconds(video.metadata?.duration || video.metadata?.detectedDuration || video.duration),
@@ -32,7 +36,9 @@ export function createDashboardStats({
     deleted: videoItems.filter((item) => item.isDeleted).length,
     types: contentTypes.length,
     collections: virtualCollections.length,
-    tags: hierarchicalTags.length
+    tags: hierarchicalTags.length,
+    needsReview: completeness.needsReview,
+    completenessAverage: completeness.averagePercent
   };
 }
 

@@ -17,6 +17,7 @@ import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
 } from "./mediaPreview.js";
+import { COMPLETENESS_TIERS } from "./completeness.js";
 import {
   formatDateTime,
   formatFileSize,
@@ -30,14 +31,24 @@ const REVIEW_STATUS_CLASS = {
   "معتمد": "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
 };
 
-function ItemBadges({ item, compact = false }) {
+function ItemBadges({ item, compact = false, completeness = null }) {
   const reviewStatus = item.metadata?.reviewStatus;
   const rating = Number(item.metadata?.rating) || 0;
   const statusClass = reviewStatus ? REVIEW_STATUS_CLASS[reviewStatus] : null;
-  if (!statusClass && rating === 0) return null;
+  const tier = completeness ? COMPLETENESS_TIERS[completeness.tier] : null;
+  if (!statusClass && rating === 0 && !tier) return null;
   return jsxs("div", {
     className: "flex flex-wrap items-center gap-1",
     children: [
+      tier && jsxs("span", {
+        className: "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium",
+        style: { borderColor: `${tier.color}55`, color: tier.color },
+        title: completeness.missing.length ? `ينقص: ${completeness.missing.join("، ")}` : "توصيف مكتمل",
+        children: [
+          jsx("span", { "aria-hidden": "true", style: { width: "6px", height: "6px", borderRadius: "9999px", background: tier.color, display: "inline-block" } }),
+          `${completeness.percent}%`
+        ]
+      }),
       statusClass && jsx("span", {
         className: `va-chip rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusClass}`,
         children: reviewStatus
@@ -372,7 +383,7 @@ export function SegmentedControl({ label, value, options, onChange }) {
   });
 }
 
-export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu }) {
+export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu, completeness = null }) {
   const size = ARCHIVE_CARD_SIZE[itemSize] || ARCHIVE_CARD_SIZE.comfortable;
   const highlight = bulkMode ? bulkSelected : selected;
   const handleCardClick = bulkMode ? () => onBulkToggle?.() : onPreview;
@@ -409,7 +420,7 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
                   item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
                 ]
               }),
-              jsx(ItemBadges, { item, compact: itemSize === "xs" || itemSize === "compact" }),
+              jsx(ItemBadges, { item, compact: itemSize === "xs" || itemSize === "compact", completeness }),
               item.tags?.length > 0 && jsxs("div", {
                 className: "flex flex-wrap gap-1.5",
                 children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
@@ -475,7 +486,7 @@ export function AnimatedItem({ index, children, as = "div", className = "", item
  * key metadata stack on the other, and a single primary action.
  * Ideal for quick visual browsing without giving up titles or tags.
  */
-export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu }) {
+export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu, completeness = null }) {
   const highlight = bulkMode ? bulkSelected : selected;
   const handlePreview = bulkMode ? () => onBulkToggle?.() : onPreview;
   const tagLimit = itemSize === "xs" ? 1 : itemSize === "compact" ? 2 : itemSize === "comfortable" ? 3 : 4;
@@ -512,7 +523,7 @@ export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPrevi
             ]
           }),
           jsx("p", { className: "mt-0.5 line-clamp-1 text-[11px] text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
-          jsx(ItemBadges, { item, compact: true }),
+          jsx(ItemBadges, { item, compact: true, completeness }),
           item.tags?.length > 0 && jsx("div", {
             className: "mt-1 flex flex-wrap gap-1",
             children: item.tags.slice(0, tagLimit).map((tag) => jsx("span", {
@@ -558,7 +569,7 @@ export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPrevi
   });
 }
 
-export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu }) {
+export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPreview, onOpen, onFavorite, onDelete, onRestore, showDeleted, itemSize = "comfortable", bulkMode = false, bulkSelected = false, onBulkToggle, onContextMenu, completeness = null }) {
   const size = ARCHIVE_LIST_SIZE[itemSize] || ARCHIVE_LIST_SIZE.comfortable;
   const highlight = bulkMode ? bulkSelected : selected;
   const handlePreview = bulkMode ? () => onBulkToggle?.() : onPreview;
@@ -594,7 +605,7 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
           }),
           jsx("p", { className: `mt-1 ${size.meta} text-gray-500`, children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
           item.notes && jsx("p", { className: `${size.notes} text-gray-400`, children: item.notes }),
-          jsx("div", { className: "mt-2", children: jsx(ItemBadges, { item }) }),
+          jsx("div", { className: "mt-2", children: jsx(ItemBadges, { item, completeness }) }),
           item.tags?.length > 0 && jsx("div", {
             className: "mt-2 flex flex-wrap gap-1.5",
             children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
