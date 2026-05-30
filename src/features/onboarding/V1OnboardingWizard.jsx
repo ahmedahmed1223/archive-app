@@ -42,6 +42,7 @@ import {
   normalizeOnboardingThemeChoice
 } from "./viewModel.js";
 import { WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
+import { PasswordField } from "../../components/common/PasswordField.jsx";
 
 const FIRST_TASK_OPTIONS = [
   { id: "dashboard", label: "لوحة التحكم", detail: "ابدأ من جاهزية اليوم والإجراءات السريعة.", icon: LayoutGrid },
@@ -127,7 +128,6 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
   const [firstTaskChoice, setFirstTaskChoice] = React.useState(settings.ui?.firstTaskChoice || "dashboard");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -281,44 +281,39 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
       return jsxs("div", { className: "space-y-4", children: [
         jsx("h2", { className: "text-xl font-bold text-white", children: "عيّن كلمة مرور المدير" }),
         jsx("p", { className: "text-sm leading-7 text-gray-400", children: "هذه الكلمة تؤمّن التطبيق وتصبح كلمة دخول حساب المدير." }),
-        jsxs("div", { className: "space-y-2", children: [
+        jsxs("div", { className: "max-w-md space-y-2", children: [
           jsx(FieldLabel, { children: "كلمة المرور" }),
-          jsx("input", {
-            type: showPassword ? "text" : "password",
+          jsx(PasswordField, {
             value: password,
+            autoComplete: "new-password",
+            ariaLabel: "كلمة مرور المدير",
             onChange: (event) => {
               setPassword(event.target.value);
               setError("");
-            },
-            autoComplete: "new-password",
-            dir: "ltr",
-            className: "min-h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-white outline-none focus:border-emerald-500/50"
+            }
           })
         ] }),
-        jsxs("div", { className: "space-y-2", children: [
+        jsxs("div", { className: "max-w-md space-y-2", children: [
           jsx(FieldLabel, { children: "تأكيد كلمة المرور" }),
-          jsx("input", {
-            type: showPassword ? "text" : "password",
+          jsx(PasswordField, {
             value: confirmPassword,
+            autoComplete: "new-password",
+            ariaLabel: "تأكيد كلمة مرور المدير",
             onChange: (event) => {
               setConfirmPassword(event.target.value);
               setError("");
-            },
-            autoComplete: "new-password",
-            dir: "ltr",
-            className: "min-h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-white outline-none focus:border-emerald-500/50"
+            }
           })
         ] }),
-        jsxs("div", { className: "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3", children: [
+        jsxs("div", { className: "flex max-w-md flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3", children: [
           jsxs("div", { children: [
             jsx("p", { className: "text-sm text-gray-300", children: "قوة كلمة المرور" }),
             jsx("p", { className: "text-xs", style: { color: passwordStrength.color }, children: passwordStrength.label })
           ] }),
-          jsx("div", { className: "flex min-w-40 flex-1 gap-1", dir: "rtl", children: [1, 2, 3, 4].map((level) => jsx("span", {
+          jsx("div", { className: "flex min-w-32 flex-1 gap-1", dir: "rtl", children: [1, 2, 3, 4].map((level) => jsx("span", {
             className: "h-2 flex-1 rounded-full",
             style: { backgroundColor: passwordStrength.score >= level ? passwordStrength.color : "rgba(255,255,255,0.08)" }
-          }, level)) }),
-          jsx("button", { type: "button", onClick: () => setShowPassword((value) => !value), className: "text-xs text-emerald-300 hover:text-emerald-200", children: showPassword ? "إخفاء" : "إظهار" })
+          }, level)) })
         ] }),
         confirmPassword && jsx("p", { className: `text-sm ${passwordMatches ? "text-emerald-300" : "text-red-300"}`, children: passwordMatches ? "كلمة المرور متطابقة" : "كلمة المرور غير متطابقة" })
       ] });

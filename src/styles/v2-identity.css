@@ -628,3 +628,27 @@ html.light[data-theme-version="v2"] .va-panel-premium {
 html.light[data-theme-version="v2"] .va-dialog-overlay {
   background: rgba(15, 17, 21, 0.28) !important;
 }
+
+/*
+ * First-run / replay onboarding renders as a deliberate dark "setup"
+ * backdrop. Re-pin the v2 tokens to their dark values *scoped to the
+ * wizard* so theme-aware .va-* controls inside (buttons, password field,
+ * surfaces) resolve to the same dark palette as the wizard chrome — even
+ * when the app theme is light. This removes the dark-shell / light-controls
+ * clash (the reported dark/light "bleed") without per-element edits, since
+ * the v1-alias tokens are defined with var(--va-2-*) and re-resolve here.
+ */
+.va-onboarding-shell {
+  --va-2-canvas:        #07111f;
+  --va-2-surface:       #0b1626;
+  --va-2-surface-2:     #122033;
+  --va-2-surface-3:     #1a2c44;
+  --va-2-line:          rgba(255, 255, 255, 0.08);
+  --va-2-line-strong:   rgba(255, 255, 255, 0.16);
+  --va-2-text-strong:   #f6f7fb;
+  --va-2-text:          #c9ccd6;
+  --va-2-text-soft:     #98a0b0;
+  --va-2-text-faint:    #6b7484;
+  --va-2-accent:        #7673f7;
+  --va-2-accent-strong: #5b50e6;
+}
