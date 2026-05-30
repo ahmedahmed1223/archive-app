@@ -191,11 +191,34 @@ import {
   FILE_STORE_METHODS,
   isFileStore
 } from "../src/storage/ports/FileStore.js";
+import {
+  AUTH_PROVIDER_METHODS,
+  isAuthProvider
+} from "../src/storage/ports/AuthProvider.js";
+import {
+  SYNC_PROVIDER_METHODS,
+  isSyncProvider
+} from "../src/storage/ports/SyncProvider.js";
+import {
+  AI_PROVIDER_METHODS,
+  isAiProvider
+} from "../src/storage/ports/AiProvider.js";
 import { localStorageProvider } from "../src/storage/adapters/local-indexeddb/index.js";
 import { localFileStore } from "../src/storage/adapters/files-local/index.js";
+import { localAuthProvider } from "../src/storage/adapters/local-auth/index.js";
+import { localSyncProvider } from "../src/storage/adapters/local-sync/index.js";
+import { localAiStubProvider } from "../src/storage/adapters/ai-local-stub/index.js";
 import {
   getStorageProvider,
-  registerStorageProvider
+  registerStorageProvider,
+  getFileStore,
+  registerFileStore,
+  getAuthProvider,
+  registerAuthProvider,
+  getSyncProvider,
+  registerSyncProvider,
+  getAiProvider,
+  registerAiProvider
 } from "../src/storage/index.js";
 
 function run(name, test) {
@@ -1071,8 +1094,97 @@ run("local storage adapter + registry", () => {
   assert.equal(getStorageProvider(), localStorageProvider);
 });
 
-run("local file store adapter", () => {
+run("local file store adapter + registry", () => {
   assert.equal(isFileStore(localFileStore), true);
+  assert.equal(getFileStore(), localFileStore);
+  const stub = Object.fromEntries(FILE_STORE_METHODS.map((m) => [m, () => {}]));
+  assert.equal(registerFileStore(stub), stub);
+  assert.equal(getFileStore(), stub);
+  assert.throws(() => registerFileStore({}), /FileStore port/);
+  registerFileStore(localFileStore);
+  assert.equal(getFileStore(), localFileStore);
+});
+
+run("auth/sync/ai ports", () => {
+  assert.deepEqual(AUTH_PROVIDER_METHODS, ["hashSecret", "verifySecret", "validateStrength", "isLegacyHash"]);
+  assert.deepEqual(SYNC_PROVIDER_METHODS, [
+    "stampMetadata", "planIncoming", "mergeIntoLocal", "detectConflicts", "buildFieldDiff",
+    "summarizeConflictPlan", "filterDelta", "buildSyncFloor", "subscribe", "pushChange", "pullSince"
+  ]);
+  assert.deepEqual(AI_PROVIDER_METHODS, [
+    "isAvailable", "transcribe", "summarize", "suggestTags", "proofread",
+    "autocompleteFields", "chat", "rankSearch"
+  ]);
+
+  for (const [methods, isPort] of [
+    [AUTH_PROVIDER_METHODS, isAuthProvider],
+    [SYNC_PROVIDER_METHODS, isSyncProvider],
+    [AI_PROVIDER_METHODS, isAiProvider]
+  ]) {
+    assert.equal(isPort(null), false);
+    assert.equal(isPort({}), false);
+    const full = Object.fromEntries(methods.map((m) => [m, () => {}]));
+    assert.equal(isPort(full), true);
+    delete full[methods[0]];
+    assert.equal(isPort(full), false);
+  }
+});
+
+await runAsync("local auth adapter + registry", async () => {
+  assert.equal(isAuthProvider(localAuthProvider), true);
+  assert.equal(getAuthProvider(), localAuthProvider);
+
+  // Delegates honestly to the existing bcrypt utilities (no behavior change).
+  // validateStrength returns an array of error messages (empty = valid).
+  assert.equal(localAuthProvider.validateStrength("weak").length > 0, true);
+  assert.equal(localAuthProvider.validateStrength("StrongPass123!").length, 0);
+  const hash = await localAuthProvider.hashSecret("StrongPass123!");
+  assert.equal(typeof hash, "string");
+  assert.equal(await localAuthProvider.verifySecret("StrongPass123!", hash), true);
+  assert.equal(await localAuthProvider.verifySecret("wrong", hash), false);
+  assert.equal(localAuthProvider.isLegacyHash("a".repeat(64)), true);
+  assert.equal(localAuthProvider.isLegacyHash(hash), false);
+
+  const stub = Object.fromEntries(AUTH_PROVIDER_METHODS.map((m) => [m, () => {}]));
+  assert.equal(registerAuthProvider(stub), stub);
+  assert.equal(getAuthProvider(), stub);
+  assert.throws(() => registerAuthProvider({}), /AuthProvider port/);
+  registerAuthProvider(localAuthProvider);
+});
+
+await runAsync("local sync adapter + registry", async () => {
+  assert.equal(isSyncProvider(localSyncProvider), true);
+  assert.equal(getSyncProvider(), localSyncProvider);
+
+  // Pure engine method delegates to the real implementation.
+  const stamped = localSyncProvider.stampMetadata({ id: "x" }, { deviceId: "dev-1" });
+  assert.equal(stamped.lastModifiedBy.deviceId, "dev-1");
+  assert.equal(stamped.syncVersion, 1);
+
+  // Offline transport is inert by design.
+  assert.equal(typeof localSyncProvider.subscribe(() => {}), "function");
+  assert.deepEqual(await localSyncProvider.pushChange({}), { pushed: false, reason: "offline" });
+  assert.deepEqual(await localSyncProvider.pullSince(null), { items: [], cursor: null });
+
+  const stub = Object.fromEntries(SYNC_PROVIDER_METHODS.map((m) => [m, () => {}]));
+  assert.equal(registerSyncProvider(stub), stub);
+  assert.equal(getSyncProvider(), stub);
+  assert.throws(() => registerSyncProvider({}), /SyncProvider port/);
+  registerSyncProvider(localSyncProvider);
+});
+
+await runAsync("local ai stub adapter + registry", async () => {
+  assert.equal(isAiProvider(localAiStubProvider), true);
+  assert.equal(getAiProvider(), localAiStubProvider);
+  assert.equal(localAiStubProvider.isAvailable(), false);
+  await assert.rejects(() => localAiStubProvider.summarize({ text: "x" }), /غير مُهيّأة/);
+  await assert.rejects(() => localAiStubProvider.transcribe({}), /غير مُهيّأة/);
+
+  const stub = Object.fromEntries(AI_PROVIDER_METHODS.map((m) => [m, () => {}]));
+  assert.equal(registerAiProvider(stub), stub);
+  assert.equal(getAiProvider(), stub);
+  assert.throws(() => registerAiProvider({}), /AiProvider port/);
+  registerAiProvider(localAiStubProvider);
 });
 
 // Theme v2 storage tests — runs the standalone test suite from
