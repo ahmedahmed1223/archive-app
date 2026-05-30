@@ -27,8 +27,6 @@ import {
   ToolbarButton
 } from "./ArchiveViews.jsx";
 
-const ARCHIVE_GRID_ROW_OPTIONS = [2, 3, 4, 6];
-
 function CompactStat({ label, value, hint }) {
   return jsxs("span", {
     className: "inline-flex min-h-9 items-center gap-2 va-surface-muted rounded-xl border px-3 py-1.5 text-xs text-gray-400",
@@ -46,6 +44,36 @@ const VIEW_MODE_BUTTONS = [
   { id: "list", label: "قائمة", Icon: Archive },
   { id: "table", label: "تفاصيل", Icon: FolderOpen }
 ];
+
+/**
+ * Windows-Explorer-style density slider for grid view. Drag to set how many
+ * items sit per row (2 = large cards, 8 = small/dense) — one control that
+ * replaces the old "columns" + "rows" segmented buttons. Writes an explicit
+ * column count via `changeGridColumns`; page size follows (rows × columns).
+ */
+function GridDensitySlider({ gridColumns, gridColumnCount, onChange }) {
+  const current = gridColumns === "auto" ? (gridColumnCount || 3) : (Number(gridColumns) || 3);
+  const value = Math.min(8, Math.max(2, current));
+  return jsxs("label", {
+    className: "va-surface-muted inline-flex min-h-9 items-center gap-2 rounded-xl border px-3 py-1 text-xs text-gray-400",
+    title: "اسحب للتحكم بحجم العناصر وعددها في الصف",
+    children: [
+      jsx("span", { className: "shrink-0 text-gray-500", children: "أكبر" }),
+      jsx("input", {
+        type: "range",
+        min: 2,
+        max: 8,
+        step: 1,
+        value,
+        onChange: (event) => onChange(Number(event.target.value)),
+        "aria-label": "حجم عناصر الشبكة وعددها في الصف",
+        className: "va-range w-24 sm:w-36"
+      }),
+      jsx("span", { className: "shrink-0 text-gray-500", children: "أصغر" }),
+      jsx("span", { className: "min-w-[3.25rem] shrink-0 text-center font-semibold text-gray-200", children: `${formatNumber(value)} بالصف` })
+    ]
+  });
+}
 
 /**
  * The top hero band of the archive page — search bar, view-mode
@@ -182,30 +210,10 @@ export function ArchivePageHero(props) {
                 options: ARCHIVE_ITEM_SIZE_OPTIONS,
                 onChange: changeItemSize
               }),
-              activeViewMode === "grid" ? jsxs("div", {
-                className: "inline-flex flex-wrap items-center gap-2",
-                children: [
-                  jsx(SegmentedControl, {
-                    label: "الأعمدة",
-                    value: gridColumns,
-                    options: [
-                      { value: "auto", label: "تلقائي" },
-                      { value: 2, label: "٢" },
-                      { value: 3, label: "٣" },
-                      { value: 4, label: "٤" },
-                      { value: 5, label: "٥" },
-                      { value: 6, label: "٦" },
-                      { value: 8, label: "٨" }
-                    ],
-                    onChange: changeGridColumns
-                  }),
-                  jsx(SegmentedControl, {
-                    label: "الصفوف",
-                    value: activeGridRows,
-                    options: ARCHIVE_GRID_ROW_OPTIONS.map((value) => ({ value, label: `${formatNumber(value)}` })),
-                    onChange: changeGridRows
-                  })
-                ]
+              activeViewMode === "grid" ? jsx(GridDensitySlider, {
+                gridColumns,
+                gridColumnCount,
+                onChange: changeGridColumns
               }) : jsxs("div", {
                 className: "inline-flex flex-wrap items-center gap-2",
                 children: [
