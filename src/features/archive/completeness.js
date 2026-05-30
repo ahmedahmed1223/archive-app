@@ -59,6 +59,25 @@ export function computeCompleteness(item = {}, contentType = null) {
 }
 
 /**
+ * Description-gap detection ("كشف فجوات التوصيف"). Pure, item-only (no type
+ * needed): flags items that are hard to find/govern — no tags at all, or
+ * tagged but never classified into a content type. Builds on PR 1 by giving
+ * a cheap filterable predicate for the archive.
+ */
+export function getGapReasons(item = {}) {
+  const reasons = [];
+  const hasTags = Array.isArray(item.tags) && item.tags.length > 0;
+  const hasType = Boolean(item.type);
+  if (!hasTags) reasons.push("بلا وسوم");
+  if (!hasType) reasons.push(hasTags ? "موسوم لكن بلا تصنيف" : "بلا تصنيف");
+  return reasons;
+}
+
+export function itemHasDescriptionGap(item = {}) {
+  return getGapReasons(item).length > 0;
+}
+
+/**
  * Aggregate completeness across many items. `typeById` is a Map or plain
  * object of contentTypeId -> contentType. Returns counts per tier + the
  * number of items that need review (mid + low) and the average percent.

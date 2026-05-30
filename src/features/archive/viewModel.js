@@ -1,4 +1,5 @@
 import { normalizeArabicSearchText } from "../../utils/formatting.js";
+import { itemHasDescriptionGap } from "./completeness.js";
 
 const ARCHIVE_SORT_FIELDS = new Set(["title", "createdAt", "updatedAt"]);
 const ARCHIVE_VIEW_MODES = new Set(["grid", "tiles", "list", "table"]);
@@ -77,7 +78,8 @@ export function getFilteredArchiveItems({
   sortField = "updatedAt",
   sortDirection = "desc",
   showDeleted = false,
-  showFavoritesOnly = false
+  showFavoritesOnly = false,
+  showGapsOnly = false
 } = {}) {
   const normalizedSortField = ARCHIVE_SORT_FIELDS.has(sortField) ? sortField : "updatedAt";
   const query = normalizeArabicSearchText(searchQuery.trim());
@@ -87,6 +89,7 @@ export function getFilteredArchiveItems({
     if (filterType && filterType !== "all" && item.type !== filterType) return false;
     if (filterSubtype && filterSubtype !== "all" && item.subtype !== filterSubtype) return false;
     if (showFavoritesOnly && !item.isFavorite) return false;
+    if (showGapsOnly && !itemHasDescriptionGap(item)) return false;
     if (!query) return true;
 
     return getArchiveItemSearchValues(item).some((value) => normalizeArabicSearchText(value).includes(query));
