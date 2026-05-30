@@ -30,6 +30,7 @@ import {
 import { getFieldsForSelection, groupCustomFields } from "../features/types/viewModel.js";
 import { StarRating } from "../components/common/StarRating.jsx";
 import { computeCompleteness, COMPLETENESS_TIERS } from "../features/archive/completeness.js";
+import { getRelatedItems } from "../features/archive/relatedItems.js";
 import {
   createLocalFileValue,
   createVideoLocalFilePatch,
@@ -143,6 +144,7 @@ export function DetailPage() {
     changeHistory = [],
     bookmarks = [],
     selectedItemId,
+    setSelectedItemId,
     setCurrentPage,
     updateVideoItem,
     deleteVideoItem,
@@ -180,6 +182,7 @@ export function DetailPage() {
     () => (bookmarks || []).filter((bookmark) => bookmark.itemId === item?.id).sort((a, b) => a.timestamp - b.timestamp),
     [bookmarks, item?.id]
   );
+  const relatedItems = React.useMemo(() => item ? getRelatedItems(item, videoItems, { limit: 6 }) : [], [item, videoItems]);
   const subtypes = selectedType?.subtypes || [];
   const history = React.useMemo(() => item ? changeHistory.filter((record) => record.itemId === item.id).sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()).slice(0, 10) : [], [changeHistory, item]);
   const previewSource = item?.path && isHtml5PreviewableVideo(item.path) ? getHtml5VideoPreviewSource(item.path) : null;
@@ -402,6 +405,21 @@ export function DetailPage() {
             jsxs("h2", { className: "flex items-center gap-2 text-base font-bold text-white", children: [jsx(Tags, { className: "h-4 w-4 text-emerald-400" }), "الوسوم", item.tags?.length ? jsx("span", { className: "mr-auto rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-400", children: item.tags.length }) : null] }),
             item.tags?.length ? jsx("div", { className: "mt-3 flex flex-wrap gap-1.5", children: item.tags.map((tag) => jsx("span", { className: "va-tag-chip inline-flex items-center rounded-full border border-white/10 bg-gray-900/60 px-2.5 py-1 text-xs text-gray-300 transition-colors hover:border-emerald-500/25 hover:text-emerald-200", children: tag }, tag)) }) : jsx("p", { className: "mt-3 text-sm text-gray-600", children: "لا توجد وسوم." })
           ] }),
+          relatedItems.length ? jsxs("section", { children: [
+            jsxs("h2", { className: "flex items-center gap-2 text-base font-bold text-white", children: [jsx(Gauge, { className: "h-4 w-4 text-emerald-400" }), "مواد قد ترتبط بهذا السياق"] }),
+            jsx("ul", { className: "mt-3 space-y-2", children: relatedItems.map((related) => jsx("li", { children: jsxs("button", {
+              type: "button",
+              onClick: () => setSelectedItemId?.(related.item.id),
+              className: "w-full rounded-xl va-surface-subtle border p-3 text-right transition-colors hover:border-emerald-500/25",
+              children: [
+                jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                  jsx("span", { className: "min-w-0 flex-1 truncate text-sm font-semibold text-white", children: related.item.title || "بدون عنوان" }),
+                  jsx("span", { dir: "ltr", className: "shrink-0 font-mono text-[10px] text-emerald-300", children: `${related.percent}%` })
+                ] }),
+                related.reason ? jsx("p", { className: "mt-1 text-[11px] text-gray-500", children: related.reason }) : null
+              ]
+            }) }, related.item.id)) })
+          ] }) : null,
           jsxs("section", { className: "rounded-xl va-surface-subtle border p-3 space-y-2", children: [
             jsx("h2", { className: "text-xs font-semibold uppercase tracking-wide text-gray-600", children: "معلومات العنصر" }),
             jsxs("div", { className: "space-y-1.5", children: [
