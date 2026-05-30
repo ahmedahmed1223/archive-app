@@ -652,3 +652,22 @@ html.light[data-theme-version="v2"] .va-dialog-overlay {
   --va-2-accent:        #7673f7;
   --va-2-accent-strong: #5b50e6;
 }
+
+/*
+ * Light-mode text bleed fix. ~339 `text-white` literals across the app were
+ * written for the dark-first design; on a light themed surface they render
+ * white-on-white (invisible) — the reported dark/light "bleed" (e.g. the
+ * DataCenter metric values). Remap *naked* white text (text that sits
+ * directly on a themed surface and carries no background of its own) to the
+ * strong text token in light mode. Buttons (`.va-primary-button` sets
+ * `color:#fff !important`), links, and any element with its own `bg-*`
+ * (chips/badges on a colored fill) are excluded so they keep white text.
+ */
+html.light[data-theme-version="v2"] :is(
+  .va-card, .va-metric-card, .va-data-card, .va-surface-muted, .va-surface-subtle,
+  .va-surface-deep, .va-surface-raised, .va-control-surface, .va-filter-surface,
+  .va-video-card, .va-action-card, .va-preview-panel, .va-tab-surface, .va-page-hero,
+  .va-page-hero-compact, .va-panel-premium, .va-card-subtle
+) .text-white:not([class*="bg-"]):not(button):not(a) {
+  color: var(--va-2-text-strong);
+}
