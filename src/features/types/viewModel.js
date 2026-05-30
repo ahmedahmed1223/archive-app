@@ -13,7 +13,8 @@ export const FIELD_TYPE_OPTIONS = [
   { id: "url", label: "رابط" },
   { id: "duration", label: "مدة" },
   { id: "thumbnail", label: "صورة مصغرة" },
-  { id: "localFile", label: "ملف محلي" }
+  { id: "localFile", label: "ملف محلي" },
+  { id: "rating", label: "تقييم" }
 ];
 
 const FIELD_TYPE_IDS = new Set(FIELD_TYPE_OPTIONS.map((item) => item.id));
@@ -116,7 +117,8 @@ const DEFAULT_ARCHIVE_CONTENT_TYPE_DEFINITIONS = [
     fields: [
       { id: "field_interview_local_file", label: "ملف المقابلة", storageKey: "localFile", type: "localFile", order: 0 },
       { id: "field_interview_guest", label: "الضيف", storageKey: "guest", type: "text", order: 1 },
-      { id: "field_interview_location", label: "الموقع", storageKey: "location", type: "text", order: 2 }
+      { id: "field_interview_location", label: "الموقع", storageKey: "location", type: "text", order: 2 },
+      { id: "field_interview_rating", label: "تقييم المقابلة", storageKey: "rating", type: "rating", order: 3 }
     ],
     subtypes: ["كاملة", "مقتطفات", "عن بعد"]
   },
@@ -129,7 +131,8 @@ const DEFAULT_ARCHIVE_CONTENT_TYPE_DEFINITIONS = [
     fields: [
       { id: "field_report_local_file", label: "ملف التقرير", storageKey: "localFile", type: "localFile", order: 0 },
       { id: "field_report_subject", label: "الموضوع", storageKey: "subject", type: "text", order: 1 },
-      { id: "field_report_status", label: "الحالة", storageKey: "status", type: "select", options: ["مسودة", "جاهز", "منشور"], order: 2 }
+      { id: "field_report_status", label: "الحالة", storageKey: "status", type: "select", options: ["مسودة", "جاهز", "منشور"], order: 2 },
+      { id: "field_report_review_status", label: "حالة المراجعة", storageKey: "reviewStatus", type: "select", options: ["يحتاج مراجعة", "قيد المراجعة", "معتمد"], order: 3 }
     ],
     subtypes: ["إخباري", "تحقيقي", "تحليلي"]
   },
@@ -142,7 +145,9 @@ const DEFAULT_ARCHIVE_CONTENT_TYPE_DEFINITIONS = [
     fields: [
       { id: "field_program_local_file", label: "ملف الحلقة", storageKey: "localFile", type: "localFile", order: 0 },
       { id: "field_program_name", label: "اسم البرنامج", storageKey: "programName", type: "text", order: 1 },
-      { id: "field_episode_number", label: "رقم الحلقة", storageKey: "episodeNumber", type: "number", order: 2 }
+      { id: "field_episode_number", label: "رقم الحلقة", storageKey: "episodeNumber", type: "number", order: 2 },
+      { id: "field_program_rating", label: "تقييم الحلقة", storageKey: "rating", type: "rating", order: 3 },
+      { id: "field_program_review_status", label: "حالة المراجعة", storageKey: "reviewStatus", type: "select", options: ["يحتاج مراجعة", "قيد المراجعة", "معتمد"], order: 4 }
     ],
     subtypes: ["حلقة كاملة", "برومو", "مقطع من الحلقة"]
   },
@@ -154,7 +159,8 @@ const DEFAULT_ARCHIVE_CONTENT_TYPE_DEFINITIONS = [
     color: "#f59e0b",
     fields: [
       { id: "field_clip_local_file", label: "ملف المقطع", storageKey: "localFile", type: "localFile", order: 0 },
-      { id: "field_clip_platform", label: "المنصة", storageKey: "platform", type: "select", options: ["YouTube", "TikTok", "Instagram", "X"], order: 1 }
+      { id: "field_clip_platform", label: "المنصة", storageKey: "platform", type: "select", options: ["YouTube", "TikTok", "Instagram", "X"], order: 1 },
+      { id: "field_clip_rating", label: "تقييم المقطع", storageKey: "rating", type: "rating", order: 2 }
     ],
     subtypes: ["عمودي", "أفقي", "مربع"]
   },

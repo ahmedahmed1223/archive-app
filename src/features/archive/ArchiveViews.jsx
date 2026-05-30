@@ -24,6 +24,33 @@ import {
 } from "../../utils/formatting.js";
 import { normalizeLocalFileValue } from "../videos/viewModel.js";
 
+const REVIEW_STATUS_CLASS = {
+  "يحتاج مراجعة": "border-amber-500/25 bg-amber-500/10 text-amber-200",
+  "قيد المراجعة": "border-blue-500/25 bg-blue-500/10 text-blue-200",
+  "معتمد": "border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+};
+
+function ItemBadges({ item, compact = false }) {
+  const reviewStatus = item.metadata?.reviewStatus;
+  const rating = Number(item.metadata?.rating) || 0;
+  const statusClass = reviewStatus ? REVIEW_STATUS_CLASS[reviewStatus] : null;
+  if (!statusClass && rating === 0) return null;
+  return jsxs("div", {
+    className: "flex flex-wrap items-center gap-1",
+    children: [
+      statusClass && jsx("span", {
+        className: `va-chip rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusClass}`,
+        children: reviewStatus
+      }),
+      rating > 0 && jsx("span", {
+        className: `text-amber-400 ${compact ? "text-[10px]" : "text-xs"}`,
+        "aria-label": `تقييم ${rating} من 5`,
+        children: "★".repeat(rating) + "☆".repeat(5 - rating)
+      })
+    ]
+  });
+}
+
 function BulkCheckbox({ checked, onToggle, label }) {
   return jsx("button", {
     type: "button",
@@ -382,6 +409,7 @@ export function VideoCard({ item, typeLabel, subtypeLabel, selected, onPreview, 
                   item.isFavorite && jsx("span", { className: "rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-200", children: "مفضلة" })
                 ]
               }),
+              jsx(ItemBadges, { item, compact: itemSize === "xs" || itemSize === "compact" }),
               item.tags?.length > 0 && jsxs("div", {
                 className: "flex flex-wrap gap-1.5",
                 children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
@@ -484,6 +512,7 @@ export function VideoTileItem({ item, typeLabel, subtypeLabel, selected, onPrevi
             ]
           }),
           jsx("p", { className: "mt-0.5 line-clamp-1 text-[11px] text-gray-500", children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
+          jsx(ItemBadges, { item, compact: true }),
           item.tags?.length > 0 && jsx("div", {
             className: "mt-1 flex flex-wrap gap-1",
             children: item.tags.slice(0, tagLimit).map((tag) => jsx("span", {
@@ -565,8 +594,9 @@ export function VideoListItem({ item, typeLabel, subtypeLabel, selected, onPrevi
           }),
           jsx("p", { className: `mt-1 ${size.meta} text-gray-500`, children: [typeLabel, subtypeLabel].filter(Boolean).join(" / ") || "غير مصنف" }),
           item.notes && jsx("p", { className: `${size.notes} text-gray-400`, children: item.notes }),
+          jsx("div", { className: "mt-2", children: jsx(ItemBadges, { item }) }),
           item.tags?.length > 0 && jsx("div", {
-            className: "mt-3 flex flex-wrap gap-1.5",
+            className: "mt-2 flex flex-wrap gap-1.5",
             children: item.tags.slice(0, size.tags).map((tag) => jsx("span", {
               className: "va-chip rounded-full border border-white/5 bg-gray-950/45 px-2 py-0.5 text-xs text-gray-400",
               children: tag
