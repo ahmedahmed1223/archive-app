@@ -28,6 +28,7 @@ import { MotionPage, PageHero } from "../components/ui/V1Primitives.jsx";
 import {
   createArchiveRouteParams
 } from "../features/archive/viewModel.js";
+import { TagCloud } from "../features/archive/TagCloud.jsx";
 import {
   createSearchRouteParams,
   getSearchActiveFilterCount,
@@ -360,6 +361,7 @@ export function SearchPage() {
               actionIcon: activeFilterCount > 0 ? RefreshCw : undefined
             })
           }),
+          jsx(TagCloud, { videoItems, onSelect: (tag) => setQuery(tag), activeTag: query }),
           recentSearches.length > 0 && jsxs("div", {
             className: "va-card rounded-2xl border p-4 text-right",
             dir: "rtl",
