@@ -27,7 +27,7 @@ import {
   getHtml5VideoPreviewSource,
   isHtml5PreviewableVideo
 } from "../features/archive/mediaPreview.js";
-import { getFieldsForSelection } from "../features/types/viewModel.js";
+import { getFieldsForSelection, groupCustomFields } from "../features/types/viewModel.js";
 import { StarRating } from "../components/common/StarRating.jsx";
 import {
   createLocalFileValue,
@@ -70,6 +70,34 @@ function LocalFilePicker({ value, onFileSelect }) {
       style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" }
     })
   ] });
+}
+
+/**
+ * Renders custom fields, splitting them into tabs when they carry group
+ * names (so items with many fields stay scannable). `renderField` returns the
+ * per-field node; ungrouped fields fall into a single flat grid (no tabs).
+ */
+function GroupedFields({ fields, renderField, gap = "gap-4" }) {
+  const groups = React.useMemo(() => groupCustomFields(fields), [fields]);
+  const [active, setActive] = React.useState(0);
+  React.useEffect(() => { if (active >= groups.length) setActive(0); }, [groups.length, active]);
+  if (!fields.length) return null;
+  const tabbed = groups.length > 1;
+  const visible = tabbed ? (groups[active]?.fields || []) : fields;
+  return jsxs("div", {
+    className: "space-y-3",
+    children: [
+      tabbed ? jsx("div", { role: "tablist", className: "flex flex-wrap gap-1 overflow-x-auto rounded-xl va-surface-muted border p-1", children: groups.map((group, index) => jsxs("button", {
+        type: "button",
+        role: "tab",
+        "aria-selected": active === index,
+        onClick: () => setActive(index),
+        className: `inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${active === index ? "bg-emerald-500/15 text-emerald-100" : "text-gray-400 hover:bg-white/5 hover:text-white"}`,
+        children: [group.name, jsx("span", { className: "rounded-full bg-white/10 px-1.5 text-[10px]", children: `${group.fields.length}` })]
+      }, group.name)) }) : null,
+      jsx("div", { className: `grid ${gap} md:grid-cols-2`, children: visible.map(renderField) })
+    ]
+  });
 }
 
 function EditableField({ field, value, onChange }) {
@@ -290,10 +318,10 @@ export function DetailPage() {
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "الوسوم" }), jsx("input", { value: draft.tagsText || "", onChange: (event) => updateDraft({ tagsText: event.target.value }), className: "min-h-11 w-full va-surface-deep rounded-xl border px-3 text-sm text-white outline-none" })] }),
           jsxs("label", { className: "space-y-1 text-sm text-gray-300 md:col-span-2", children: [jsx("span", { children: "ملاحظات" }), jsx("textarea", { value: draft.notes || "", onChange: (event) => updateDraft({ notes: event.target.value }), className: "min-h-[90px] w-full va-surface-deep rounded-xl border p-3 text-sm text-white outline-none" })] })
         ] }),
-        fields.length > 0 && jsx("div", { className: "grid gap-4 md:grid-cols-2", children: fields.map((field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "md:col-span-2" : ""}`, children: [
+        fields.length > 0 && jsx(GroupedFields, { fields, gap: "gap-4", renderField: (field) => jsxs("label", { className: `space-y-1 text-sm text-gray-300 ${field.type === "textarea" || field.type === "localFile" ? "md:col-span-2" : ""}`, children: [
           jsx("span", { children: field.label }),
           jsx(EditableField, { field, value: draft.metadata?.[fieldKey(field)], onChange: updateMetadata })
-        ] }, field.id)) }),
+        ] }, field.id) }),
         jsxs("div", { className: "flex justify-end gap-2", children: [
           jsx("button", { type: "button", onClick: () => setEditing(false), className: "rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-300 hover:bg-white/5", children: "إلغاء" }),
           jsx("button", { type: "button", onClick: save, className: "va-primary-button rounded-xl px-4 py-2 text-sm font-semibold text-white", children: "حفظ" })
@@ -310,10 +338,10 @@ export function DetailPage() {
             ] }),
             jsx("div", { className: "mt-2 text-sm text-gray-300", children: jsx(ReadonlyField, { field: { type: "localFile" }, value: item.metadata.localFile }) })
           ] }),
-          fields.length ? jsx("div", { className: "grid gap-3 md:grid-cols-2", children: fields.map((field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
+          fields.length ? jsx(GroupedFields, { fields, gap: "gap-3", renderField: (field) => jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
             jsx("p", { className: "text-xs text-gray-600", children: field.label }),
             jsx("div", { className: "mt-1 text-sm text-gray-300", children: jsx(ReadonlyField, { field, value: item.metadata?.[fieldKey(field)] }) })
-          ] }, field.id)) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })
+          ] }, field.id) }) : jsx("p", { className: "text-sm text-gray-500", children: "لا توجد حقول مخصصة لهذا العنصر." })
         ] }),
         jsxs("aside", { className: "va-preview-panel space-y-5 rounded-2xl va-surface-muted border p-5 text-right", children: [
           jsxs("section", { children: [
