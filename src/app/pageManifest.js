@@ -8,6 +8,7 @@ export const PAGE_MANIFEST = [
   { id: "types", group: "organization", heavy: false, meta: { title: "إدارة الأنواع", breadcrumb: "التنظيم / الأنواع", hint: "أنواع، فروع، حقول مخصصة، وأيقونات.", helpSection: "content-types" } },
   { id: "vocabulary", group: "organization", heavy: false, meta: { title: "القاموس", breadcrumb: "التنظيم / القاموس", hint: "مصطلحات موحدة تظهر في الاستدعاء الذكي.", helpSection: "vocabulary-autocomplete" } },
   { id: "htags", group: "organization", heavy: false, meta: { title: "الوسوم الهرمية", breadcrumb: "التنظيم / الوسوم", hint: "وسوم جذرية وفرعية للاستدعاء عبر #.", helpSection: "tags" } },
+  { id: "graph", group: "organization", heavy: true, meta: { title: "خريطة العلاقات", breadcrumb: "التنظيم / خريطة العلاقات", hint: "شبكة تربط المواد بالوسوم المشتركة والنوع لاكتشاف الصلات.", helpSection: "collections" } },
   { id: "users", group: "administration", heavy: false, meta: { title: "المستخدمون", breadcrumb: "الإدارة / المستخدمون", hint: "أدوار وصلاحيات للاستخدام اليومي الآمن.", helpSection: "users" } },
   { id: "settings", group: "administration", heavy: true, meta: { title: "الإعدادات", breadcrumb: "الإدارة / الإعدادات", hint: "خيارات مجمعة بتبويبات مع حفظ صريح للتغييرات.", helpSection: "reports-settings" } },
   { id: "history", group: "administration", heavy: false, meta: { title: "سجل التغييرات", breadcrumb: "الإدارة / السجل", hint: "مراجعة عمليات الإنشاء والتعديل والحذف.", helpSection: "notifications-guide" } },

@@ -26,6 +26,7 @@ import {
   Shield,
   Tag,
   Users,
+  Workflow,
   X,
   Video
 } from "lucide-react";
@@ -62,6 +63,7 @@ const iconMap = {
   types: FolderTree,
   vocabulary: BookOpen,
   htags: Tag,
+  graph: Workflow,
   users: Users,
   settings: Shield,
   history: History,
