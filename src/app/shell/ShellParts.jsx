@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useAppStore, useAuthStore } from "../../stores/index.js";
+import { PasswordField } from "../../components/common/PasswordField.jsx";
 import { buildVideoItemCommands, filterCommandPaletteCommands } from "../../components/common/commandPaletteViewModel.js";
 import { undoRedoManager as sharedUndoRedoManager, SimpleUndoRedoManager } from "../../components/common/undoManager.js";
 import { InsightPanel, SkeletonBlock, WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
@@ -279,12 +280,12 @@ export function LockScreen() {
         <Lock className="h-10 w-10 text-emerald-300" />
         <h1 className="mt-4 text-2xl font-bold">التطبيق مقفل</h1>
         <p className="mt-2 text-sm text-slate-400">أدخل كلمة المرور الرئيسية للمتابعة.</p>
-        <input
+        <PasswordField
           autoFocus
-          type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="mt-5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-right text-white outline-none focus:border-emerald-400/60"
+          className="mt-5"
+          autoComplete="current-password"
           placeholder="كلمة المرور"
         />
         {error && <p className="mt-3 text-sm text-red-200">{error}</p>}
@@ -339,10 +340,15 @@ export function LoginScreen() {
               )) : <option value="admin">admin</option>}
             </select>
           </label>
-          <label className="mt-4 block text-sm text-slate-300">
-            كلمة المرور
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-right text-white" />
-          </label>
+          <div className="mt-4">
+            <span className="block text-sm text-slate-300">كلمة المرور</span>
+            <PasswordField
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="mt-2"
+              autoComplete="current-password"
+            />
+          </div>
           <label className="mt-4 flex items-center gap-2 text-sm text-slate-300">
             <input type="checkbox" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} className="h-4 w-4 accent-emerald-500" />
             تذكر الجلسة على هذا الجهاز
@@ -619,7 +625,13 @@ export function ForceChangePasswordDialog() {
       <form onSubmit={submit} className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0b1626] p-6">
         <KeyRound className="h-9 w-9 text-emerald-300" />
         <h2 className="mt-4 text-xl font-bold">تغيير كلمة المرور مطلوب</h2>
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-5 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-right" placeholder="كلمة المرور الجديدة" />
+        <PasswordField
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          className="mt-5"
+          autoComplete="new-password"
+          placeholder="كلمة المرور الجديدة"
+        />
         {error && <p className="mt-3 text-sm text-red-200">{error}</p>}
         <button type="submit" className="va-primary-button mt-5 w-full rounded-xl px-4 py-3 font-semibold text-white">حفظ كلمة المرور</button>
       </form>

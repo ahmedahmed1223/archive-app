@@ -1,5 +1,7 @@
 import {
   Database,
+  Eye,
+  EyeOff,
   HardDrive,
   Keyboard,
   LayoutGrid,
@@ -172,18 +174,35 @@ export function SelectRow({ label, value, options, onChange, description }) {
 }
 
 export function TextInputRow({ label, value, onChange, description, dir = "rtl", placeholder = "", type = "text" }) {
+  const [revealed, setRevealed] = React.useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword ? (revealed ? "text" : "password") : type;
+  const RevealIcon = revealed ? EyeOff : Eye;
   return jsxs("label", {
     className: "va-card-subtle block rounded-xl border border-white/10 bg-gray-950/30 p-3",
     children: [
       jsx("span", { className: "block text-sm font-semibold text-white", children: label }),
       description && jsx("span", { className: "mt-1 block text-xs leading-relaxed text-gray-500", children: description }),
-      jsx("input", {
-        type,
-        value,
-        onChange: (event) => onChange(event.target.value),
-        placeholder,
-        dir,
-        className: "mt-3 min-h-10 w-full rounded-xl border border-white/10 bg-gray-900 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500/50"
+      jsxs("div", {
+        className: "relative mt-3",
+        children: [
+          jsx("input", {
+            type: inputType,
+            value,
+            onChange: (event) => onChange(event.target.value),
+            placeholder,
+            dir,
+            className: `min-h-10 w-full rounded-xl border border-white/10 bg-gray-900 py-2 text-sm text-white outline-none focus:border-emerald-500/50 ${isPassword ? "ps-3 pe-10" : "px-3"}`
+          }),
+          isPassword && jsx("button", {
+            type: "button",
+            onClick: (event) => { event.preventDefault(); setRevealed((prev) => !prev); },
+            "aria-label": revealed ? "إخفاء كلمة المرور" : "إظهار كلمة المرور",
+            "aria-pressed": revealed,
+            className: "absolute inset-inline-end-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-gray-500 transition-colors hover:text-gray-200",
+            children: jsx(RevealIcon, { className: "h-4 w-4" })
+          })
+        ]
       })
     ]
   });

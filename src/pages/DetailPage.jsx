@@ -28,6 +28,7 @@ import {
   isHtml5PreviewableVideo
 } from "../features/archive/mediaPreview.js";
 import { getFieldsForSelection } from "../features/types/viewModel.js";
+import { StarRating } from "../components/common/StarRating.jsx";
 import {
   createLocalFileValue,
   createVideoLocalFilePatch,
@@ -82,10 +83,15 @@ function EditableField({ field, value, onChange }) {
   ] });
   if (field.type === "tags" || field.type === "multiselect") return jsx("input", { value: Array.isArray(value) ? value.join("، ") : value || "", onChange: (event) => onChange(key, parseVideoTags(event.target.value)), className: commonClass });
   if (field.type === "localFile") return jsx(LocalFilePicker, { value, onFileSelect: (file) => onChange(key, createLocalFileValue(file)) });
+  if (field.type === "rating") return jsx("div", { className: "flex min-h-11 items-center", children: jsx(StarRating, { value: Number(value) || 0, onChange: (val) => onChange(key, val) }) });
   return jsx("input", { type: field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text", value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass });
 }
 
 function ReadonlyField({ field, value }) {
+  if (field.type === "rating") {
+    const num = Number(value) || 0;
+    return num > 0 ? jsx(StarRating, { value: num, readonly: true }) : "—";
+  }
   if (field.type === "checkbox") return value ? "نعم" : "لا";
   if (field.type === "localFile") {
     const file = normalizeLocalFileValue(value);

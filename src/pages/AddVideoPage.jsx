@@ -21,6 +21,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { getFieldsForSelection } from "../features/types/viewModel.js";
+import { StarRating } from "../components/common/StarRating.jsx";
 import {
   createLocalFileValue,
   createVideoLocalFilePatch,
@@ -172,6 +173,9 @@ function FieldInput({ field, value, onChange, inputId }) {
   }
   if (field.type === "localFile") {
     return jsx(LocalFilePicker, { value, onFileSelect: (file) => onChange(key, createLocalFileValue(file)) });
+  }
+  if (field.type === "rating") {
+    return jsx("div", { className: "flex min-h-11 items-center", children: jsx(StarRating, { value: Number(value) || 0, onChange: (val) => onChange(key, val) }) });
   }
   return jsx("input", { id: inputId, type: field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "url" ? "url" : "text", value: value || "", onChange: (event) => onChange(key, event.target.value), className: commonClass, placeholder: field.placeholder || field.label });
 }
