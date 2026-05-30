@@ -1,6 +1,7 @@
 node_modules
 .vite/
 output/
+dist-cloud/
 Base_old/
 .npm-cache/
 .superpowers/
