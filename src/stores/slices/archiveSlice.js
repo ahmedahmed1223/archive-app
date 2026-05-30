@@ -176,6 +176,26 @@ export function createArchiveActions({ set, get, getAuthStore }) {
       get().addAuditLog?.("video.create", value.id, "video", { title: value.title });
       return value;
     },
+    addBookmark: async ({ itemId, timestamp, label, description } = {}) => {
+      if (!itemId) return null;
+      const value = {
+        id: `bm_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
+        itemId,
+        timestamp: Math.max(0, Math.round(Number(timestamp) || 0)),
+        label: String(label || "").trim() || "إشارة",
+        description: String(description || "").trim(),
+        createdAt: nowIso()
+      };
+      set((state) => ({ bookmarks: [...state.bookmarks, value] }));
+      await dbPut(STORES.BOOKMARKS, value).catch(() => {});
+      get().addAuditLog?.("bookmark.create", value.id, "bookmark", { itemId, timestamp: value.timestamp });
+      return value;
+    },
+    removeBookmark: async (id) => {
+      set((state) => ({ bookmarks: state.bookmarks.filter((bookmark) => bookmark.id !== id) }));
+      await dbDelete(STORES.BOOKMARKS, id).catch(() => {});
+      return true;
+    },
     updateVideoItem: async (item) => {
       checkPermission(get, getAuthStore, ACTIONS.VIDEO_UPDATE);
       const deviceId = getActiveDeviceId(get);
