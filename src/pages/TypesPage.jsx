@@ -2,6 +2,7 @@ import {
   useAppStore
 } from "../stores/index.js";
 import {
+  ChevronDown,
   Database,
   Eye,
   FolderOpen,
@@ -140,7 +141,10 @@ function FieldsEditor({ draft, setDraft }) {
     className: "rounded-2xl va-surface-subtle border p-4",
     children: [
       jsxs("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
-        jsx("h3", { className: "text-sm font-bold text-white", children: "الحقول المخصصة" }),
+        jsxs("div", { className: "flex items-center gap-2", children: [
+          jsx("h3", { className: "text-sm font-bold text-white", children: "الحقول المخصصة" }),
+          (draft.fields || []).length ? jsx("span", { className: "rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-medium text-gray-300", children: `${(draft.fields || []).length}` }) : null
+        ] }),
         jsx("span", { className: "rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-200", children: "يدعم ملف محلي" })
       ] }),
       // Add-field row — single horizontal layout at sm: so 13-15"
@@ -298,6 +302,14 @@ export function TypesPage() {
   const [selectedTypeId, setSelectedTypeId] = React.useState(contentTypes.find((type) => type.status !== "archived")?.id || contentTypes[0]?.id || null);
   const [editingType, setEditingType] = React.useState(null);
   const [showEditor, setShowEditor] = React.useState(false);
+  const [journeyOpen, setJourneyOpen] = React.useState(() => {
+    try { return localStorage.getItem("videoArchive:typesJourney") === "1"; } catch (error) { return false; }
+  });
+  const toggleJourney = () => setJourneyOpen((value) => {
+    const next = !value;
+    try { localStorage.setItem("videoArchive:typesJourney", next ? "1" : "0"); } catch (error) { /* ignore */ }
+    return next;
+  });
 
   const filteredTypes = React.useMemo(() => getFilteredContentTypes(contentTypes, query, includeArchived), [contentTypes, includeArchived, query]);
   const usageCounts = React.useMemo(() => getTypeUsageCounts(contentTypes, videoItems), [contentTypes, videoItems]);
@@ -365,12 +377,22 @@ export function TypesPage() {
           }, stat.id);
         }) })
       }),
-      jsxs("section", { className: "va-control-surface rounded-2xl va-surface-muted border p-4 text-right", children: [
-        jsxs("div", { className: "mb-3 flex items-center gap-2", children: [
-          jsx(Palette, { className: "h-5 w-5 text-emerald-300" }),
-          jsx("h2", { className: "text-sm font-bold text-white", children: "رحلة بناء نوع محتوى" })
-        ] }),
-        jsx("div", { className: "grid gap-2 md:grid-cols-4", children: [
+      !showEditor && jsxs("section", { className: "va-control-surface overflow-hidden rounded-2xl va-surface-muted border text-right", children: [
+        jsxs("button", {
+          type: "button",
+          onClick: toggleJourney,
+          "aria-expanded": journeyOpen,
+          className: "flex w-full items-center justify-between gap-3 p-4 text-right transition-colors hover:bg-white/5",
+          children: [
+            jsxs("span", { className: "flex min-w-0 items-center gap-2", children: [
+              jsx(Palette, { className: "h-5 w-5 shrink-0 text-emerald-300" }),
+              jsx("h2", { className: "text-sm font-bold text-white", children: "رحلة بناء نوع محتوى" }),
+              jsx("span", { className: "hidden truncate text-xs text-gray-500 sm:inline", children: "الهوية ← الفروع ← الحقول ← الاستخدام" })
+            ] }),
+            jsx(ChevronDown, { className: `h-4 w-4 shrink-0 text-gray-400 transition-transform ${journeyOpen ? "rotate-180" : ""}` })
+          ]
+        }),
+        journeyOpen && jsx("div", { className: "grid gap-2 px-4 pb-4 md:grid-cols-4", children: [
           ["الهوية", "اسم وأيقونة ولون"],
           ["الفروع", "تقسيم داخلي واضح"],
           ["الحقول", "بيانات مخصصة لكل نوع"],
