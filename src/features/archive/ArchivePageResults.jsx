@@ -3,6 +3,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 
 import { EmptyState } from "../../components/common/EmptyState.jsx";
 import { formatNumber } from "../../utils/formatting.js";
+import { computeCompleteness } from "./completeness.js";
 import {
   ARCHIVE_GRID_CLASSES,
   ARCHIVE_ITEM_SIZE_LABELS,
@@ -37,6 +38,7 @@ function buildItemActionsFor(item, deps) {
     item,
     typeLabel: typeLabel(item),
     subtypeLabel: subtypeLabel(item),
+    completeness: computeCompleteness(item, deps.typeById?.get?.(item.type)),
     selected: previewItem?.id === item.id,
     showDeleted,
     itemSize: activeItemSize,

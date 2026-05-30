@@ -29,6 +29,7 @@ import {
 } from "../features/archive/mediaPreview.js";
 import { getFieldsForSelection, groupCustomFields } from "../features/types/viewModel.js";
 import { StarRating } from "../components/common/StarRating.jsx";
+import { computeCompleteness, COMPLETENESS_TIERS } from "../features/archive/completeness.js";
 import {
   createLocalFileValue,
   createVideoLocalFilePatch,
@@ -169,6 +170,7 @@ export function DetailPage() {
 
   const fields = React.useMemo(() => item ? getFieldsForSelection(contentTypes, draft?.type || item.type, draft?.subtype || item.subtype) : [], [contentTypes, draft?.subtype, draft?.type, item]);
   const selectedType = contentTypes.find((type) => type.id === (draft?.type || item?.type));
+  const completeness = React.useMemo(() => item ? computeCompleteness(item, selectedType) : null, [item, selectedType]);
   const subtypes = selectedType?.subtypes || [];
   const history = React.useMemo(() => item ? changeHistory.filter((record) => record.itemId === item.id).sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()).slice(0, 10) : [], [changeHistory, item]);
   const previewSource = item?.path && isHtml5PreviewableVideo(item.path) ? getHtml5VideoPreviewSource(item.path) : null;
@@ -330,6 +332,17 @@ export function DetailPage() {
       jsxs("section", { className: "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]", children: [
         jsxs("div", { className: "va-card space-y-4 rounded-2xl va-surface-muted border p-5 text-right", children: [
           jsxs("h2", { className: "flex items-center gap-2 text-lg font-bold text-white", children: [jsx(FileText, { className: "h-5 w-5 text-emerald-400" }), "البيانات"] }),
+          completeness && jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
+            jsxs("div", { className: "flex items-center justify-between gap-3", children: [
+              jsxs("span", { className: "flex items-center gap-2 text-sm font-semibold", style: { color: COMPLETENESS_TIERS[completeness.tier].color }, children: [
+                jsx("span", { "aria-hidden": "true", style: { width: "8px", height: "8px", borderRadius: "9999px", background: COMPLETENESS_TIERS[completeness.tier].color, display: "inline-block" } }),
+                `جودة التوصيف: ${COMPLETENESS_TIERS[completeness.tier].label}`
+              ] }),
+              jsx("span", { dir: "ltr", className: "font-mono text-sm text-gray-300", children: `${completeness.percent}%` })
+            ] }),
+            jsx("div", { className: "mt-2 h-1.5 overflow-hidden rounded-full bg-white/10", children: jsx("div", { className: "h-full rounded-full", style: { width: `${completeness.percent}%`, background: COMPLETENESS_TIERS[completeness.tier].color } }) }),
+            completeness.missing.length ? jsxs("p", { className: "mt-2 text-xs leading-6 text-gray-500", children: ["ينقص: ", completeness.missing.join("، ")] }) : jsx("p", { className: "mt-2 text-xs text-gray-500", children: "كل الحقول الأساسية والمطلوبة مكتملة." })
+          ] }),
           item.notes && jsx("p", { className: "rounded-xl va-surface-muted border p-3 text-sm leading-relaxed text-gray-400", children: item.notes }),
           item.metadata?.localFile && jsxs("div", { className: "rounded-xl va-surface-muted border p-3", children: [
             jsxs("div", { className: "flex items-center gap-2", children: [
