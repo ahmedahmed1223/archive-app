@@ -47,10 +47,28 @@ export function createCustomFieldValue(partial = {}) {
     description: partial.description || "",
     order: Number.isFinite(Number(partial.order)) ? Number(partial.order) : 0,
     groupId: partial.groupId,
+    group: typeof partial.group === "string" ? partial.group.trim() : "",
     status: partial.status || "active",
     archivedAt: partial.archivedAt,
     archivedBy: partial.archivedBy
   };
+}
+
+/**
+ * Group custom fields by their `group` (tab) name, preserving first-seen
+ * order of both groups and fields. Ungrouped fields fall into "عام".
+ * Returns [{ name, fields }]. A single returned group means the caller can
+ * render a flat list (no tabs needed).
+ */
+export function groupCustomFields(fields = []) {
+  const order = [];
+  const map = new Map();
+  for (const field of fields) {
+    const key = (field.group || "").trim() || "عام";
+    if (!map.has(key)) { map.set(key, []); order.push(key); }
+    map.get(key).push(field);
+  }
+  return order.map((name) => ({ name, fields: map.get(name) }));
 }
 
 export function createSubtypeValue(partial = {}) {
