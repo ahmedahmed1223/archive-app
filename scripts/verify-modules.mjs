@@ -183,6 +183,20 @@ import {
   applyAccentColor,
   getAccentColorTokens
 } from "../src/theme/accentColor.js";
+import {
+  STORAGE_PROVIDER_METHODS,
+  isStorageProvider
+} from "../src/storage/ports/StorageProvider.js";
+import {
+  FILE_STORE_METHODS,
+  isFileStore
+} from "../src/storage/ports/FileStore.js";
+import { localStorageProvider } from "../src/storage/adapters/local-indexeddb/index.js";
+import { localFileStore } from "../src/storage/adapters/files-local/index.js";
+import {
+  getStorageProvider,
+  registerStorageProvider
+} from "../src/storage/index.js";
 
 function run(name, test) {
   test();
@@ -1019,6 +1033,46 @@ await runAsync("store action smoke tests", async () => {
   assert.equal(replaceResult.success, true);
   await useAppStore.getState().loadAllData();
   assert.deepEqual(useAppStore.getState().videoItems.map((item) => item.id), ["replace-video"]);
+});
+
+run("storage ports", () => {
+  // Ports declare the contract surface and a shape-validator each.
+  assert.deepEqual(STORAGE_PROVIDER_METHODS, [
+    "open", "get", "getAll", "put", "add", "delete", "clear", "putBatch", "deleteBatch"
+  ]);
+  assert.deepEqual(FILE_STORE_METHODS, ["putBlob", "getUrl", "remove", "list"]);
+
+  assert.equal(isStorageProvider(null), false);
+  assert.equal(isStorageProvider({}), false);
+  const fullProvider = Object.fromEntries(STORAGE_PROVIDER_METHODS.map((m) => [m, () => {}]));
+  assert.equal(isStorageProvider(fullProvider), true);
+  delete fullProvider.put;
+  assert.equal(isStorageProvider(fullProvider), false);
+
+  assert.equal(isFileStore(null), false);
+  assert.equal(isFileStore({}), false);
+  const fullFileStore = Object.fromEntries(FILE_STORE_METHODS.map((m) => [m, () => {}]));
+  assert.equal(isFileStore(fullFileStore), true);
+});
+
+run("local storage adapter + registry", () => {
+  // The IndexedDB adapter satisfies the StorageProvider port.
+  assert.equal(isStorageProvider(localStorageProvider), true);
+  // Registry default is the local adapter (offline SPA behavior).
+  assert.equal(getStorageProvider(), localStorageProvider);
+
+  // Registering a valid provider swaps the active one; invalid is rejected.
+  const stub = Object.fromEntries(STORAGE_PROVIDER_METHODS.map((m) => [m, () => {}]));
+  assert.equal(registerStorageProvider(stub), stub);
+  assert.equal(getStorageProvider(), stub);
+  assert.throws(() => registerStorageProvider({}), /StorageProvider port/);
+  // Restore the default so later tests/imports see expected behavior.
+  registerStorageProvider(localStorageProvider);
+  assert.equal(getStorageProvider(), localStorageProvider);
+});
+
+run("local file store adapter", () => {
+  assert.equal(isFileStore(localFileStore), true);
 });
 
 // Theme v2 storage tests — runs the standalone test suite from

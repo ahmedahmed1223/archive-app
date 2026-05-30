@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --configLoader runner",
     "build": "vite build --configLoader runner",
+    "build:spa": "vite build --configLoader runner",
+    "build:cloud": "vite build --mode cloud --configLoader runner",
     "verify": "node scripts/verify-modules.mjs",
     "refactor:status": "node scripts/refactor-status.mjs",
-    "check": "npm run verify && npm run build",
+    "check": "npm run verify && npm run build:spa",
     "preview": "vite preview --host 127.0.0.1 --configLoader runner"
   },
   "dependencies": {
