@@ -697,3 +697,41 @@ html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-amber-100, .t
 html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-red-100, .text-red-200, .text-red-300)             { color: #fca5a5; }
 html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-blue-100, .text-blue-200, .text-blue-300)          { color: #93c5fd; }
 html.light[data-theme-version="v2"] .va-onboarding-shell :is(.text-cyan-200, .text-cyan-300)                          { color: #67e8f9; }
+
+/*
+ * Range slider (Windows-Explorer-style grid density control). Themed track +
+ * accent thumb, works in both light and dark. accent-color handles the fill
+ * in modern Chromium/Edge; the explicit thumb/track rules keep it consistent.
+ */
+.va-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--va-2-line-strong);
+  accent-color: var(--va-2-accent);
+  cursor: pointer;
+  outline: none;
+}
+.va-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 999px;
+  background: var(--va-2-accent);
+  border: 2px solid var(--va-2-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.va-range::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 999px;
+  background: var(--va-2-accent);
+  border: 2px solid var(--va-2-surface);
+  cursor: pointer;
+}
+.va-range:focus-visible {
+  box-shadow: 0 0 0 2px var(--va-2-accent-glow);
+}
