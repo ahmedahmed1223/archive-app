@@ -43,6 +43,7 @@ import {
 } from "./viewModel.js";
 import { WorkflowStepper } from "../../components/ui/V1Primitives.jsx";
 import { PasswordField } from "../../components/common/PasswordField.jsx";
+import { validatePasswordStrength } from "../../utils/passwordHash.js";
 
 const FIRST_TASK_OPTIONS = [
   { id: "dashboard", label: "لوحة التحكم", detail: "ابدأ من جاهزية اليوم والإجراءات السريعة.", icon: LayoutGrid },
@@ -141,7 +142,13 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
   const activeStep = steps[activeStepIndex] || steps[0];
   const passwordStrength = getPasswordStrength(password);
   const passwordMatches = password.length > 0 && password === confirmPassword;
-  const canContinueAdmin = replayMode || securityMode === "quick" || (password.length >= 8 && passwordMatches && passwordStrength.score >= 2);
+  // Gate on the SAME policy setMasterPassword enforces (letter + digit +
+  // symbol + length >= 8). Previously the wizard accepted score >= 2 (symbol
+  // optional), so a password the wizard accepted could be silently rejected
+  // by setMasterPassword — leaving the admin without a usable password and
+  // breaking login.
+  const passwordPolicyErrors = validatePasswordStrength(password);
+  const canContinueAdmin = replayMode || securityMode === "quick" || (passwordMatches && passwordPolicyErrors.length === 0);
 
   React.useEffect(() => {
     if (!open) return;
@@ -200,7 +207,13 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
     });
     try {
       if (!replayMode && securityMode === "secure") {
-        await setMasterPassword(password);
+        const passwordSet = await setMasterPassword(password);
+        if (!passwordSet) {
+          setError("كلمة المرور لا تستوفي الشروط (8 أحرف على الأقل، مع حرف ورقم ورمز). صحّحها ثم أعد المحاولة.");
+          setStepId("admin");
+          setIsSubmitting(false);
+          return;
+        }
       }
       await updateSettings(completionPatch);
       setTheme(themeChoice);
@@ -315,6 +328,7 @@ export function V1OnboardingWizard({ open, mode = "startup", onComplete, onCance
             style: { backgroundColor: passwordStrength.score >= level ? passwordStrength.color : "rgba(255,255,255,0.08)" }
           }, level)) })
         ] }),
+        password.length > 0 && passwordPolicyErrors.length > 0 && jsx("p", { className: "text-xs leading-6 text-amber-300/90", children: passwordPolicyErrors[0] }),
         confirmPassword && jsx("p", { className: `text-sm ${passwordMatches ? "text-emerald-300" : "text-red-300"}`, children: passwordMatches ? "كلمة المرور متطابقة" : "كلمة المرور غير متطابقة" })
       ] });
     }
