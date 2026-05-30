@@ -94,6 +94,7 @@ export function useArchivePageState() {
   const [sortDirection, setSortDirection] = React.useState(initialRouteState.sortDirection || "desc");
   const [showDeleted, setShowDeleted] = React.useState(initialRouteState.showDeleted || false);
   const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(initialRouteState.showFavoritesOnly || false);
+  const [showGapsOnly, setShowGapsOnly] = React.useState(false);
   const [page, setPage] = React.useState(initialRouteState.page || 1);
   const [pageSize, setPageSize] = React.useState(initialRouteParams.has("per") ? initialRouteState.pageSize : 24);
   const [itemSize, setItemSize] = React.useState(initialRouteParams.has("size") ? initialRouteState.itemSize : settings.ui?.archiveItemSize || "compact");
@@ -199,8 +200,9 @@ export function useArchivePageState() {
     sortField,
     sortDirection,
     showDeleted,
-    showFavoritesOnly
-  }), [filterType, filterSubtype, localSearch, showDeleted, showFavoritesOnly, sortDirection, sortField, videoItems]);
+    showFavoritesOnly,
+    showGapsOnly
+  }), [filterType, filterSubtype, localSearch, showDeleted, showFavoritesOnly, showGapsOnly, sortDirection, sortField, videoItems]);
   const quickSearchMatches = React.useMemo(
     () => (localSearch.trim() ? filteredItems.slice(0, 5) : []),
     [filteredItems, localSearch]
@@ -372,6 +374,7 @@ export function useArchivePageState() {
     setFilterSubtype?.("all");
     setShowDeleted(false);
     setShowFavoritesOnly(false);
+    setShowGapsOnly(false);
     setSortField("updatedAt");
     setSortDirection("desc");
     setPage(1);
@@ -485,6 +488,8 @@ export function useArchivePageState() {
     setShowDeleted,
     showFavoritesOnly,
     setShowFavoritesOnly,
+    showGapsOnly,
+    setShowGapsOnly,
     resetFilters,
     hasFilters,
     activeFilterCount,

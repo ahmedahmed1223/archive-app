@@ -8,6 +8,7 @@ import {
   Search,
   Tags,
   Trash2,
+  TriangleAlert,
   Upload,
   Video
 } from "lucide-react";
@@ -103,6 +104,8 @@ export function ArchivePageHero(props) {
     activeFilterCount,
     showFavoritesOnly,
     setShowFavoritesOnly,
+    showGapsOnly,
+    setShowGapsOnly,
     showDeleted,
     setShowDeleted,
     bulkMode,
@@ -270,6 +273,7 @@ export function ArchivePageHero(props) {
           jsx(CompactStat, { label: "المعاينة", value: formatNumber(filteredItems.filter((item) => isHtml5PreviewableVideo(item.path || item.filePath || item.url || "")).length), hint: "HTML5" }),
           jsx(ToolbarButton, { active: showFavoritesOnly, onClick: () => setShowFavoritesOnly((value) => !value), icon: jsx(Tags, { className: "h-4 w-4" }), children: "المفضلة" }),
           jsx(ToolbarButton, { active: showDeleted, danger: showDeleted, onClick: () => setShowDeleted((value) => !value), icon: jsx(Trash2, { className: "h-4 w-4" }), children: "المحذوفات" }),
+          jsx(ToolbarButton, { active: showGapsOnly, onClick: () => setShowGapsOnly?.((value) => !value), icon: jsx(TriangleAlert, { className: "h-4 w-4" }), children: "بحاجة لتوصيف" }),
           jsx(ToolbarButton, {
             active: bulkMode,
             onClick: () => {
