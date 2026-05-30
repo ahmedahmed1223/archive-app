@@ -20,7 +20,7 @@ import * as React from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { getFieldsForSelection, groupCustomFields } from "../features/types/viewModel.js";
+import { getFieldsForSelection, groupCustomFields, getVisibleFields, getMissingRequiredFields } from "../features/types/viewModel.js";
 import { StarRating } from "../components/common/StarRating.jsx";
 import {
   createLocalFileValue,
@@ -110,15 +110,16 @@ function fieldKey(field) {
  * stays scannable; otherwise a flat two-column grid is shown.
  */
 function FieldsStep({ fields, metadata, onChange }) {
-  const groups = React.useMemo(() => groupCustomFields(fields), [fields]);
+  const visibleFields = React.useMemo(() => getVisibleFields(fields, metadata), [fields, metadata]);
+  const groups = React.useMemo(() => groupCustomFields(visibleFields), [visibleFields]);
   const [active, setActive] = React.useState(0);
   React.useEffect(() => { if (active >= groups.length) setActive(0); }, [groups.length, active]);
 
-  if (!fields.length) {
+  if (!visibleFields.length) {
     return jsx("p", { className: "rounded-xl border border-dashed border-white/10 bg-gray-950/35 p-6 text-center text-sm text-gray-400", children: "لا توجد حقول مخصصة لهذا النوع." });
   }
   const tabbed = groups.length > 1;
-  const visible = tabbed ? (groups[active]?.fields || []) : fields;
+  const visible = tabbed ? (groups[active]?.fields || []) : visibleFields;
   return jsxs("div", {
     className: "space-y-3",
     children: [
@@ -329,6 +330,13 @@ export function AddVideoPage() {
 
   const save = async (addAnother = false) => {
     if (!canSave) return;
+    const missingRequired = getMissingRequiredFields(fields, metadata);
+    if (missingRequired.length) {
+      setStepIndex(STEPS.findIndex((step) => step.id === "fields"));
+      setStepError(`حقول مطلوبة فارغة: ${missingRequired.map((field) => field.label).join("، ")}`);
+      showToast?.("أكمل الحقول المطلوبة قبل الحفظ.", "error");
+      return;
+    }
     const item = createVideoItemValue({
       title,
       path,
